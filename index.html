@@ -1,0 +1,1197 @@
+<title>Upper Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Lexend:wght@400;500;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+/* Layout: herramienta de producción — pasos arriba, formulario a la izquierda, vista previa fija a la derecha.
+   Colores y tipografías del Brandbook Upper 2025: Upper Dark Blue, Green, Cream Green; Noland + Rethink Sans. */
+:root{
+  --navy:#141D30; --green:#CDF5A3; --cream:#F0FFE8;
+  --bg:#F0FFE8; --panel:#FFFFFF; --fg:#141D30; --muted:#4E5B6E; --line:#D3E3C6; --chip:#E3F3D6;
+  --btn:#141D30; --btn-fg:#CDF5A3; --focus:#141D30; --sel:#E3F7CF;
+  --ok:#2E7D32; --warn:#A15C00; --bad:#C62828; --logo:#141D30;
+  --f-display:"UpperDisplay","Anton",Impact,sans-serif;
+  --f-body:"UpperText","Lexend",Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141D30; --panel:#1B2740; --fg:#F0FFE8; --muted:#A9B6C9; --line:#2C3A57; --chip:#24324F;
+  --btn:#CDF5A3; --btn-fg:#141D30; --focus:#CDF5A3; --sel:#22351F;
+  --ok:#8FDB7E; --warn:#F2B35A; --bad:#FF8A80; --logo:#CDF5A3; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141D30; --panel:#1B2740; --fg:#F0FFE8; --muted:#A9B6C9; --line:#2C3A57; --chip:#24324F;
+  --btn:#CDF5A3; --btn-fg:#141D30; --focus:#CDF5A3; --sel:#22351F;
+  --ok:#8FDB7E; --warn:#F2B35A; --bad:#FF8A80; --logo:#CDF5A3; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.5}
+.wrap{max-width:1320px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:14px}
+.brand svg{height:30px;width:auto;display:block}
+.brand svg path{fill:var(--logo)}
+.brand b{font:400 20px/1 var(--f-display);letter-spacing:.04em;text-transform:uppercase}
+.brand small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.hdr-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mode{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.mode i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
+.mode.on i{background:var(--ok)}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:99px;padding:9px 16px;font-weight:500}
+.btn:hover{border-color:var(--fg)}
+.btn.primary{background:var(--btn);color:var(--btn-fg);border-color:var(--btn);font-weight:700}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.sm{padding:6px 12px;font-size:12.5px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+:is(.btn,input,select,textarea,.tpl,.step,.vis):focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:18px}
+.step{border:0;background:transparent;text-align:left;padding:8px 4px 10px;border-bottom:3px solid var(--line);color:var(--muted);min-width:0}
+.step b{display:block;font:400 16px/1.1 var(--f-display);letter-spacing:.03em;text-transform:uppercase;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step span{font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.step.done{color:var(--fg);border-color:color-mix(in srgb,var(--fg) 35%,transparent)}
+.step.on{color:var(--fg);border-color:var(--fg)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,470px);gap:20px;align-items:start}
+.grid.full{grid-template-columns:minmax(0,1fr)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+.panel h2{font:400 26px/1.05 var(--f-display);text-transform:uppercase;letter-spacing:.02em;margin:0 0 6px;text-wrap:balance}
+.panel h3{font:700 14px var(--f-body);margin:0 0 8px}
+.lead{color:var(--muted);margin:0 0 18px;max-width:66ch}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fields .full{grid-column:1/-1}
+label.f{display:flex;flex-direction:column;gap:6px;font-weight:500;font-size:13px;min-width:0}
+.hint{font-weight:400;color:var(--muted);font-size:12px}
+input[type=text],input[type=url],select,textarea{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+input[type=file]{font-size:12.5px;max-width:100%}
+textarea{resize:vertical;min-height:80px}
+.counter{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;align-self:flex-end;margin-top:-2px}
+.counter.over{color:var(--bad);font-weight:700}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
+.tpls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.tpl{border:2px solid var(--line);border-radius:14px;background:var(--bg);padding:10px;text-align:left;color:var(--fg);display:flex;flex-direction:column;gap:6px;min-width:0}
+.tpl.sel{border-color:var(--fg);background:var(--sel)}
+.thumb{height:160px;display:grid;place-items:center;background:var(--chip);border-radius:10px;overflow:hidden}
+.thumb canvas{max-width:100%;max-height:150px;width:auto;height:auto;display:block;border-radius:3px}
+.tpl b{font-weight:700;font-size:14px}
+.dim{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tpl p{margin:0;font-size:12px;color:var(--muted)}
+.fmts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.fmt{border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:99px;padding:7px 14px;font-size:13px}
+.fmt.sel{background:var(--btn);color:var(--btn-fg);border-color:var(--btn);font-weight:700}
+aside.preview{position:sticky;top:max(12px,env(safe-area-inset-top,0px))}
+.stage{background:repeating-conic-gradient(var(--chip) 0 25%,var(--panel) 0 50%) 0 0/16px 16px;border-radius:12px;padding:14px;display:grid;place-items:center;min-height:220px}
+.stage canvas{max-width:100%;max-height:60vh;width:auto;height:auto;box-shadow:0 6px 24px rgba(20,29,48,.22);border-radius:4px}
+.schemes{display:flex;gap:6px;margin-bottom:10px}
+.meta{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin-top:10px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border-radius:99px;padding:3px 10px;font-size:12px;font-weight:500}
+.checks{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:5px}
+.checks li{display:flex;gap:8px;align-items:flex-start;font-size:12.5px}
+.checks li::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;margin-top:6px;background:var(--ok)}
+.checks li.warn::before{background:var(--warn)}
+.checks li.bad::before{background:var(--bad)}
+.box{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--bg);margin-top:16px}
+.box h3{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.score{font:400 28px var(--f-display);font-variant-numeric:tabular-nums}
+.opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.opt{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel);display:flex;flex-direction:column;gap:6px;min-width:0}
+.opt.sel{border-color:var(--fg);box-shadow:0 0 0 1px var(--fg)}
+.opt .tag{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.opt .t{font:400 19px/1.05 var(--f-display);text-transform:uppercase}
+.opt .d{font-weight:700;font-size:13px}
+.opt .s{font-size:12.5px;color:var(--muted)}
+.opt .btn{margin-top:auto}
+.status{font-size:13px;color:var(--muted);margin-top:10px;min-height:1.2em}
+.status.err{color:var(--bad)}
+ul.plain{margin:6px 0 0;padding-left:18px}
+ul.plain li{margin:2px 0}
+.files{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.fileitem{display:flex;align-items:center;gap:6px;background:var(--chip);border-radius:8px;padding:4px 6px 4px 4px;font-size:12px}
+.fileitem img{width:34px;height:34px;object-fit:contain;background:#141D30;border-radius:6px;padding:3px}
+.fileitem button{border:0;background:transparent;color:var(--muted);font-size:15px;line-height:1;padding:2px 4px}
+.visuals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.vis{border:2px solid var(--line);border-radius:12px;background:var(--panel);color:var(--fg);padding:8px;font-size:12.5px;display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center}
+.vis.sel{border-color:var(--fg);background:var(--sel)}
+.vis canvas{width:100%;height:auto;border-radius:6px;background:#141D30}
+.final{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--bg);display:flex;flex-direction:column;gap:10px;min-width:0}
+.card h3{margin:0;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.card .stage{padding:10px;min-height:0}
+.card canvas{max-height:520px}
+img.out{max-width:100%;border-radius:4px;margin-top:8px}
+.adapt{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:12px}
+.ad{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--panel);display:flex;flex-direction:column;gap:6px;min-width:0}
+.ad .thumb{height:150px}
+.ad b{font-size:13px}
+.ad .flag{font-size:12px}
+.ad .flag.warn{color:var(--warn)} .ad .flag.bad{color:var(--bad)} .ad .flag.ok{color:var(--ok)}
+.wa{white-space:pre-wrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13.5px}
+.kit[hidden]{display:none!important}
+.kit{margin-bottom:18px}
+.kitrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.sw{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sw i{width:66px;height:46px;border-radius:8px;border:1px solid var(--line);display:block}
+.rules{margin:0;padding-left:18px;font-size:12.5px;color:var(--muted)}
+.fontrow{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--line)}
+.note{font-size:12px;color:var(--muted)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:500;font-size:13px;z-index:20}
+@media (max-width:1000px){.grid{grid-template-columns:1fr}aside.preview{position:static}.kitrow{grid-template-columns:1fr}}
+@media (max-width:640px){.fields,.opts,.final,.tpls{grid-template-columns:1fr}.visuals{grid-template-columns:repeat(2,minmax(0,1fr))}.step b{font-size:12px}.step span{font-size:10px}}
+/* Revisión de marca */
+:root{--block:#C62828;--block-bg:#FDECEA;--warnc:#9A5B00;--warn-bg:#FFF3DC;--info-bg:#E3F3D6}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--block:#FF8A80;--block-bg:#3A1F24;--warnc:#F2B35A;--warn-bg:#3A3020;--info-bg:#22351F}}
+:root[data-theme="dark"]{--block:#FF8A80;--block-bg:#3A1F24;--warnc:#F2B35A;--warn-bg:#3A3020;--info-bg:#22351F}
+.review{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.rv-card{margin-top:0;border-top:0;padding-top:0}
+.design{margin:4px 0 4px}
+.design .stage canvas{max-height:70vh}
+.review-box .review{margin-top:0;border-top:0;padding-top:0}
+.crit{margin-top:12px;padding:12px;border-radius:10px;background:var(--panel);border:1px solid var(--line);font-size:13px}
+.crit b{display:block;font-size:12px;margin-top:6px}
+.crit b:first-child{margin-top:0}
+.crit li b{display:inline;margin:0;font-size:13px}
+label.f.ai-filled input,label.f.ai-filled textarea{border-color:var(--ok);box-shadow:0 0 0 1px var(--ok)}
+.aitag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ok);margin-left:6px}
+#aside.copy-only .schemes,#aside.copy-only .stage,#aside.copy-only .meta{display:none}
+#aside.copy-only .review{margin-top:0;border-top:0;padding-top:0}
+.rv-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.rv-head h3{margin:0;font:400 18px var(--f-display);text-transform:uppercase;letter-spacing:.03em}
+.rv-sum{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.chip{font-size:12px;font-weight:500;border-radius:99px;padding:3px 10px;background:var(--chip)}
+.chip.c-block{background:var(--block-bg);color:var(--block);font-weight:700}
+.chip.c-warn{background:var(--warn-bg);color:var(--warnc);font-weight:700}
+.chip.c-ok{background:var(--info-bg);color:var(--ok);font-weight:700}
+.rv-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.rv{border-radius:10px;padding:8px 10px;background:var(--bg);border-left:4px solid var(--line);display:flex;flex-direction:column;gap:3px;font-size:13px;min-width:0}
+.rv b{font-weight:500}
+.rv small{color:var(--muted);font-size:12px}
+.rv-block{border-left-color:var(--block);background:var(--block-bg)}
+.rv-warn{border-left-color:var(--warnc);background:var(--warn-bg)}
+.rv-info{border-left-color:var(--ok)}
+.rv-ok{border-left-color:var(--ok)}
+.sev{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:99px;padding:1px 8px;display:inline-block}
+.sev-block{background:var(--block);color:#fff}
+.sev-warn{background:var(--warnc);color:#fff}
+.sev-info{background:var(--chip);color:var(--fg)}
+:root[data-theme="dark"] .sev-block,:root[data-theme="dark"] .sev-warn{color:#141D30}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sev-block,:root:not([data-theme="light"]) .sev-warn{color:#141D30}}
+.kind{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.rv-t{display:block;font-size:12.5px;margin-bottom:6px}
+.rv-block-wrap,.rv-check{display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:4px 0}
+div.rv-block{margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);border-left-width:1px}
+.rv-pass{margin-top:12px;font-size:13px}
+.rv-pass summary{cursor:pointer;font-weight:500;color:var(--muted)}
+.rv-pass .rv-list{margin-top:8px}
+.rules-top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-bottom:14px}
+.rules-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.col-h{font:400 20px var(--f-display);text-transform:uppercase;letter-spacing:.03em;margin:0 0 8px;padding-bottom:6px;border-bottom:3px solid var(--ok)}
+.col-h.dont{border-color:var(--block)}
+.rule{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;background:var(--bg)}
+.rule.off{opacity:.6}
+.rule-main b{font-weight:500;font-size:13.5px}
+.badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;align-items:center}
+.badges .pill{font-size:11px;padding:1px 8px;font-weight:500}
+.why{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+.rule-ctrl{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.rule-ctrl select{width:auto;padding:5px 8px;font-size:12.5px}
+.sw-toggle{font-size:12.5px;display:flex;gap:5px;align-items:center}
+.rule-reason{grid-column:1/-1;border-top:1px dashed var(--line);padding-top:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn.danger{border-color:var(--block);color:var(--block)}
+.log{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.log li{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:3px;font-size:13px;background:var(--bg)}
+.log small{color:var(--muted)}
+dialog#gate{border:0;border-radius:18px;padding:0;max-width:min(640px,calc(100vw - 32px));width:100%;background:var(--panel);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog#gate::backdrop{background:rgba(20,29,48,.55)}
+.gate{padding:22px;display:flex;flex-direction:column;gap:6px;max-height:85vh;overflow:auto}
+.gate h2{font:400 26px/1.05 var(--f-display);text-transform:uppercase;margin:0}
+.gate-list{list-style:none;margin:8px 0;padding:0;display:grid;gap:8px}
+.gate-list label.f{margin-top:6px}
+@media (max-width:760px){.rules-cols{grid-template-columns:1fr}.rule{grid-template-columns:1fr}.rule-ctrl{flex-direction:row;align-items:center;flex-wrap:wrap}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="189.8 467.9 700.5 144.1" role="img" aria-label="Upper"><path id="logoPath"/></svg>
+      <div><b>Studio</b></div>
+    </div>
+    <div class="hdr-actions">
+      <span class="mode" id="aiMode"><i></i><span>IA: comprobando…</span></span>
+      <button class="btn sm" id="rulesBtn" aria-expanded="false">Reglas de marca</button>
+      <button class="btn sm" id="kitBtn" aria-expanded="false">Kit de marca</button>
+    </div>
+  </header>
+
+  <section class="panel kit" id="kit" hidden>
+    <h2>Kit de marca</h2>
+    <p class="lead">Estos elementos son fijos. Las plantillas los aplican solas y nadie los cambia desde el flujo.</p>
+    <div class="kitrow">
+      <div>
+        <h3>Cromática</h3>
+        <div class="swatches" id="swatches"></div>
+        <h3 style="margin-top:16px">Jerarquía del logo</h3>
+        <p class="note" style="margin:0">Sobre azul oscuro va verde. Sobre verde o claro Upper va azul oscuro. El logo es el vector oficial y no se puede distorsionar, girar, sombrear ni recolorear.</p>
+      </div>
+      <div>
+        <h3>Tipografías</h3>
+        <div id="fontStatus"></div>
+        <p class="note">Vienen incluidas en la carpeta <code>fonts/</code>. Si cambia una versión, reemplázala aquí para esta sesión (.woff2, .woff, .otf o .ttf).</p>
+        <div class="fields" style="grid-template-columns:1fr">
+          <label class="f">Titulares: Noland Bold<input type="file" id="fontD" accept=".woff2,.woff,.otf,.ttf"></label>
+          <label class="f">Cuerpo: Rethink Sans (variable)<input type="file" id="fontT" accept=".woff2,.woff,.otf,.ttf"></label>
+        </div>
+      </div>
+      <div>
+        <h3>Reglas que aplica la plataforma</h3>
+        <p class="note" style="margin:0 0 6px">La lista completa y editable está en <button class="btn sm" data-open-rules>Reglas de marca</button></p>
+        <ul class="rules">
+          <li>Solo 3 colores: Upper Dark Blue, Green y Cream Green.</li>
+          <li>Titulares en Noland, siempre en mayúsculas.</li>
+          <li>Cuerpo, botones y etiquetas en Rethink Sans.</li>
+          <li>Ilustraciones: solo las oficiales, en su versión para fondo claro u oscuro.</li>
+          <li>Logo con tamaño mínimo: 35 px en pantalla, 0,5 cm impreso.</li>
+          <li>Sin fondos fotográficos sobrecargados, sombras ni gradientes.</li>
+          <li>Sin emojis en la pieza; van en el mensaje que la acompaña.</li>
+          <li>Máximo 3 logos de aliados por pieza.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel kit" id="rules" hidden>
+    <div class="rules-top"><div><h2>Reglas de marca</h2><p class="lead" style="margin-bottom:6px">Do's y Don'ts que se revisan en cada pieza. Las del brandbook no se pueden borrar: se pueden suavizar o desactivar explicando el motivo. Las del equipo se agregan y editan libremente.</p>
+      <span class="pill" id="rulesScope"></span> <span class="status err" id="rulesStatus" hidden></span></div>
+      <div class="fmts" role="group" aria-label="Secciones"><button class="fmt" data-rtab="reglas">Reglas</button><button class="fmt" data-rtab="cambios">Historial de cambios</button><button class="fmt" data-rtab="excepciones">Excepciones</button></div></div>
+    <div id="rulesBody"></div>
+  </section>
+
+  <nav class="steps" id="steps" aria-label="Pasos"></nav>
+
+  <div class="grid" id="grid">
+    <main class="panel" id="main"></main>
+    <aside class="preview panel" id="aside">
+      <div class="schemes" id="liveSchemes"></div>
+      <div class="stage"><canvas id="live"></canvas></div>
+      <div class="meta"><span id="liveName"></span><span id="liveDim"></span></div>
+      <div id="review" class="review"></div>
+    </aside>
+  </div>
+</div>
+<div id="qrTmp" hidden></div>
+<dialog id="gate" aria-label="Revisión antes de descargar"></dialog>
+
+<script>
+/* ===================== MARCA (Brandbook 2025) ===================== */
+const LOGO_D="M835.22,468.03c-15.91,0-20.82,7.38-23.79,15.14-2.97,7.76-8.53,22.3-15.33,40.06-2.6,6.81-4.46,11.72-5.74,15.12-1.45,3.84-5.13,6.4-9.23,6.4h-6.13s-49.29-.05-49.29-.05h-12.71c-16.07,0-19.73-7.59-17.81-13.93.86-2.83,1.7-4.81,2.6-7.16l1.08-2.87c.94-2.49,2.96-3.37,5.52-3.37h39.5c8.5,0,17.42-2.26,22.31-9.22,2.89-4.11,4.04-6.87,5.88-11.72,3.49-9.22,5.77-20.09-2.4-24.69-6.37-3.59-14.38-3.76-23.84-3.76h-19.94c-14.71,0-31.49,4.71-43.83,13.25-14.39,9.98-22.05,23.35-25.56,40.98-1.38,9.2-.07,16.93,1.9,22.59h-45.96l22.37-58.36c3.39-8.84-3.14-18.32-12.6-18.32h-76.92c-9.97,0-18.9,6.15-22.46,15.46l-23.38,61.22h-34.72l22.5-58.33c3.41-8.84-3.11-18.35-12.59-18.35h-76.88c-9.97,0-18.9,6.15-22.46,15.46l-23.35,61.14h-27.46c-3.58,0-5.93-3.75-4.36-6.97l26.82-69.64h-37.26s-27.72,72.36-27.72,72.36c-1.12,2.58-3.34,4.25-6.15,4.25h-15.42c-5.23,0-8.55-5.48-6.26-10.18l25.55-66.43h-70.38c-7.78,0-14.77,4.79-17.53,12.07-.8,2.1-1.51,4.01-1.98,5.28h46.98l-18.5,48.34c-1.29,3.73-2.88,6.8-3.51,10.02-1.11,5.56-.59,9.86,1.59,13.14,2.26,3.44,6.03,5.1,11.5,5.1h117.47s-19.08,49.96-19.08,49.96h35.19l45.1-118.35c.73-1.9,2.55-3.16,4.59-3.16h34.56c2.32,0,3.92,2.33,3.09,4.5l-19.08,49.8h-27.03c-1.02,0-1.93.63-2.29,1.58l-3.56,9.29c-1.23,3.21,1.14,6.66,4.58,6.66h91.35s-18.98,49.68-18.98,49.68h35.19l45.1-118.35c.73-1.9,2.55-3.16,4.58-3.16h34.58c2.32,0,3.92,2.32,3.1,4.49l-18.91,49.81h-27.21c-1.02,0-1.93.63-2.29,1.58l-3.56,9.29c-1.23,3.21,1.14,6.66,4.58,6.66h171.79s0-.03,0-.03h54.29v.03c5.83,0,16.17.01,24.91.02,7.35,0,13.96-4.64,16.58-11.51.72-1.89,1.56-4.07,2.53-6.57,2.07-5.46,16.96-44.16,19.41-50.51,3.06-7.95,3.38-7.95,15.93-7.95h16.1c7.76,0,14.72-4.76,17.54-11.99l2.24-5.78h-55.01ZM705.06,504.55l5.54-14.23c1.6-4.23,4.56-6.26,9.12-6.26l13.07-.05c3.33-.01,5.63,3.32,4.44,6.43l-6.46,16.84h-24.02c-1.4,0-2.32-1.48-1.7-2.73Z";
+const LB={x:189.81,y:467.98,w:700.45,h:144.04};
+const LOGO_PATH=new Path2D(LOGO_D);
+const C={navy:'#141D30',green:'#CDF5A3',cream:'#F0FFE8'};
+const PALETTE=[['Upper Dark Blue','#141D30','Pantone 2767C'],['Green','#CDF5A3','Pantone 7486C'],['Cream Green','#F0FFE8','CMYK 5·0·11·0']];
+/* Combinaciones aprobadas (jerarquía de aplicación del brandbook) */
+const SCHEMES={
+  oscuro:{name:'Verde + azul oscuro',bg:C.navy,fg:C.cream,hi:C.green,hiMode:'color',line:C.cream,logo:C.green,ctaBg:C.green,ctaFg:C.navy,offerBg:C.green,offerFg:C.navy,tabBg:C.green,tabLogo:C.navy,card:C.green,cuponBg:C.navy,cuponCard:C.cream,cuponFg:C.navy},
+  claro:{name:'Azul oscuro + claro Upper',bg:C.cream,fg:C.navy,hi:C.navy,hiMode:'marker',line:C.navy,logo:C.navy,ctaBg:C.navy,ctaFg:C.green,offerBg:C.navy,offerFg:C.green,tabBg:C.navy,tabLogo:C.green,card:C.green,cuponBg:C.green,cuponCard:C.cream,cuponFg:C.navy}
+};
+const FD='"UpperDisplay", "Anton", Impact, sans-serif';
+const FT='"UpperText", "Lexend", Arial, sans-serif';
+const fd=s=>`400 ${s}px ${FD}`;
+const ft=(w,s)=>`${w} ${s}px ${FT}`;
+
+/* Formatos: 3 plantillas por formato. Las 3 composiciones (hero, pestaña, cupón) se adaptan a cualquier proporción. */
+const FORMATS={
+  inapp:{label:'Banner in-app',canal:'App Upper',templates:[
+    {id:'hero',name:'Hero + ilustración',w:1059,h:465,layout:'hero',desc:'Titular grande a la izquierda y visual con la cinta Upper.'},
+    {id:'tab',name:'Pestaña de logo',w:1080,h:540,layout:'tab',desc:'Logo en pestaña, titular y tarjeta de producto.'},
+    {id:'cupon',name:'Cupón',w:1080,h:400,layout:'cupon',desc:'Tarjeta tipo gift card con monto y código.'}]},
+  social:{label:'Redes sociales',canal:'Instagram / Facebook',templates:[
+    {id:'feed',name:'Feed 4:5',w:1080,h:1350,layout:'tab',desc:'Pestaña de logo y producto. El formato del brandbook.'},
+    {id:'story',name:'Historia 9:16',w:1080,h:1920,layout:'hero',opt:{safeTop:.11,safeBot:.14},desc:'Con zonas seguras para la interfaz.'},
+    {id:'sq',name:'Cuadrado',w:1080,h:1080,layout:'cupon',desc:'Cupón para anuncios y carrusel.'}]},
+  wa:{label:'Imagen WhatsApp',canal:'WhatsApp',templates:[
+    {id:'wsq',name:'Post cuadrado',w:1080,h:1080,layout:'tab',desc:'Se entiende en miniatura dentro del chat.'},
+    {id:'estado',name:'Estado 9:16',w:1080,h:1920,layout:'hero',opt:{safeTop:.11,safeBot:.14},desc:'Textos fuera de las zonas que tapa la app.'},
+    {id:'wv',name:'Vertical 4:5',w:1080,h:1350,layout:'cupon',desc:'Cupón vertical con QR o código.'}]},
+  hablador:{label:'Hablador impreso',canal:'Punto de venta',print:true,templates:[
+    {id:'a5',name:'A5 vertical',w:1819,h:2551,layout:'hero',desc:'148×210 mm a 300 dpi con 3 mm de sangrado.'},
+    {id:'a6',name:'A6 horizontal',w:1819,h:1311,layout:'cupon',desc:'148×105 mm, tent card con QR.'},
+    {id:'colg',name:'Colgante 15 cm',w:1843,h:1843,layout:'tab',desc:'150×150 mm para vitrina.'}]}
+};
+Object.entries(FORMATS).forEach(([k,f])=>f.templates.forEach(t=>t.fmt=k));
+const LIMITS={eyebrow:28,titular:40,subtitulo:100,destacado:12,nota:18,cta:20,codigo:14,fecha:24,legal:140};
+
+/* ===================== ESTADO ===================== */
+const DEFAULTS={
+  req:{campana:'Regalo 10 USD noviembre',objetivo:'Activación',canal:'inapp',descripcion:'Usuarios que descargaron la app y no han hecho su primer pedido. Les regalamos 10 USD para su primera compra en tiendas de USA durante noviembre.',vigencia:'Hasta el 30 de noviembre'},
+  propuesta:'Te regalamos 10 dólares para tu primer pedido, compra en USA y te lo traemos en 7 días',
+  copy:{eyebrow:'',titular:'',subtitulo:'',destacado:'',cta:'',nota:'',codigo:'',fecha:'',legal:''},
+  waMsg:'',
+  visual:'giftcard',qr:''
+};
+const S={step:1,formato:'inapp',tpl:'hero',scheme:'oscuro',
+  req:{...DEFAULTS.req},propuesta:DEFAULTS.propuesta,copy:{...DEFAULTS.copy},waMsg:DEFAULTS.waMsg,
+  evalr:null,opciones:[],optSel:-1,casilla:'',extrasAI:null,
+  extras:{aliados:[],producto:null,visual:DEFAULTS.visual,qr:DEFAULTS.qr},
+  fonts:{display:false,text:false},manual:{},aiReview:null,msgAI:null};
+const isExample=()=>S.req.campana===DEFAULTS.req.campana;
+const curFormat=()=>FORMATS[S.formato];
+const curTpl=()=>curFormat().templates.find(t=>t.id===S.tpl)||curFormat().templates[0];
+const store={get(k){try{return JSON.parse(localStorage.getItem('upper_'+k))}catch{return null}},set(k,v){try{localStorage.setItem('upper_'+k,JSON.stringify(v))}catch{}}};
+function saveDraft(){store.set('draft',{v:2,req:S.req,propuesta:S.propuesta,copy:S.copy,waMsg:S.waMsg,formato:S.formato,tpl:S.tpl,scheme:S.scheme,visual:S.extras.visual,qr:S.extras.qr});}
+function loadDraft(){const d=store.get('draft');if(!d)return;if(!d.v){if(d.copy)['nota','codigo','fecha','legal'].forEach(k=>d.copy[k]='');d.waMsg='';}Object.assign(S.req,d.req||{});Object.assign(S.copy,d.copy||{});['propuesta','waMsg','formato','tpl','scheme'].forEach(k=>{if(d[k]!=null)S[k]=d[k]});if(d.visual)S.extras.visual=d.visual;if(!VISUALS.some(v=>v[0]===S.extras.visual))S.extras.visual=DEFAULTS.visual;if(d.qr!=null)S.extras.qr=d.qr;if(!FORMATS[S.formato]){S.formato='inapp';S.tpl='hero';}if(!SCHEMES[S.scheme])S.scheme='oscuro';}
+
+/* ===================== DIBUJO ===================== */
+function rr(ctx,x,y,w,h,r){r=Math.max(0,Math.min(r,w/2,h/2));ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function drawLogo(ctx,x,y,h,color){const s=h/LB.h;ctx.save();ctx.translate(x-LB.x*s,y-LB.y*s);ctx.scale(s,s);ctx.fillStyle=color;ctx.fill(LOGO_PATH);ctx.restore();return LB.w*s;}
+const tintCache=new Map();
+function tinted(img,color){const k=img.src.slice(-60)+color;if(tintCache.has(k))return tintCache.get(k);const c=document.createElement('canvas');c.width=img.naturalWidth||img.width;c.height=img.naturalHeight||img.height;const x=c.getContext('2d');x.drawImage(img,0,0,c.width,c.height);x.globalCompositeOperation='source-in';x.fillStyle=color;x.fillRect(0,0,c.width,c.height);tintCache.set(k,c);return c;}
+/* Logo Upper + aliados (separados por línea). Devuelve el alto real del logo. */
+function logoRow(ctx,R,x,y,h,maxW,align,color){
+  const al=S.extras.aliados.slice(0,3);const gap=h*.9;
+  const items=()=>[{w:h*LB.w/LB.h,draw:(cx,hh)=>drawLogo(ctx,cx,y+(h-hh)/2,hh,color),hh:h},...al.map(a=>{const ah=h*1.05;const im=a.img;return{w:ah*im.width/im.height,draw:(cx,hh)=>ctx.drawImage(a.white?tinted(im,color):im,cx,y+(h-hh)/2,hh*im.width/im.height,hh),hh:ah};})];
+  let it=items();let tot=it.reduce((a,i)=>a+i.w,0)+gap*(it.length-1);let k=Math.min(1,maxW/tot);
+  let cx=align==='center'?x+(maxW-tot*k)/2:align==='right'?x+maxW-tot*k:x;
+  it.forEach((i,n)=>{i.draw(cx,i.hh*k);cx+=i.w*k;if(n<it.length-1){ctx.fillStyle=color;ctx.globalAlpha=.8;ctx.fillRect(cx+gap*k/2-Math.max(1,h*k*.025),y-h*.1,Math.max(2,h*k*.05),h*1.2);ctx.globalAlpha=1;cx+=gap*k;}});
+  R.logo=true;R.logoH=Math.min(R.logoH??Infinity,h*k);
+  return tot*k;
+}
+/* Texto con ajuste automático. *palabras* = resaltado (verde sobre oscuro, marcador verde sobre claro). */
+function parseRich(t,upper){const out=[];let hi=false;String(t||'').split(/(\*)/).forEach(p=>{if(p==='*'){hi=!hi;return;}p.split(/\s+/).filter(Boolean).forEach(w=>out.push({w:upper?w.toLocaleUpperCase('es'):w,hi}));});return out;}
+function wrapWords(ctx,words,maxW){const sp=ctx.measureText(' ').width;const lines=[];let cur=[],cw=0;for(const w of words){const ww=ctx.measureText(w.w).width;if(ww>maxW)return null;const add=cur.length?cw+sp+ww:ww;if(add<=maxW){cur.push({...w,ww});cw=add;}else{lines.push({t:cur,w:cw});cur=[{...w,ww}];cw=ww;}}if(cur.length)lines.push({t:cur,w:cw});return{lines,sp};}
+function text(ctx,R,label,str,b,o){
+  const words=parseRich(str,o.upper);if(!words.length||b.h<=0)return{h:0,w:0,size:0};
+  const font=s=>o.font==='d'?fd(s):ft(o.weight||400,s);const lh=o.lh||1.15;const step=Math.max(.5,o.max*.03);
+  let size=o.max,res=null;
+  for(;size>=o.min;size-=step){ctx.font=font(size);res=wrapWords(ctx,words,b.w);if(res&&res.lines.length<=(o.maxLines||8)&&res.lines.length*size*lh<=b.h)break;res=null;}
+  if(!res){size=o.min;ctx.font=font(size);res=wrapWords(ctx,words,b.w)||{lines:[{t:words.map(w=>({...w,ww:ctx.measureText(w.w).width})),w:b.w}],sp:ctx.measureText(' ').width};R.checks.push({lvl:'bad',fit:true,msg:`“${label}” no cabe en su zona: acórtalo.`});}
+  const th=res.lines.length*size*lh;let y0=b.y;if(o.valign==='middle')y0=b.y+(b.h-th)/2;else if(o.valign==='bottom')y0=b.y+b.h-th;
+  ctx.save();ctx.font=font(size);ctx.textBaseline='middle';ctx.textAlign='left';
+  let mw=0,hiCount=0;
+  res.lines.forEach((ln,i)=>{let x=o.align==='center'?b.x+(b.w-ln.w)/2:o.align==='right'?b.x+b.w-ln.w:b.x;const cy=y0+(i+.5)*size*lh;mw=Math.max(mw,ln.w);
+    ln.t.forEach((tk,j)=>{let col=o.color;
+      if(tk.hi){hiCount++;if(o.hiMode==='marker'){ctx.fillStyle=C.green;const ext=j<ln.t.length-1&&ln.t[j+1].hi?res.sp:0;ctx.fillRect(x-size*.08,cy-size*.5,tk.ww+ext+size*.16,size*1.0);col=C.navy;}else col=o.hi||o.color;}
+      ctx.fillStyle=col;ctx.fillText(tk.w,x,cy+size*(o.font==='d'?.04:.02));x+=tk.ww+res.sp;});});
+  ctx.restore();
+  if(o.bg)R.pairs.push({fg:o.color,bg:o.bg,large:size>=24||((o.weight||400)>=700&&size>=18.7),label});
+  if(o.hi&&o.bg&&hiCount&&o.hiMode!=='marker')R.pairs.push({fg:o.hi,bg:o.bg,large:size>=24,label:label+' (resaltado)'});
+  return{h:th,w:mw,size,y:y0};
+}
+function pill(ctx,R,str,x,y,h,bg,fg,o={}){
+  if(!str)return 0;const s=o.upper?str.toLocaleUpperCase('es'):str;let fs=h*(o.fs||.42);ctx.font=ft(o.weight||700,fs);
+  if('letterSpacing' in ctx)ctx.letterSpacing=o.upper?`${fs*.06}px`:'0px';
+  const padX=h*.55;let w=ctx.measureText(s).width+padX*2;
+  if(o.maxW&&w>o.maxW){fs=fs*(o.maxW-padX*2)/(w-padX*2);ctx.font=ft(o.weight||700,fs);w=o.maxW;if(fs<h*.28)R.checks.push({lvl:'warn',msg:`“${o.label||s}” queda pequeño: acórtalo.`});}
+  const px=o.align==='center'?x-w/2:o.align==='right'?x-w:x;rr(ctx,px,y,w,h,h/2);
+  if(bg){ctx.fillStyle=bg;ctx.fill();}
+  if(o.stroke){ctx.lineWidth=Math.max(2,h*.05);ctx.strokeStyle=o.stroke;ctx.stroke();}
+  ctx.fillStyle=fg;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(s,px+w/2,y+h/2+fs*.04);
+  if('letterSpacing' in ctx)ctx.letterSpacing='0px';
+  if(o.label==='CTA')R.ctas=(R.ctas||0)+1;
+  if(bg)R.blocks=(R.blocks||0)+1;
+  R.pairs.push({fg,bg:o.pairBg||bg,large:fs>=18.7,label:o.label||s});return w;
+}
+/* Etiqueta de texto sin contenedor (fecha, código): el brandbook no usa textos con contorno */
+function tag(ctx,R,str,x,y,h,color,o={}){if(!str)return 0;let fs=h*.46;ctx.font=ft(600,fs);let w=ctx.measureText(str).width;
+  if(o.maxW&&w>o.maxW){fs*=o.maxW/w;ctx.font=ft(600,fs);w=o.maxW;}
+  const px=o.align==='right'?x-w:o.align==='center'?x-w/2:x;ctx.fillStyle=color;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(str,px,y+h/2);
+  if(o.bg)R.pairs.push({fg:color,bg:o.bg,large:fs>=18.7,label:o.label||str});return w;}
+/* Bloque de oferta: cifra en Noland + nota corta (ej. $5 +IVA/libra, 10 USD de regalo) */
+function offer(ctx,R,d,x,y,h,maxW,sc,align){
+  if(!d.destacado)return 0;const main=d.destacado.toLocaleUpperCase('es');
+  const nl=(d.nota||'').trim();let nLines=[];if(nl){const ws=nl.split(/\s+/);const half=Math.ceil(ws.length/2);nLines=ws.length>1?[ws.slice(0,half).join(' '),ws.slice(half).join(' ')]:[nl];}
+  let fs=h*.82,ns=h*.2;const gap=h*.12;
+  const measure=()=>{ctx.font=fd(fs);const mw=ctx.measureText(main).width;ctx.font=ft(700,ns);const nw=nLines.length?Math.max(...nLines.map(l=>ctx.measureText(l).width)):0;return{mw,nw,w:mw+(nw?gap+nw:0)};};
+  let m=measure();if(m.w>maxW){const k=maxW/m.w;fs*=k;ns*=k;m=measure();if(fs<h*.45)R.checks.push({lvl:'warn',msg:'El destacado queda pequeño: acórtalo.'});}
+  const x0=align==='center'?x-m.w/2:align==='right'?x-m.w:x;
+  ctx.fillStyle=sc.hi;ctx.textBaseline='middle';ctx.textAlign='left';ctx.font=fd(fs);ctx.fillText(main,x0,y+h/2+fs*.04);
+  if(nLines.length){ctx.fillStyle=sc.fg;ctx.font=ft(700,ns);const nx=x0+m.mw+gap;const lh=ns*1.1;const ny=y+h/2-(nLines.length*lh)/2+lh/2;nLines.forEach((l,i)=>ctx.fillText(l,nx,ny+i*lh));}
+  R.pairs.push({fg:sc.hi,bg:sc.bg,large:true,label:'Destacado'});if(nLines.length)R.pairs.push({fg:sc.fg,bg:sc.bg,large:ns>=18.7,label:'Nota del destacado'});
+  return m.w;
+}
+/* Antetítulo: texto en mayúsculas espaciadas, sin bloque */
+function eyebrow(ctx,R,str,x,y,h,sc,o={}){if(!str)return 0;const s=str.toLocaleUpperCase('es');let fs=h*.62;ctx.font=ft(700,fs);
+  if('letterSpacing' in ctx)ctx.letterSpacing=`${fs*.12}px`;let w=ctx.measureText(s).width;if(o.maxW&&w>o.maxW){fs*=o.maxW/w;ctx.font=ft(700,fs);if('letterSpacing' in ctx)ctx.letterSpacing=`${fs*.12}px`;w=ctx.measureText(s).width;}
+  const px=o.align==='center'?x-w/2:x;ctx.fillStyle=sc.hi;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(s,px,y+h/2);if('letterSpacing' in ctx)ctx.letterSpacing='0px';
+  R.pairs.push({fg:sc.hi,bg:sc.bg,large:fs>=18.7,label:'Antetítulo'});return w;}
+/* Cinta Upper: trazo grueso con esquinas redondeadas (elemento gráfico del brandbook) */
+function ribbon(ctx,pts,lw,rad,color){ctx.save();ctx.beginPath();ctx.moveTo(...pts[0]);for(let i=1;i<pts.length-1;i++)ctx.arcTo(pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1],rad);ctx.lineTo(...pts[pts.length-1]);ctx.lineWidth=lw;ctx.lineCap='butt';ctx.lineJoin='round';ctx.strokeStyle=color;ctx.stroke();ctx.restore();}
+/* Ilustraciones oficiales (NUEVAS_ILUSTRACIONES.ai): versión "claro" (línea azul) y "oscuro" (línea crema) */
+const ILUS=[['giftcard','Gift card'],['caja-manos','Caja en manos'],['celular-bolsa','Compra en la app'],['celular-mano','Celular en mano'],['caja-sorpresa','Caja sorpresa'],['avion-letrero','Avión y letrero']];
+const ILUS_IMG={};
+const isIllus=k=>ILUS.some(i=>i[0]===k);
+function loadIllus(){return Promise.all(ILUS.flatMap(([k])=>['claro','oscuro'].map(v=>new Promise(res=>{const im=new Image();im.onload=()=>{(ILUS_IMG[k]??={})[v]=im;res();};im.onerror=()=>res();im.src=`assets/ilustraciones/${k}_${v}.svg`;}))));}
+function drawIllus(ctx,R,k,b,bg){const v=lum(bg)<.3?'oscuro':'claro';const im=ILUS_IMG[k]?.[v];
+  if(!im){R.checks.push({lvl:'warn',msg:'No cargó la ilustración: revisa la carpeta assets/ilustraciones.'});return;}
+  contain(ctx,im,b.x,b.y,b.w,b.h);R.visual=true;}
+function contain(ctx,img,x,y,w,h){const k=Math.min(w/img.width,h/img.height);const iw=img.width*k,ih=img.height*k;ctx.drawImage(img,x+(w-iw)/2,y+(h-ih)/2,iw,ih);}
+function visual(ctx,R,b,sc,o={}){
+  if(b.w<20||b.h<20)return;const v=S.extras.visual;
+  if(v==='producto'&&S.extras.producto){const cb={x:b.x+b.w*.06,y:b.y+b.h*.22,w:b.w*.88,h:b.h*.74};rr(ctx,cb.x,cb.y,cb.w,cb.h,Math.min(cb.w,cb.h)*.12);ctx.fillStyle=sc.card;ctx.fill();contain(ctx,S.extras.producto,b.x+b.w*.12,b.y,b.w*.76,b.h*.96);R.visual=true;return;}
+  if(v==='producto'){R.checks.push({lvl:'warn',msg:'Elegiste foto de producto pero no hay imagen cargada (paso Extras).'});return;}
+  if(isIllus(v))drawIllus(ctx,R,v,b,sc.bg);
+}
+let qrCache={k:'',c:null};
+function qrCanvas(t){if(qrCache.k===t)return qrCache.c;if(typeof QRCode==='undefined')return null;const el=document.getElementById('qrTmp');el.innerHTML='';try{new QRCode(el,{text:t,width:512,height:512,colorDark:C.navy,colorLight:C.cream,correctLevel:QRCode.CorrectLevel.M});}catch{return null}const c=el.querySelector('canvas');qrCache={k:t,c};return c;}
+function qr(ctx,R,x,y,s,print){
+  if(!S.extras.qr)return false;const c=qrCanvas(S.extras.qr);if(!c){R.checks.push({lvl:'warn',msg:'No se pudo generar el QR.'});return false;}
+  rr(ctx,x,y,s,s*1.18,s*.08);ctx.fillStyle=C.cream;ctx.fill();ctx.strokeStyle=C.navy;ctx.lineWidth=Math.max(1,s*.01);ctx.stroke();ctx.drawImage(c,x+s*.08,y+s*.08,s*.84,s*.84);
+  ctx.fillStyle=C.navy;ctx.font=ft(700,s*.095);ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('ESCANEA AQUÍ',x+s/2,y+s*1.06);
+  R.qr=true;R.blocks=(R.blocks||0)+1;if(print&&s<300)R.checks.push({lvl:'warn',msg:'El QR mide menos de 2,5 cm impreso: puede costar leerlo.'});if(!print&&s<150)R.checks.push({lvl:'warn',msg:'El QR queda pequeño en pantalla.'});return true;
+}
+const hiOpts=sc=>({hi:sc.hi,hiMode:sc.hiMode});
+
+/* ---------- Composiciones ---------- */
+const L={};
+/* HERO: titular Noland grande + visual con cinta en U (landing, newsletter, banner 10 USD) */
+L.hero=(ctx,W,H,d,sc,R,o)=>{
+  ctx.fillStyle=sc.bg;ctx.fillRect(0,0,W,H);
+  if(W/H>1.3){
+    const p=H*.1,cw=W*.53;
+    const vx=W*.64,vw=W*.29;if(!isIllus(S.extras.visual))ribbon(ctx,[[vx,H*1.2],[vx,H*.26],[vx+vw,H*.26],[vx+vw,H*1.2]],H*.12,vw*.4,C.green);
+    visual(ctx,R,{x:W*.58,y:H*.22,w:W*.4,h:H*.72},sc);
+    const lh=Math.max(H*.075,minLogo(R));logoRow(ctx,R,p,p,lh,cw*.7,'left',sc.logo);
+    if(d.fecha)tag(ctx,R,d.fecha,W-p,p-lh*.05,lh*1.1,sc.fg,{align:'right',maxW:W*.28,label:'Fecha',bg:sc.bg});
+    let y=p+lh+H*.07;
+    if(d.eyebrow){eyebrow(ctx,R,d.eyebrow,p,y,H*.06,sc,{maxW:cw});y+=H*.06+H*.03;}
+    const bottomH=H*.15,legalH=d.legal?H*.07:0;const yb=H-p*.6-legalH-bottomH;
+    let r=text(ctx,R,'Titular',d.titular,{x:p,y,w:cw,h:Math.max(0,yb-y-H*.14)},{font:'d',max:H*.17,min:H*.06,color:sc.fg,bg:sc.bg,upper:true,lh:.98,maxLines:3,...hiOpts(sc)});y+=r.h+H*.025;
+    text(ctx,R,'Subtítulo',d.subtitulo,{x:p,y,w:cw*.92,h:Math.max(0,yb-y-H*.03)},{font:'t',max:H*.042,min:H*.026,color:sc.fg,bg:sc.bg,lh:1.3,maxLines:3});
+    let x=p;const rowH=H*.12;
+    if(d.destacado)x+=offer(ctx,R,d,x,yb,rowH*1.1,cw*.55,sc)+W*.018;
+    if(d.cta)x+=pill(ctx,R,d.cta,x,yb+rowH*.18,rowH*.8,sc.ctaBg,sc.ctaFg,{maxW:Math.max(60,cw-(x-p)),label:'CTA'})+W*.015;
+    if(d.codigo&&cw-(x-p)>W*.1)tag(ctx,R,'Código: '+d.codigo,x+W*.005,yb+rowH*.18,rowH*.8,sc.fg,{maxW:cw-(x-p),label:'Código',bg:sc.bg});
+    if(S.extras.qr)qr(ctx,R,W-p-H*.26,H-p*.6-H*.26*1.18,H*.26,curFormatFor(R).print);
+    text(ctx,R,'Legal',d.legal,{x:p,y:H-p*.6-legalH,w:cw*1.05,h:legalH},{font:'t',max:H*.026,min:H*.017,color:sc.fg,bg:sc.bg,lh:1.2,maxLines:2,valign:'bottom'});
+  }else{
+    const top=H*(o.safeTop||0),bot=H*(o.safeBot||0);const p=W*.08,iw=W-p*2;const A=H-top-bot;
+    let y=top+p*.9;const lh=Math.max(W*.055,minLogo(R));logoRow(ctx,R,p,y,lh,iw*.6,'left',sc.logo);
+    if(d.fecha)tag(ctx,R,d.fecha,W-p,y-lh*.1,lh*1.2,sc.fg,{align:'right',maxW:iw*.42,label:'Fecha',bg:sc.bg});
+    y+=lh+A*.045;
+    if(d.eyebrow){const eh=W*.05;eyebrow(ctx,R,d.eyebrow,p,y,eh,sc,{maxW:iw});y+=eh+A*.02;}
+    let r=text(ctx,R,'Titular',d.titular,{x:p,y,w:iw,h:A*.18},{font:'d',max:Math.min(W*.115,A*.085),min:W*.06,color:sc.fg,bg:sc.bg,upper:true,lh:.98,maxLines:3,...hiOpts(sc)});y+=r.h+A*.02;
+    r=text(ctx,R,'Subtítulo',d.subtitulo,{x:p,y,w:iw,h:A*.11},{font:'t',max:Math.min(W*.038,A*.03),min:W*.026,color:sc.fg,bg:sc.bg,lh:1.3,maxLines:4});y+=r.h+A*.03;
+    const legalH=d.legal?A*.06:0;const rowH=W*.11;const yb=top+A-p*.8-legalH-rowH*1.1-A*.02;
+    const owT=d.destacado?offerWidth(ctx,d,rowH*1.1):0,cwT=d.cta?ctaWidth(ctx,d.cta,rowH*.8):0;ctx.font=ft(700,rowH*.8*.42);const kwT=d.codigo?ctx.measureText(d.codigo).width+rowH*.88:0;
+    const codeInline=d.codigo&&owT+cwT+kwT+W*.06<=iw;const codeH=d.codigo&&!codeInline?rowH*.6+A*.02:0;const vh=yb-y-A*.03-codeH;
+    if(vh>A*.08){const qrOn=!!S.extras.qr;const vw=qrOn?iw*.62:iw;if(!isIllus(S.extras.visual))ribbon(ctx,[[p+vw*.12,y],[p+vw*.12,y+vh*.88],[p+vw*.88,y+vh*.88],[p+vw*.88,y]],W*.07,vw*.18,C.green);visual(ctx,R,{x:p,y,w:vw,h:isIllus(S.extras.visual)?vh:vh*.9},sc);if(qrOn)qr(ctx,R,p+iw-iw*.32,y+vh*.88-iw*.32*1.18,iw*.32,curFormatFor(R).print);}
+    else{R.checks.push({lvl:'warn',msg:'No queda espacio para el visual: acorta titular o subtítulo.'});if(S.extras.qr)R.checks.push({lvl:'warn',msg:'Tampoco hay espacio para el QR.'});}
+    let x=p;
+    if(d.destacado)x+=offer(ctx,R,d,x,yb,rowH*1.1,iw*.58,sc)+W*.025;
+    if(d.cta)x+=pill(ctx,R,d.cta,x,yb+rowH*.15,rowH*.8,sc.ctaBg,sc.ctaFg,{maxW:Math.max(80,iw-(x-p)),label:'CTA'})+W*.025;
+    if(codeInline)tag(ctx,R,'Código: '+d.codigo,x,yb+rowH*.15,rowH*.8,sc.fg,{maxW:p+iw-x,label:'Código',bg:sc.bg});
+    else if(d.codigo){const cy=yb-rowH*.6-A*.015;if(cy>y)tag(ctx,R,'Código: '+d.codigo,p,cy,rowH*.6,sc.fg,{maxW:iw*.6,label:'Código',bg:sc.bg});}
+    text(ctx,R,'Legal',d.legal,{x:p,y:top+A-p*.8-legalH,w:iw,h:legalH},{font:'t',max:W*.022,min:W*.016,color:sc.fg,bg:sc.bg,lh:1.25,maxLines:3,valign:'bottom'});
+  }
+};
+/* PESTAÑA: logo en pestaña superior, titular centrado, tarjeta verde con producto (piezas sociales del brandbook) */
+L.tab=(ctx,W,H,d,sc,R,o)=>{
+  ctx.fillStyle=sc.bg;ctx.fillRect(0,0,W,H);
+  const wide=W/H>1.3;const top=H*(o.safeTop||0),bot=H*(o.safeBot||0);const A=H-top-bot;
+  const tabH=Math.max(wide?H*.14:W*.1,minLogo(R)/.42),tabW=tabH*2.6;const tx=wide?W*.06:(W-tabW)/2;
+  ctx.save();rr(ctx,tx,top-tabH*.5,tabW,tabH*1.5,tabH*.32);ctx.fillStyle=sc.tabBg;ctx.fill();ctx.restore();
+  const lgh=Math.max(tabH*.42,minLogo(R));drawLogo(ctx,tx+(tabW-lgh*LB.w/LB.h)/2,top+(tabH-lgh)/2,lgh,sc.tabLogo);R.logo=true;R.logoH=lgh;
+  R.pairs.push({fg:sc.tabLogo,bg:sc.tabBg,large:true,label:'Logo'});
+  if(S.extras.aliados.length){const ah=lgh*.9;logoRowAliados(ctx,R,wide?W*.94:W-W*.06,top+tabH*.3,ah,sc.logo);}
+  if(wide){
+    const p=W*.06,cw=W*.46;let y=top+tabH+H*.08;
+    if(d.eyebrow){eyebrow(ctx,R,d.eyebrow,p,y,H*.055,sc,{maxW:cw});y+=H*.055+H*.03;}
+    const legalH=d.legal?H*.07:0;const yb=H-H*.07-legalH-H*.12;
+    let r=text(ctx,R,'Titular',d.titular,{x:p,y,w:cw,h:Math.max(0,yb-y-H*.12)},{font:'d',max:H*.14,min:H*.055,color:sc.fg,bg:sc.bg,upper:true,lh:.98,maxLines:3,...hiOpts(sc)});y+=r.h+H*.02;
+    text(ctx,R,'Subtítulo',d.subtitulo,{x:p,y,w:cw,h:Math.max(0,yb-y-H*.03)},{font:'t',max:H*.04,min:H*.025,color:sc.fg,bg:sc.bg,lh:1.3,maxLines:3});
+    let x=p;const rowH=H*.115;
+    if(d.destacado)x+=offer(ctx,R,d,x,yb,rowH,cw*.6,sc)+W*.015;
+    if(d.cta)pill(ctx,R,d.cta,x,yb+rowH*.12,rowH*.76,sc.ctaBg,sc.ctaFg,{maxW:Math.max(60,cw-(x-p)),label:'CTA'});
+    const card={x:W*.56,y:H*.14,w:W*.4,h:H*.76};const cf=cardFill(sc),cp=cardPills(cf);rr(ctx,card.x,card.y,card.w,card.h,card.h*.12);ctx.fillStyle=cf;ctx.fill();
+    drawCardVisual(ctx,R,card,sc);
+    if(d.fecha)tag(ctx,R,d.fecha,card.x+card.w*.06,card.y+card.h-card.h*.05-H*.075,H*.075,cp.t,{maxW:card.w*.6,label:'Fecha',bg:cf});
+    if(d.codigo)tag(ctx,R,'Código: '+d.codigo,card.x+card.w*.94,card.y+card.h*.04,H*.075,cp.t,{align:'right',maxW:card.w*.6,label:'Código',bg:cf});
+    if(S.extras.qr)qr(ctx,R,card.x+card.w-H*.24-card.w*.05,card.y+card.h-H*.24*1.18-card.h*.05,H*.24,curFormatFor(R).print);
+    text(ctx,R,'Legal',d.legal,{x:p,y:H-H*.05-legalH,w:cw,h:legalH},{font:'t',max:H*.026,min:H*.017,color:sc.fg,bg:sc.bg,lh:1.2,maxLines:2,valign:'bottom'});
+  }else{
+    const p=W*.08,iw=W-p*2;let y=top+tabH+A*.04;
+    if(d.eyebrow){const eh=W*.045;eyebrow(ctx,R,d.eyebrow,W/2,y,eh,sc,{align:'center',maxW:iw});y+=eh+A*.02;}
+    let r=text(ctx,R,'Titular',d.titular,{x:p,y,w:iw,h:A*.17},{font:'d',max:W*.1,min:W*.055,color:sc.fg,bg:sc.bg,upper:true,lh:.98,align:'center',maxLines:3,...hiOpts(sc)});y+=r.h+A*.015;
+    r=text(ctx,R,'Subtítulo',d.subtitulo,{x:p+iw*.05,y,w:iw*.9,h:A*.1},{font:'t',max:W*.036,min:W*.025,color:sc.fg,bg:sc.bg,lh:1.3,align:'center',maxLines:3});y+=r.h+A*.03;
+    const legalH=d.legal?A*.055:0;const rowH=W*.11;const yb=top+A-W*.05-legalH-rowH-A*.02;
+    const ch=yb-y-A*.035;
+    if(ch>A*.14){const card={x:p,y,w:iw,h:ch};const cf=cardFill(sc),cp=cardPills(cf);rr(ctx,card.x,card.y,card.w,card.h,Math.min(card.w,card.h)*.1);ctx.fillStyle=cf;ctx.fill();drawCardVisual(ctx,R,card,sc);
+      if(d.fecha)tag(ctx,R,d.fecha,card.x+card.w*.05,card.y+card.w*.03,W*.06,cp.t,{maxW:card.w*.5,label:'Fecha',bg:cf});
+      if(d.codigo)tag(ctx,R,'Código: '+d.codigo,card.x+card.w*.95,card.y+card.w*.03,W*.06,cp.t,{align:'right',maxW:card.w*.45,label:'Código',bg:cf});
+      if(S.extras.qr)qr(ctx,R,card.x+card.w-card.w*.3-card.w*.04,card.y+card.h-card.w*.3*1.18-card.w*.04,card.w*.3,curFormatFor(R).print);}
+    else R.checks.push({lvl:'warn',msg:'No queda espacio para la tarjeta de producto: acorta los textos.'});
+    const ow=d.destacado?offerWidth(ctx,d,rowH):0;const cw0=d.cta?ctaWidth(ctx,d.cta,rowH*.78):0;const gap=ow&&cw0?W*.025:0;let tot=Math.min(iw,ow+cw0+gap);let x=W/2-tot/2;
+    if(d.destacado)x+=offer(ctx,R,d,x,yb,rowH,iw*.6,sc)+gap;
+    if(d.cta)pill(ctx,R,d.cta,x,yb+rowH*.11,rowH*.78,sc.ctaBg,sc.ctaFg,{maxW:Math.max(80,p+iw-x),label:'CTA'});
+    text(ctx,R,'Legal',d.legal,{x:p,y:top+A-W*.05-legalH,w:iw,h:legalH},{font:'t',max:W*.021,min:W*.015,color:sc.fg,bg:sc.bg,lh:1.25,maxLines:3,align:'center',valign:'bottom'});
+  }
+};
+function offerWidth(ctx,d,h){ctx.font=fd(h*.82);let w=ctx.measureText(d.destacado.toLocaleUpperCase('es')).width;if(d.nota){ctx.font=ft(700,h*.2);const ws=d.nota.split(/\s+/);const half=Math.ceil(ws.length/2);w+=h*.12+Math.max(ctx.measureText(ws.slice(0,half).join(' ')).width,ctx.measureText(ws.slice(half).join(' ')).width);}return w;}
+function ctaWidth(ctx,t,h){ctx.font=ft(700,h*.42);return ctx.measureText(t).width+h*1.1;}
+function logoRowAliados(ctx,R,rightX,y,h,color){let x=rightX;[...S.extras.aliados].slice(0,3).reverse().forEach(a=>{const im=a.img;const w=h*im.width/im.height;x-=w;ctx.drawImage(a.white?tinted(im,color):im,x,y,w,h);x-=h*.6;});}
+/* Tarjeta de la composición pestaña: verde para producto o cinta; con ilustración, contraste inverso al fondo */
+function cardFill(sc){return isIllus(S.extras.visual)?(sc.bg===C.navy?C.cream:C.navy):C.green;}
+function cardPills(fill){return{t:fill===C.navy?C.cream:C.navy};}
+function drawCardVisual(ctx,R,card,sc){
+  const v=S.extras.visual;
+  if(v==='producto'&&S.extras.producto){contain(ctx,S.extras.producto,card.x+card.w*.06,card.y-card.h*.04,card.w*.88,card.h*.98);R.visual=true;return;}
+  if(v==='producto')R.checks.push({lvl:'warn',msg:'Elegiste foto de producto pero no hay imagen cargada (paso Extras).'});
+  if(isIllus(v)){drawIllus(ctx,R,v,{x:card.x+card.w*.05,y:card.y+card.h*.06,w:card.w*.9,h:card.h*.9},cardFill(sc));return;}
+  ribbon(ctx,[[card.x+card.w*.2,card.y],[card.x+card.w*.2,card.y+card.h*.7],[card.x+card.w*.8,card.y+card.h*.7],[card.x+card.w*.8,card.y]],Math.min(card.w,card.h)*.08,card.w*.15,C.cream);
+}
+/* CUPÓN: tarjeta tipo gift card con monto Noland, código y QR (gift card del brandbook) */
+L.cupon=(ctx,W,H,d,sc,R,o)=>{
+  ctx.fillStyle=sc.cuponBg;ctx.fillRect(0,0,W,H);
+  const wide=W/H>1.3;const top=H*(o.safeTop||0),bot=H*(o.safeBot||0);const A=H-top-bot;
+  const outerFg=sc.cuponBg===C.navy?C.cream:C.navy;
+  ribbon(ctx,[[W*1.1,H*.16],[W*.84,H*.16],[W*.84,H*.58],[-W*.1,H*.58]],Math.min(W,H)*.1,Math.min(W,H)*.14,sc.cuponBg===C.navy?C.green:C.cream);
+  const legalH=d.legal?(wide?H*.08:A*.06):0;
+  const card=wide?{x:W*.07,y:H*.1,w:W*.86,h:H-H*.1-H*.06-legalH-H*.03}:{x:W*.08,y:top+A*.08,w:W*.84,h:A*.78-legalH};
+  ctx.save();ctx.shadowColor='transparent';rr(ctx,card.x,card.y,card.w,card.h,Math.min(card.w,card.h)*.07);ctx.fillStyle=sc.cuponCard;ctx.fill();ctx.restore();
+  const fg=sc.cuponFg,bg=sc.cuponCard;const p=Math.min(card.w,card.h)*.09;
+  const qrOn=!!S.extras.qr;const rightW=wide?card.w*.3:0;
+  const lh=Math.max(wide?card.h*.11:card.w*.07,minLogo(R));
+  logoRow(ctx,R,card.x+p,card.y+p,lh,(card.w-p*2)*.6,'left',fg);
+  if(d.fecha)tag(ctx,R,d.fecha,card.x+card.w-p,card.y+p-lh*.05,lh*1.1,fg,{align:'right',maxW:card.w*.34,label:'Fecha',bg});
+  const cx=card.x+p,cw=card.w-p*2-(wide?rightW+p*.5:0);let y=card.y+p+lh+(wide?card.h*.07:card.h*.06);
+  let r=text(ctx,R,'Titular',d.titular,{x:cx,y,w:cw,h:wide?card.h*.2:card.h*.17},{font:'d',max:wide?card.h*.11:card.w*.075,min:wide?card.h*.06:card.w*.045,color:fg,bg,upper:true,lh:1,maxLines:2,hi:C.navy,hiMode:'marker'});y+=r.h+card.h*.015;
+  if(d.destacado){r=text(ctx,R,'Destacado',d.destacado,{x:cx,y,w:cw,h:wide?card.h*.28:card.h*.18},{font:'d',max:wide?card.h*.28:card.w*.18,min:card.h*.1,color:fg,bg,upper:true,lh:.95,maxLines:1});
+    if(d.nota&&r.w){ctx.font=ft(700,r.size*.2);ctx.fillStyle=fg;ctx.textBaseline='alphabetic';ctx.textAlign='left';const nx=cx+r.w+r.size*.08;if(nx+ctx.measureText(d.nota).width<cx+cw)ctx.fillText(d.nota,nx,y+r.h*.85);else{ctx.fillText(d.nota,cx,y+r.h+r.size*.22);y+=r.size*.25;}}
+    y+=r.h+card.h*.02;}
+  const remain=card.y+card.h-p-y;
+  if(d.codigo&&remain>card.h*.1){const chH=wide?card.h*.11:card.w*.07;tag(ctx,R,'Código: '+d.codigo,cx,y,chH,fg,{maxW:cw*.7,label:'Código',bg});y+=chH+card.h*.02;}
+  text(ctx,R,'Subtítulo',d.subtitulo,{x:cx,y,w:cw,h:Math.max(0,card.y+card.h-p-y-(wide?0:card.w*.12))},{font:'t',max:wide?card.h*.055:card.w*.034,min:wide?card.h*.026:card.w*.018,color:fg,bg,lh:1.3,maxLines:4});
+  if(wide){const rx=card.x+card.w-p-rightW,ry=card.y+card.h*.3;
+    if(qrOn){const s=Math.min(rightW,(card.y+card.h-p-ry)/1.18);qr(ctx,R,rx+(rightW-s)/2,card.y+card.h-p-s*1.18,s,curFormatFor(R).print);}
+    else{visual(ctx,R,{x:rx-rightW*.1,y:ry-card.h*.05,w:rightW*1.2,h:card.h*.5},{...sc,bg,line:fg});if(d.cta)pill(ctx,R,d.cta,rx+rightW/2,card.y+card.h-p-card.h*.13,card.h*.13,sc.ctaBg===C.green?C.navy:sc.ctaBg,C.green,{align:'center',maxW:rightW,label:'CTA'});}}
+  else{const by=card.y+card.h-p-card.w*.09;
+    if(qrOn){const s=card.w*.24;qr(ctx,R,card.x+card.w-p-s,card.y+card.h-p-s*1.18,s,curFormatFor(R).print);}
+    else if(d.cta)pill(ctx,R,d.cta,card.x+card.w-p,by,card.w*.09,C.navy,C.green,{align:'right',maxW:card.w*.45,label:'CTA'});}
+  text(ctx,R,'Legal',d.legal,{x:card.x,y:card.y+card.h+(wide?H*.03:A*.025),w:card.w,h:legalH},{font:'t',max:wide?H*.03:W*.021,min:wide?H*.02:W*.015,color:outerFg,bg:sc.cuponBg,lh:1.25,maxLines:3,align:'center'});
+};
+const curFormatFor=R=>FORMATS[R.fmt];
+const minLogo=R=>curFormatFor(R).print?64:40;
+
+function lum(hex){if(!hex||hex[0]!=='#')return null;const n=parseInt(hex.slice(1),16);const c=[n>>16&255,n>>8&255,n&255].map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*c[0]+.7152*c[1]+.0722*c[2];}
+function ratio(a,b){const A=lum(a),B=lum(b);if(A==null||B==null)return null;return(Math.max(A,B)+.05)/(Math.min(A,B)+.05);}
+
+/* Render + revisión de marca automática */
+function render(canvas,tpl,schemeKey,k){
+  const sc=SCHEMES[schemeKey];const W=tpl.w,H=tpl.h;canvas.width=Math.max(1,Math.round(W*k));canvas.height=Math.max(1,Math.round(H*k));
+  const ctx=canvas.getContext('2d');ctx.setTransform(k,0,0,k,0,0);ctx.clearRect(0,0,W,H);
+  const R={checks:[],pairs:[],logo:false,visual:false,fmt:tpl.fmt,ctas:0};
+  L[tpl.layout](ctx,W,H,S.copy,sc,R,tpl.opt||{});
+  return evaluate(R,tpl);
+}
+/* Revisa una pieza sin mostrarla (exportación y kit) */
+function reviewOf(tpl,schemeKey){return render(document.createElement('canvas'),tpl,schemeKey,.05);}
+
+/* ===================== REVISIÓN DE MARCA: reglas ===================== */
+/* check: auto = la plataforma la mide · ai = Claude la revisa · manual = el ejecutor la confirma · fixed = la plataforma la garantiza
+   sev: block = bloqueante · warn = alerta · info = recomendación */
+const SEV={block:{n:3,label:'Bloqueante'},warn:{n:2,label:'Alerta'},info:{n:1,label:'Recomendación'}};
+const CHECK_LABEL={auto:'Automática',ai:'La revisa Claude',manual:'La confirma el ejecutor',fixed:'Garantizada por la plataforma'};
+const COPY_RULES=new Set(['d_highlight','d_limits','d_voice','d_tuteo','d_verbs','d_title_alone','d_urgency','d_7dias','d_msg','n_title7','n_sub15','n_cta1','n_overinfo','n_emoji','n_phrases','n_jargon','n_invent']);
+const BRAND_RULES=[
+  // Do's — identidad visual
+  {id:'d_colors',kind:'do',check:'fixed',sev:'block',text:'Usar solo Upper Dark Blue, Green y Cream Green, en las combinaciones aprobadas.'},
+  {id:'d_type',kind:'do',check:'auto',sev:'warn',text:'Titulares en Noland, siempre en mayúsculas; cuerpo en Rethink Sans.'},
+  {id:'d_logo_color',kind:'do',check:'fixed',sev:'block',text:'Logo en el color que corresponde al fondo: verde sobre azul, azul sobre claro o verde.'},
+  {id:'d_logo_min',kind:'do',check:'auto',sev:'block',text:'Logo sobre el tamaño mínimo: 35 px en pantalla, 0,5 cm impreso.'},
+  {id:'d_fit',kind:'do',check:'auto',sev:'block',text:'Todos los textos completos y dentro de su zona.'},
+  {id:'d_contrast',kind:'do',check:'auto',sev:'warn',text:'Contraste de textos dentro de la norma de accesibilidad (WCAG AA).'},
+  {id:'d_highlight',kind:'do',check:'auto',sev:'warn',text:'Resaltar una sola palabra o frase del titular.'},
+  {id:'d_illus',kind:'do',check:'fixed',sev:'block',text:'Usar solo ilustraciones oficiales, en su versión clara u oscura.'},
+  {id:'d_layout',kind:'do',check:'auto',sev:'warn',text:'Cada elemento de la plantilla visible y legible (visual, QR, destacado).'},
+  {id:'d_limits',kind:'do',check:'auto',sev:'warn',text:'Textos dentro del límite de caracteres de cada campo.'},
+  // Do's — tono de marca (skill Upper UX Writer)
+  {id:'d_voice',kind:'do',check:'ai',sev:'warn',text:'Tono Upper: joven, directo, cómplice y con energía. Suena a alguien que te da un tip, no a una empresa.'},
+  {id:'d_tuteo',kind:'do',check:'auto',sev:'warn',text:'Tutear siempre ("tu", "tus", "tráelos"); nunca "usted".'},
+  {id:'d_verbs',kind:'do',check:'ai',sev:'warn',text:'CTA con verbo de acción inmediata: Compra ya, Aprovecha, Tráelo, Usa el código, Refiere.'},
+  {id:'d_title_alone',kind:'do',check:'ai',sev:'info',text:'El titular funciona solo: si nadie lee más, igual queda el mensaje principal.'},
+  {id:'d_urgency',kind:'do',check:'auto',sev:'warn',text:'Si hay fecha límite, ponla: la urgencia es real, nunca fingida.'},
+  {id:'d_7dias',kind:'do',check:'ai',sev:'info',text:'Usar "en 7 días" como diferenciador de Upper cuando aplique.'},
+  {id:'d_msg',kind:'do',check:'auto',sev:'info',text:'El mensaje que acompaña la pieza lleva emojis y el CTA dentro del texto: "Mira aquí", "Descubre aquí" o "Encuentra aquí".'},
+  // Don'ts
+  {id:'n_title7',kind:'dont',check:'auto',sev:'warn',text:'Titulares de más de 7 palabras.'},
+  {id:'n_sub15',kind:'dont',check:'auto',sev:'warn',text:'Subtítulos de más de 15 palabras.'},
+  {id:'n_cta1',kind:'dont',check:'auto',sev:'warn',text:'Más de un CTA por pieza.'},
+  {id:'n_stroke',kind:'dont',check:'auto',sev:'warn',scope:'design',text:'Más de un bloque redondeado con texto por pieza (máximo uno: el CTA). Sin textos con contorno.'},
+  {id:'n_overinfo',kind:'dont',check:'auto',sev:'warn',text:'Sobreinformar: más de 30 palabras de mensaje (sin contar fecha, código ni legal) o demasiados elementos a la vez.'},
+  {id:'n_emoji',kind:'dont',check:'auto',sev:'block',text:'Emojis en la gráfica (van en el mensaje que la acompaña).'},
+  {id:'n_phrases',kind:'dont',check:'auto',sev:'warn',text:'Frases prohibidas: "Te invitamos a", "Puedes", "Recuerda que puedes".'},
+  {id:'n_jargon',kind:'dont',check:'ai',sev:'warn',text:'Jerga logística en piezas de marketing (guía aérea, consolidado, tracking, manifiesto).'},
+  {id:'n_invent',kind:'dont',check:'ai',sev:'warn',text:'Inventar montos, descuentos o fechas que no están en el requerimiento.'},
+  {id:'n_logo_mod',kind:'dont',check:'fixed',sev:'block',text:'Distorsionar, girar, sombrear o recolorear el logo.'},
+  {id:'n_logo_bg',kind:'dont',check:'fixed',sev:'block',text:'Poner el logo sobre fondos sobrecargados o fotográficos.'},
+  {id:'n_effects',kind:'dont',check:'fixed',sev:'block',text:'Gradientes, sombras o efectos en textos y logo.'},
+  {id:'n_aliados',kind:'dont',check:'fixed',sev:'block',text:'Más de 3 logos de aliados en una pieza.'},
+];
+const RULES={overrides:{},custom:[],updatedAt:0};
+function applyRules(cfg){RULES.overrides=cfg?.overrides&&typeof cfg.overrides==='object'?cfg.overrides:{};RULES.custom=Array.isArray(cfg?.custom)?cfg.custom.filter(r=>r&&r.id&&r.text):[];RULES.updatedAt=cfg?.updatedAt||0;
+  try{drawLive();if(!$('#rules').hidden)drawRules();if(S.step===5)drawMain();}catch{}}
+function allRules(){
+  const base=BRAND_RULES.map(r=>{const o=RULES.overrides[r.id]||{};const sev=r.check==='fixed'?r.sev:(SEV[o.sev]&&SEV[o.sev].n<=SEV[r.sev].n?o.sev:r.sev);
+    return{...r,scope:COPY_RULES.has(r.id)?'copy':'design',origin:'brandbook',baseSev:r.sev,sev,enabled:r.check==='fixed'?true:o.enabled!==false,reason:o.reason||'',by:o.by||null,at:o.at||0};});
+  return[...base,...RULES.custom.map(r=>({...r,scope:r.check==='manual'?'design':'copy',origin:'custom',baseSev:r.sev,enabled:r.enabled!==false,check:r.check==='manual'?'manual':'ai',sev:SEV[r.sev]?r.sev:'warn'}))];
+}
+const words=s=>String(s||'').replace(/\*/g,'').split(/\s+/).filter(Boolean);
+const PIECE_FIELDS=['eyebrow','titular','subtitulo','destacado','nota','cta','codigo','fecha'];
+const FORBIDDEN=/\b(te invitamos a|recuerda que puedes|puedes)\b/i;
+function copyHash(){return JSON.stringify([S.copy,S.waMsg,S.req.descripcion,S.req.vigencia]);}
+/* Evalúa todas las reglas activas sobre una pieza ya dibujada */
+function evaluate(R,tpl){
+  const d=S.copy,fmt=FORMATS[tpl.fmt];
+  const ok=(detail='')=>({state:'ok',detail}),fail=detail=>({state:'fail',detail});
+  const AUTO={
+    d_type:()=>S.fonts.display&&S.fonts.text?ok():fail(`Tipografía provisional: ${[!S.fonts.display&&'Anton en lugar de Noland',!S.fonts.text&&'Lexend en lugar de Rethink Sans'].filter(Boolean).join(', ')}.`),
+    d_logo_min:()=>{if(!R.logo)return fail('Falta el logo.');const min=fmt.print?59:35;return R.logoH>=min?ok(`${Math.round(R.logoH)} px de alto.`):fail(`El logo mide ${Math.round(R.logoH)} px; el mínimo es ${fmt.print?'0,5 cm (59 px a 300 dpi)':'35 px'}. Quita un aliado o cambia de plantilla.`);},
+    d_fit:()=>{const f=R.checks.filter(c=>c.fit);if(!d.titular&&!d.destacado)return fail('La pieza no tiene mensaje principal.');return f.length?fail(f.map(c=>c.msg).join(' ')):ok();},
+    d_contrast:()=>{const bad=R.pairs.filter(p=>{const r=ratio(p.fg,p.bg);return r!=null&&r<(p.large?3:4.5)});return bad.length?fail('Contraste bajo en: '+[...new Set(bad.map(b=>b.label))].join(', ')+'.'):ok();},
+    d_highlight:()=>{const runs=(d.titular||'').match(/\*[^*]+\*/g)||[];if(!runs.length)return ok('Sin resaltado.');const hw=runs.reduce((a,r)=>a+words(r).length,0);
+      if(runs.length>1)return fail(`Hay ${runs.length} partes resaltadas; deja una.`);if(hw>words(d.titular).length*.6)return fail('Resaltaste casi todo el titular; si todo resalta, nada resalta.');return ok();},
+    d_layout:()=>{const f=R.checks.filter(c=>!c.fit);return f.length?fail(f.map(c=>c.msg).join(' ')):ok();},
+    d_limits:()=>{const over=Object.keys(LIMITS).filter(f=>(d[f]||'').replace(/\*/g,'').length>LIMITS[f]);return over.length?fail(over.map(f=>`${FIELD_LABEL[f]}: ${(d[f]||'').replace(/\*/g,'').length}/${LIMITS[f]}`).join(' · ')):ok();},
+    d_tuteo:()=>{const t=PIECE_FIELDS.map(f=>d[f]).join(' ')+' '+S.waMsg;return/\bustedes?\b/i.test(t)?fail('El texto usa "usted". Tutea.'):ok();},
+    d_urgency:()=>S.req.vigencia&&!d.fecha?fail('El requerimiento tiene vigencia, pero la pieza no muestra la fecha.'):ok(),
+    d_msg:()=>{const m=S.waMsg.trim();if(!m)return{state:'na',detail:'Sin mensaje acompañante.'};const issues=[];if(!/\p{Extended_Pictographic}/u.test(m))issues.push('al menos un emoji');if(!/(mira|descubre|encuentra) aquí/i.test(m))issues.push('el CTA "Mira aquí", "Descubre aquí" o "Encuentra aquí"');return issues.length?fail('Al mensaje le falta '+issues.join(' y ')+'.'):ok();},
+    n_title7:()=>{const n=words(d.titular).length;return n>7?fail(`El titular tiene ${n} palabras (máximo 7).`):ok(`${n} palabras.`);},
+    n_sub15:()=>{const n=words(d.subtitulo).length;return n>15?fail(`El subtítulo tiene ${n} palabras (máximo 15).`):ok(`${n} palabras.`);},
+    n_cta1:()=>{const n=(R.ctas||0)+(R.qr?1:0);const multi=/\s+(y|o)\s+|\/|\|/i.test(d.cta||'');
+      if(n>1)return fail(`La pieza muestra ${n} llamados a la acción${R.qr?' (botón y QR "Escanea aquí")':''}. Deja uno.`);if(multi)return fail('El CTA pide dos acciones a la vez. Deja una.');return ok();},
+    n_overinfo:()=>{const n=['eyebrow','titular','subtitulo','destacado','nota','cta'].reduce((a,f)=>a+words(d[f]).length,0);const els=[d.eyebrow,d.destacado,d.codigo,d.fecha,d.cta,S.extras.qr,S.extras.aliados.length].filter(Boolean).length;
+      if(n>30)return fail(`La pieza tiene ${n} palabras sin contar fecha, código ni legal (máximo 30). Quita lo que no ayuda a decidir.`);if(els>=7)return fail('La pieza combina demasiados elementos a la vez (antetítulo, destacado, código, fecha, CTA, QR y aliados).');return ok(`${n} palabras.`);},
+    n_stroke:()=>(R.blocks||0)>1?fail(`La pieza tiene ${R.blocks} bloques (${[R.ctas&&'CTA',R.qr&&'QR'].filter(Boolean).join(' + ')}). Deja uno para no sobrecargarla.`):ok(),
+    n_emoji:()=>/\p{Extended_Pictographic}/u.test(Object.values(d).join(' '))?fail('Hay emojis en la gráfica. Pásalos al mensaje que la acompaña.'):ok(),
+    n_phrases:()=>{const t=PIECE_FIELDS.map(f=>d[f]).join(' · ')+' · '+S.waMsg;const m=t.match(FORBIDDEN);return m?fail(`Aparece "${m[0]}". Usa un verbo de acción directo.`):ok();},
+  };
+  const aiFresh=S.aiReview&&S.aiReview.hash===copyHash();
+  const res=allRules().filter(r=>r.enabled).map(r=>{let v;
+    if(r.check==='fixed')v={state:'fixed',detail:''};
+    else if(r.check==='auto')v=AUTO[r.id]?AUTO[r.id]():{state:'na',detail:''};
+    else if(r.check==='manual')v=S.manual[r.id]?{state:'ok',detail:'Confirmada por el ejecutor.'}:{state:'pending',detail:'Falta confirmarla.'};
+    else{const a=aiFresh?S.aiReview.res[r.id]:null;v=a?(a.cumple?{state:'ok',detail:a.motivo||''}:{state:'fail',detail:[a.motivo,a.sugerencia&&('Sugerencia: '+a.sugerencia)].filter(Boolean).join(' ')}):{state:'pending',detail:S.aiReview?'El copy cambió desde la última revisión.':'Sin revisar con Claude.'};}
+    return{...r,...v};});
+  res.fmt=tpl.fmt;return res;
+}
+/* Qué frena una descarga: fallos de severidad bloqueante o alerta, y reglas manuales sin confirmar */
+const issuesOf=rv=>rv.filter(r=>(r.state==='fail'||(r.state==='pending'&&r.check==='manual'))&&r.sev!=='info');
+
+/* ===================== Reglas compartidas: claude.ai (db), servidor propio o este navegador ===================== */
+const Team={mode:'local',db:null,user:null,meId:null,me:'',loaded:false,
+  async init(){
+    if(inArtifact){try{const[db,user]=await Promise.all([claude.use('db'),claude.use('user')]);this.user=user;
+        if(db){this.db=db;this.mode='db';this.meId=user?await user.id():null;this.subscribe();return;}}catch{}}
+    else{try{const r=await fetch('api/reglas',{cache:'no-store'});if(r.ok){const j=await r.json();this.mode='server';this.me=j.me||'';this.loaded=true;applyRules(j.config);return;}}catch{}}
+    this.mode='local';this.loaded=true;applyRules(store.get('reglas'));},
+  subscribe(){const t=setTimeout(()=>{if(!this.loaded)setRulesStatus('No se pudo conectar con las reglas del equipo. Se aplican las del brandbook.');},10000);
+    this.db.doc('config/reglas').onSnapshot(s=>{clearTimeout(t);this.loaded=true;setRulesStatus('');applyRules(s.exists?s.data():null);},
+      e=>{clearTimeout(t);setRulesStatus(e?.code==='not_granted'?'Inicia sesión para ver las reglas del equipo. Se aplican las del brandbook.':'No se pudo conectar con las reglas del equipo. Se aplican las del brandbook.');});},
+  scopeLabel(){return this.mode==='db'?'Compartidas con el equipo en claude.ai':this.mode==='server'?'Compartidas con el equipo en el servidor':'Guardadas solo en este navegador';},
+  async save(cfg,change){cfg.updatedAt=Date.now();const entry={...change,at:Date.now()};
+    if(this.mode==='db'){await this.db.doc('config/reglas').set(cfg);await this.db.collection('cambios').add({...entry,by:this.meId});return;}
+    if(this.mode==='server'){const r=await fetch('api/reglas',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({config:cfg,change:entry})});if(!r.ok)throw{code:'server'};applyRules(cfg);return;}
+    store.set('reglas',cfg);const hist=store.get('cambios')||[];hist.unshift({...entry,by:'Tú'});store.set('cambios',hist.slice(0,100));applyRules(cfg);},
+  async log(entry){entry.at=Date.now();
+    if(this.mode==='db'){await this.db.collection('excepciones').add({...entry,by:this.meId});return;}
+    if(this.mode==='server'){await fetch('api/excepciones',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(entry)});return;}
+    const l=store.get('excepciones')||[];l.unshift({...entry,by:'Tú'});store.set('excepciones',l.slice(0,100));},
+  async list(kind,n=30){
+    if(this.mode==='db'){const q=await this.db.collection(kind).orderBy('at','desc').limit(n).get();const rows=q.docs.map(x=>x.data());
+      const ids=[...new Set(rows.map(r=>r.by).filter(Boolean))];let ps={};try{if(this.user&&ids.length)ps=await this.user.profiles(ids);}catch{}
+      return rows.map(r=>({...r,who:r.by===this.meId?'Tú':(ps[r.by]?.name||'Alguien del equipo')}));}
+    if(this.mode==='server'){const r=await fetch(`api/${kind}?n=${n}`,{cache:'no-store'});if(!r.ok)throw{code:'server'};return(await r.json()).items.map(x=>({...x,who:x.by===this.me?'Tú':x.by}));}
+    return(store.get(kind)||[]).slice(0,n).map(x=>({...x,who:x.by}));},
+  async myName(){if(this.mode==='server')return this.me;if(this.user){try{return(await this.user.name())||'';}catch{}}return '';}
+};
+function setRulesStatus(m){const el=$('#rulesStatus');if(el){el.textContent=m;el.hidden=!m;}}
+
+/* ===================== IA: runtime de claude.ai o servidor propio ===================== */
+const AI={mode:'none',sample:null,
+  async json(prompt,opts={}){
+    if(this.mode==='artifact')return this.sample.json(prompt,{signal:opts.signal,modelTier:'default'});
+    if(this.mode==='server'){let r;try{r=await fetch('api/claude',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt}),signal:opts.signal});}catch(e){throw{code:e?.name==='AbortError'?'cancelled':'network'};}
+      const j=await r.json().catch(()=>({}));if(!r.ok)throw{code:j.code||(r.status===429?'rate_limited':'server'),message:j.message};return j.data;}
+    throw{code:'unavailable'};},
+  ready(){return this.mode!=='none'}};
+function setAiMode(m){AI.mode=m;const el=document.getElementById('aiMode');el.classList.toggle('on',m!=='none');el.querySelector('span').textContent=m==='artifact'?'IA: Claude en claude.ai':m==='server'?'IA: servidor propio':'IA: sin conexión';if(S.step===3||S.step===4)drawMain();}
+const VOICE=`Upper es el courier internacional líder en Ecuador: el usuario compra en tiendas de USA (Amazon, SHEIN, TEMU, Apple…) y Upper se lo trae en 7 días. También tiene casillero en Miami y Madrid.
+Taglines de marca: "Tus compras, sin fronteras", "Sin fronteras, así de simple", "Todo a un pedido de distancia", "Tú lo compras, nosotros lo traemos", "Hola, soy tu pedido".
+Tono: joven, directo, cómplice y con energía. Suena a alguien que te da un tip, no a una empresa.
+- Activación (aún no compran): sorpresivo, casi travieso; habla como si se perdieran algo que ya les pertenece ("¡ALERTA DE REGALO!", "No preguntes cómo, solo úsala").
+- Retención (compraron y están inactivos): contextual y cómplice; conecta con una tienda, temporada, quincena o feriado y da el empujón.
+- Referidos: social, "tus amigos te dan libras gratis".
+Reglas: tuteo siempre (nunca "usted"); verbos de acción inmediata (Compra ya, Aprovecha, Tráelo, Usa el código, Refiere); urgencia real con fecha si hay límite; "en 7 días" como diferenciador cuando aplique; el titular funciona solo; sin jerga logística en piezas de marketing; prohibido "Te invitamos a", "Puedes", "Recuerda que puedes".
+En la PIEZA GRÁFICA no van emojis. Los emojis van en el mensaje de WhatsApp o push que acompaña la imagen (en título y cuerpo), con el CTA dentro del texto: "Mira aquí", "Descubre aquí", "Encuentra aquí".
+Límites de la pieza: titular de máximo 7 palabras; subtítulo de máximo 15 palabras; un solo CTA por pieza; no sobreinformar (máximo 30 palabras de mensaje sin contar fecha, código ni legal).
+El titular se compone en Noland, en mayúsculas. Marca entre asteriscos *así* la palabra o frase corta que debe resaltarse en verde (una sola por titular).`;
+
+/* ===================== UI ===================== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const STEPS=['Requerimiento','Formato','Mensaje','Diseño','Descarga'];
+let downloads=null;const inArtifact=!!window.claude?.use;
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600);}
+function drawSteps(){$('#steps').innerHTML=STEPS.map((n,i)=>`<button class="step ${i+1===S.step?'on':i+1<S.step?'done':''}" data-s="${i+1}" ${i+1===S.step?'aria-current="step"':''}><span>Paso ${i+1}</span><b>${n}</b></button>`).join('');$('#steps').querySelectorAll('.step').forEach(b=>b.onclick=()=>go(+b.dataset.s));}
+function go(n){S.step=Math.max(1,Math.min(5,n));drawSteps();drawMain();drawLive();saveDraft();window.scrollTo({top:0,behavior:'smooth'});}
+function navHtml(next){return `<div class="nav">${S.step>1?'<button class="btn" id="prev">Atrás</button>':'<span></span>'}${S.step<5?`<button class="btn primary" id="next">${next||'Siguiente'}</button>`:'<button class="btn" id="restart">Nueva pieza</button>'}</div>`;}
+function bindNav(){$('#prev')&&($('#prev').onclick=()=>go(S.step-1));$('#next')&&($('#next').onclick=()=>go(S.step+1));$('#restart')&&($('#restart').onclick=()=>{S.optSel=-1;S.opciones=[];S.evalr=null;S.extrasAI=null;S.msgAI=null;S.manual={};S.aiReview=null;Object.keys(S.copy).forEach(k=>S.copy[k]='');S.waMsg='';S.propuesta='';S.extras.qr='';go(1);});}
+function schemeBtns(id){return Object.entries(SCHEMES).map(([k,v])=>`<button class="fmt ${k===S.scheme?'sel':''}" data-sc="${k}" aria-pressed="${k===S.scheme}">${v.name}</button>`).join('');}
+function drawDesign(){const cv=$('#d_live');if(!cv)return;
+  $('#d_schemes').innerHTML=schemeBtns();$('#d_schemes').querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>{S.scheme=b.dataset.sc;drawDesign();saveDraft();});
+  const t=curTpl();const rv=render(cv,t,S.scheme,Math.min(1,1100/Math.max(t.w,t.h)));
+  $('#d_review').innerHTML=reviewHtml(rv);bindReview($('#d_review'));}
+function drawLive(){
+  if(S.step===4){drawDesign();}
+  const hide=S.step!==3;$('#aside').hidden=hide;$('#grid').classList.toggle('full',hide);if(hide)return;
+  const copyOnly=S.step===3;$('#aside').classList.toggle('copy-only',copyOnly);
+  if(copyOnly){const rv=reviewOf(curTpl(),S.scheme).filter(r=>r.scope==='copy');$('#review').innerHTML=reviewHtml(rv,{title:'Revisión del mensaje'});bindReview($('#review'));return;}
+  $('#liveSchemes').innerHTML=schemeBtns();$('#liveSchemes').querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>{S.scheme=b.dataset.sc;drawLive();if(S.step===2)drawMain();saveDraft();});
+  const t=curTpl();const k=Math.min(1,900/Math.max(t.w,t.h));const rv=render($('#live'),t,S.scheme,k);
+  $('#liveName').innerHTML=`<span class="pill">${esc(curFormat().label)}</span> ${esc(t.name)}`;$('#liveDim').textContent=`${t.w}×${t.h} px`;
+  $('#review').innerHTML=reviewHtml(rv);bindReview($('#review'));
+}
+
+/* ---------- Paso 1 ---------- */
+function step1(){const r=S.req;
+  return `<h2>Requerimiento</h2><p class="lead">Cuéntale a la plataforma qué necesitas comunicar. ${isExample()?'<span class="pill">Ejemplo cargado: reemplázalo con tu caso</span>':''}</p>
+  <div class="fields">
+    <label class="f">Nombre de la campaña<input type="text" id="r_campana" value="${esc(r.campana)}"></label>
+    <label class="f">Objetivo<select id="r_objetivo">${['Activación','Retención','Activación y retención','Referidos','Promoción con aliado','Informativo'].map(o=>`<option ${o===r.objetivo?'selected':''}>${o}</option>`).join('')}</select></label>
+    <label class="f">Canal principal<select id="r_canal">${Object.entries(FORMATS).map(([k,f])=>`<option value="${k}" ${k===r.canal?'selected':''}>${f.canal}</option>`).join('')}</select></label>
+    <label class="f">Vigencia<input type="text" id="r_vigencia" value="${esc(r.vigencia)}" placeholder="Ej. Del 23 al 26 de junio"></label>
+    <label class="f full">Qué necesitas comunicar y a quién<textarea id="r_descripcion" rows="4">${esc(r.descripcion)}</textarea><span class="hint">Incluye segmento, incentivo, tienda o aliado y cualquier restricción.</span></label>
+  </div>${navHtml('Elegir formato')}`;}
+function bind1(){['campana','vigencia','descripcion'].forEach(k=>$('#r_'+k).oninput=e=>{S.req[k]=e.target.value;saveDraft();});
+  $('#r_objetivo').onchange=e=>S.req.objetivo=e.target.value;
+  $('#r_canal').onchange=e=>{S.req.canal=e.target.value;S.formato=e.target.value;S.tpl=FORMATS[S.formato].templates[0].id;};
+  $('#next').onclick=()=>go(2);}
+
+/* ---------- Paso 2 ---------- */
+function step2(){const f=curFormat();
+  return `<h2>Formato y plantilla</h2><p class="lead">Elige el formato y una de sus tres composiciones. Los esquemas muestran dónde va cada elemento; después escribes el mensaje y ves el diseño en el paso Diseño.</p>
+  <div class="fmts">${Object.entries(FORMATS).map(([k,v])=>`<button class="fmt ${k===S.formato?'sel':''}" data-f="${k}" aria-pressed="${k===S.formato}">${v.label}</button>`).join('')}</div>
+  <p class="hint" style="margin:0 0 12px">${f.print?'Salida para imprenta: PNG a 300 dpi con 3 mm de sangrado.':'Salida digital en PNG a tamaño real.'}</p>
+  <div class="tpls">${f.templates.map(t=>`<button class="tpl ${t.id===S.tpl?'sel':''}" data-t="${t.id}" aria-pressed="${t.id===S.tpl}"><div class="thumb"><canvas data-th="${t.id}"></canvas></div><b>${esc(t.name)}</b><span class="dim">${t.w}×${t.h} px</span><p>${esc(t.desc)}</p></button>`).join('')}</div>
+  ${navHtml('Escribir mensaje')}`;}
+function bind2(){document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{S.formato=b.dataset.f;S.tpl=FORMATS[S.formato].templates[0].id;drawMain();drawLive();saveDraft();});
+  curFormat().templates.forEach(t=>drawWire(document.querySelector(`canvas[data-th="${t.id}"]`),t));
+  document.querySelectorAll('.tpl').forEach(b=>b.onclick=()=>{S.tpl=b.dataset.t;drawMain();drawLive();saveDraft();});}
+
+/* Esquema de la composición (sin diseño): zonas de logo, textos, visual y CTA */
+function drawWire(c,t){const k=Math.min(.4,340/Math.max(t.w,t.h));const W=t.w,H=t.h;c.width=Math.round(W*k);c.height=Math.round(H*k);const x=c.getContext('2d');x.setTransform(k,0,0,k,0,0);
+  const dark=document.documentElement.dataset.theme==='dark'||(!document.documentElement.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches);
+  const bg=dark?'#24324F':'#FFFFFF',ln=dark?'#5D6B88':'#B9C7AE',fl=dark?'#2F3E5E':'#E9F3E0',ac=dark?'#CDF5A3':'#141D30';
+  x.fillStyle=bg;x.fillRect(0,0,W,H);const box=(a,b,w,h,f=fl,r=Math.min(W,H)*.02)=>{rr(x,a,b,w,h,r);x.fillStyle=f;x.fill();x.lineWidth=Math.max(2,Math.min(W,H)*.006);x.strokeStyle=ln;x.stroke();};
+  const bars=(a,b,w,n,hh,g)=>{for(let i=0;i<n;i++){x.fillStyle=ln;x.fillRect(a,b+i*(hh+g),w*(i===n-1?.6:1),hh);}};
+  const wide=W/H>1.3,top=H*(t.opt?.safeTop||0),bot=H*(t.opt?.safeBot||0),A=H-top-bot;
+  if(t.opt?.safeTop){x.fillStyle=dark?'rgba(255,255,255,.06)':'rgba(20,29,48,.05)';x.fillRect(0,0,W,top);x.fillRect(0,H-bot,W,bot);}
+  if(t.layout==='hero'){if(wide){const p=H*.1;box(p,p,H*.35,H*.08,ln);bars(p,H*.3,W*.45,2,H*.11,H*.04);bars(p,H*.6,W*.4,2,H*.035,H*.025);box(p,H*.76,W*.12,H*.11,ac,H*.055);box(W*.6,H*.15,W*.34,H*.75);}
+    else{const p=W*.08;box(p,top+p,W*.28,W*.06,ln);bars(p,top+A*.14,W*.8,2,A*.05,A*.02);bars(p,top+A*.3,W*.75,2,A*.015,A*.012);box(p,top+A*.38,W-p*2,A*.4);box(p,top+A*.84,W*.3,A*.06,ac,A*.03);}}
+  else if(t.layout==='tab'){if(wide){box(W*.06,-H*.05,H*.36,H*.19,ln);bars(W*.06,H*.28,W*.42,2,H*.1,H*.04);bars(W*.06,H*.56,W*.4,2,H*.035,H*.025);box(W*.06,H*.76,W*.13,H*.11,ac,H*.055);box(W*.56,H*.14,W*.4,H*.76);}
+    else{const p=W*.08;box(W/2-W*.13,top-W*.05,W*.26,W*.15,ln);bars(W*.18,top+A*.12,W*.64,2,A*.05,A*.02);bars(W*.22,top+A*.27,W*.56,1,A*.015,A*.01);box(p,top+A*.33,W-p*2,A*.45);box(W/2-W*.16,top+A*.83,W*.32,A*.06,ac,A*.03);}}
+  else{const cw=wide?W*.86:W*.84,ch=wide?H*.72:A*.7,cx=(W-cw)/2,cy=wide?H*.1:top+A*.1;box(cx,cy,cw,ch,dark?'#1B2740':'#F7FBF3');const p=Math.min(cw,ch)*.09;
+    box(cx+p,cy+p,cw*.22,ch*.08,ln);bars(cx+p,cy+ch*.3,cw*.4,1,ch*.07,0);bars(cx+p,cy+ch*.42,cw*.45,1,ch*.18,0);bars(cx+p,cy+ch*.68,cw*.5,2,ch*.03,ch*.02);box(cx+cw-p-cw*.22,cy+ch-p-ch*.12,cw*.22,ch*.12,ac,ch*.06);}
+}
+
+/* ---------- Paso 3 ---------- */
+const FIELDS=[['eyebrow','Antetítulo','Ej. Compra desde USA'],['titular','Titular (Noland, mayúsculas)','Máximo 7 palabras. Usa *asteriscos* para resaltar'],['subtitulo','Subtítulo','Máximo 15 palabras'],['destacado','Destacado','Ej. $5, 10 USD, 1 LIBRA'],['cta','Llamado a la acción','Un solo verbo + acción']];
+const EXTRA_FIELDS=[['nota','Nota del destacado','Ej. +IVA/libra, de regalo'],['fecha','Fecha / vigencia','Ej. Hasta el 30 de nov'],['codigo','Código promocional','Ej. UPPER10'],['legal','Texto legal','Términos y condiciones']];
+const FIELD_LABEL=Object.fromEntries([...FIELDS,...EXTRA_FIELDS].map(([k,l])=>[k,l.replace(/ \(.*\)/,'')]));
+function step3(){const t=curTpl();const filled=new Set(S.msgAI?.campos||[]);
+  return `<h2>Mensaje</h2><p class="lead">Escribe la idea con tus palabras. Claude la valida con el tono de Upper y las reglas de marca, y completa el copy de la pieza para el formato elegido (${esc(curFormat().label)} · ${esc(t.name)}). Todo queda editable.</p>
+  <div class="box"><h3>1. Propuesta de mensaje</h3>
+    <label class="f">Qué quieres decir<textarea id="prop" rows="3" placeholder="Ej. Te regalamos 10 dólares para tu primer pedido, compra en USA y te lo traemos en 7 días">${esc(S.propuesta)}</textarea></label>
+    <div class="row" style="margin-top:10px"><button class="btn primary" id="val" ${AI.ready()?'':'disabled'}>Validar con Claude</button><button class="btn" id="stop" hidden>Detener</button></div>
+    <div class="status" id="st">${AI.ready()?'':'La IA no está conectada en esta vista: escribe el copy directamente abajo. La revisión de marca funciona igual.'}</div>
+    <div id="aiOut">${aiHtml()}</div>
+  </div>
+  <div class="box"><h3>2. Copy de la pieza <span class="hint">Fecha, código, legal y mensaje de WhatsApp se agregan en Diseño, si aplican</span></h3>
+  <div class="fields">${FIELDS.map(([k,l,ph])=>`<label class="f ${k==='subtitulo'||k==='titular'?'full':''}${filled.has(k)?' ai-filled':''}">${l}${filled.has(k)?' <span class="aitag">Completado por Claude</span>':''}<input type="text" id="c_${k}" value="${esc(S.copy[k])}" placeholder="${ph}"><span class="counter" id="n_${k}"></span></label>`).join('')}</div></div>
+  ${navHtml('Ver diseño')}`;}
+function aiHtml(){
+  if(!S.evalr&&!S.opciones.length)return '';const e=S.evalr||{};const alt=S.opciones.map((o,i)=>[o,i]).filter(([,i])=>i!==S.optSel);
+  return `<div class="crit"><div class="row" style="justify-content:space-between"><b style="margin:0">Evaluación de tu propuesta</b><span class="score">${esc(e.puntaje??'–')}<small style="font-size:14px;color:var(--muted)">/10</small></span></div>
+  ${e.fortalezas?.length?`<b>Funciona</b><ul class="plain">${e.fortalezas.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+  ${e.problemas?.length?`<b>Se ajustó</b><ul class="plain">${e.problemas.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+  ${S.optSel>=0?`<b>Aplicado en el copy</b><p class="hint" style="margin:2px 0 0">Versión “${esc(S.opciones[S.optSel]?.enfoque||'recomendada')}”. Revísala abajo y edítala si hace falta.</p>`:''}
+  ${alt.length?`<b>Otras versiones</b><div class="opts">${alt.map(([o,i])=>`<div class="opt"><span class="tag">${esc(o.enfoque||'Opción '+(i+1))}</span>${o.eyebrow?`<span class="s">${esc(o.eyebrow)}</span>`:''}<div class="t">${esc((o.titular||'').replace(/\*/g,''))}</div>${o.destacado?`<div class="d">${esc(o.destacado)}</div>`:''}<div class="s">${esc(o.subtitulo)}</div><div class="d">CTA: ${esc(o.cta)}</div><button class="btn sm" data-o="${i}">Usar esta versión</button></div>`).join('')}</div>`:''}</div>`;}
+function counters(){[...FIELDS,...EXTRA_FIELDS].forEach(([k])=>{const n=$('#n_'+k);if(!n)return;const l=(S.copy[k]||'').replace(/\*/g,'').length;n.textContent=`${l}/${LIMITS[k]}`;n.classList.toggle('over',l>LIMITS[k]);});}
+let ctl=null;
+function bind3(){$('#prop').oninput=e=>{S.propuesta=e.target.value;saveDraft();};
+  const unmark=k=>{const c=S.msgAI?.campos;if(c&&c.includes(k)){S.msgAI.campos=c.filter(x=>x!==k);const l=$('#c_'+k)?.closest('label');l?.classList.remove('ai-filled');l?.querySelector('.aitag')?.remove();}};
+  FIELDS.forEach(([k])=>$('#c_'+k).oninput=e=>{S.copy[k]=e.target.value;unmark(k);counters();drawLive();saveDraft();});
+  counters();bindOpts();$('#val').onclick=validate;$('#stop').onclick=()=>ctl?.abort();}
+function applyOption(i){const o=S.opciones[i];if(!o)return;S.optSel=i;const campos=[];
+  ['eyebrow','titular','subtitulo','destacado','cta'].forEach(k=>{S.copy[k]=o[k]!=null?String(o[k]):'';if(S.copy[k])campos.push(k);});S.msgAI={campos};saveDraft();}
+function bindOpts(){document.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{applyOption(+b.dataset.o);drawMain();drawLive();toast('Versión aplicada en el copy');});}
+async function validate(){
+  const st=$('#st');const t=curTpl();
+  const prompt=`${VOICE}
+
+Tarea: evalúa la propuesta de mensaje y escribe 3 versiones de copy para una pieza gráfica de Upper. La primera es tu recomendación: se aplicará directamente en la pieza.
+Campaña: ${S.req.campana}
+Objetivo: ${S.req.objetivo}
+Formato: ${curFormat().label} (${curFormat().canal}), plantilla "${t.name}" ${t.w}×${t.h}px
+Contexto: ${S.req.descripcion}
+Vigencia: ${S.req.vigencia||'no indicada'}
+Propuesta del usuario: """${S.propuesta}"""
+
+Campos de la pieza y límites ESTRICTOS de caracteres (cuenta espacios, sin contar asteriscos):
+- eyebrow ≤ ${LIMITS.eyebrow}: antetítulo corto en mayúsculas (ej. "COMPRA DESDE USA"); puede ir vacío.
+- titular ≤ ${LIMITS.titular}: frase contundente; marca con *asteriscos* una palabra o frase corta a resaltar.
+- subtitulo ≤ ${LIMITS.subtitulo}: beneficio o explicación.
+- destacado ≤ ${LIMITS.destacado}: la cifra u oferta (ej. "$5", "10 USD", "1 LIBRA"); vacío si no hay oferta.
+- cta ≤ ${LIMITS.cta}: un solo verbo + acción.
+No escribas fecha, código, nota, legal ni mensaje de WhatsApp: son datos opcionales que decide el ejecutor.
+Las 3 versiones deben tener enfoques distintos (directo a la oferta, urgencia, cómplice/sorpresa). Mantén la oferta y los datos reales; no inventes montos, descuentos ni fechas.\nRespeta además estas reglas de marca del equipo:\n${allRules().filter(r=>r.enabled&&r.check!=='fixed').map(r=>`- ${r.kind==='do'?'HACER':'NO HACER'}: ${r.text}`).join('\n')}
+
+Responde SOLO con JSON con esta forma:
+{"evaluacion":{"puntaje":0-10,"fortalezas":["lo que funciona de la propuesta"],"problemas":["lo que ajustaste y por qué"]},"opciones":[{"enfoque":"2-3 palabras","eyebrow":"","titular":"","subtitulo":"","destacado":"","cta":""}]}`;
+  $('#val').disabled=true;$('#stop').hidden=false;st.className='status';st.textContent='Claude está revisando tu mensaje…';ctl=new AbortController();
+  try{const r=await AI.json(prompt,{signal:ctl.signal});if(!r||!Array.isArray(r.opciones))throw{code:'invalid_json'};
+    S.evalr=r.evaluacion||null;S.opciones=r.opciones.slice(0,3).map(o=>{const c={...o};Object.keys(LIMITS).forEach(k=>{if(typeof c[k]==='string'&&c[k].replace(/\*/g,'').length>LIMITS[k])c[k]=c[k].slice(0,LIMITS[k]).trim();});return c;});S.optSel=-1;
+    applyOption(0);drawMain();drawLive();const s2=$('#st');if(s2){s2.className='status';s2.textContent='Listo. Claude completó el copy de la pieza; revísalo y edítalo si hace falta.';}}
+  catch(e){st.className='status err';st.textContent=errMsg(e);}
+  finally{if($('#val'))$('#val').disabled=false;if($('#stop'))$('#stop').hidden=true;}}
+function errMsg(e){const m={cancelled:'Revisión detenida.',not_granted:'No se dio permiso para usar Claude en esta página. Puedes escribir el copy a mano.',rate_limited:'Demasiadas consultas seguidas. Espera un minuto y vuelve a intentar.',invalid_json:'Claude respondió en un formato inesperado. Vuelve a intentarlo.',refusal:'Claude no pudo responder a este pedido. Reformúlalo.',network:'No hay conexión con el servidor de IA.',unavailable:'La IA no está disponible aquí.',auth:'El servidor no tiene una API key válida. Revisa ANTHROPIC_API_KEY.'};return m[e?.code]||e?.message||'No se pudo completar la consulta. Vuelve a intentarlo.';}
+
+/* ---------- Paso 4 ---------- */
+const VISUALS=[...ILUS,['producto','Foto de producto'],['none','Solo cinta Upper']];
+function step4(){const x=S.extras,a=S.extrasAI,t=curTpl();const filled=new Set(a?.campos||[]);
+  const mark=k=>filled.has(k)?' ai-filled':'';
+  return `<h2>Diseño</h2><p class="lead">Esta es la propuesta inicial con tu formato y tu mensaje. Ajústala con los visuales y los elementos de abajo; la pieza se actualiza al instante.</p>
+  <section class="design">
+    <div class="schemes" id="d_schemes"></div>
+    <div class="stage"><canvas id="d_live"></canvas></div>
+    <div class="meta"><span><span class="pill">${esc(curFormat().label)}</span> ${esc(t.name)}</span><span>${t.w}×${t.h} px</span></div>
+  </section>
+  <div class="box"><h3>1. Visual de la pieza</h3>
+    <div class="visuals">${VISUALS.map(([k,l])=>`<button class="vis ${x.visual===k?'sel':''}" data-v="${k}" aria-pressed="${x.visual===k}"><canvas width="240" height="160" data-vis="${k}"></canvas>${l}</button>`).join('')}</div>
+    <label class="f" style="margin-top:12px">Foto de producto<input type="file" id="prod" accept="image/png,image/webp,image/jpeg"><span class="hint">PNG recortado sin fondo. Va sobre la tarjeta, nunca como fondo completo.</span><div class="files">${x.producto?`<span class="fileitem"><img src="${x.producto.src}" alt=""> producto <button id="rmProd" aria-label="Quitar foto">×</button></span>`:''}</div></label>
+  </div>
+  <div class="box"><h3>2. ¿Qué más necesita la pieza?</h3>
+    <p class="hint" style="margin:0 0 10px">Completa los datos que apliquen y pide lo que la plantilla base no trae. Claude lo interpreta con el criterio del brandbook: lo que encaja se ubica en zonas reservadas y lo que rompe la marca se rechaza con una alternativa. Lo que acepta aparece completado en Elementos permitidos, donde puedes editarlo o borrarlo.</p>
+    <label class="f">Tu pedido<textarea id="cas" rows="3" placeholder="Ej. Válido hasta el domingo, con el código BLACK20 y un QR a upper.com.ec/blackfriday. Agrega el logo de Banco Pichincha.">${esc(S.casilla)}</textarea></label>
+    <div class="row" style="margin-top:10px"><button class="btn primary" id="interp" ${AI.ready()?'':'disabled'}>Interpretar con Claude</button></div>
+    <div class="status" id="st4">${AI.ready()?'':'La IA no está conectada en esta vista: completa los elementos directamente abajo.'}</div>
+    ${a?`<div class="crit">${a.aceptados?.length?`<b>Se aplicó</b><ul class="plain">${a.aceptados.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}${a.rechazados?.length?`<b>No se aplicó</b><ul class="plain">${a.rechazados.map(r=>`<li><b>${esc(r.pedido)}</b>: ${esc(r.motivo)}${r.alternativa?` <span class="hint">→ ${esc(r.alternativa)}</span>`:''}</li>`).join('')}</ul>`:''}${a.faltan?.length?`<b>Falta que subas</b><ul class="plain">${a.faltan.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}</div>`:''}
+  </div>
+  <div class="box"><h3>3. Elementos permitidos <span class="hint">Todos son opcionales. Vacíos, la pieza no los muestra.</span></h3>
+  <div class="fields">${EXTRA_FIELDS.map(([k,l,ph])=>`<label class="f ${k==='legal'?'full':''}${mark(k)}">${l}${filled.has(k)?' <span class="aitag">Completado por Claude</span>':''}<input type="text" id="c_${k}" value="${esc(S.copy[k])}" placeholder="${ph}"><span class="counter" id="n_${k}"></span></label>`).join('')}
+    <label class="f${mark('qr')}">QR (enlace)${filled.has('qr')?' <span class="aitag">Completado por Claude</span>':''}<input type="url" id="e_qr" value="${esc(x.qr)}" placeholder="https://upper.com.ec/..."><span class="hint">Cuenta como CTA: con QR, quita el botón. Impreso, mínimo 2,5 cm.</span></label>
+    <label class="f">Logos de aliados (máx. 3)<input type="file" id="ali" accept="image/png,image/svg+xml,image/webp,image/jpeg" multiple><span class="hint">Van junto al logo de Upper, separados por línea. PNG o SVG transparente.</span><div class="files">${x.aliados.map((al,i)=>`<span class="fileitem"><img src="${al.img.src}" alt=""> ${esc(al.name.slice(0,18))} <label style="display:flex;gap:3px;align-items:center"><input type="checkbox" data-w="${i}" ${al.white?'checked':''}>monocromo</label><button data-rm="${i}" aria-label="Quitar">×</button></span>`).join('')}</div></label>
+    <label class="f full${mark('mensaje')}">Mensaje que acompaña la pieza (WhatsApp o push)${filled.has('mensaje')?' <span class="aitag">Completado por Claude</span>':''}<textarea id="c_wa" rows="3" placeholder="Aquí sí van emojis y el CTA dentro del texto: Mira aquí…">${esc(S.waMsg)}</textarea></label>
+  </div></div>
+  <div class="box review-box"><div id="d_review"></div></div>
+  ${navHtml('Ir a descarga')}`;}
+function readImg(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=fr.result;};fr.onerror=rej;fr.readAsDataURL(file);});}
+function bind4(){
+  const unmark=k=>{const c=S.extrasAI?.campos;if(c&&c.includes(k)){S.extrasAI.campos=c.filter(x=>x!==k);const l=document.getElementById(k==='mensaje'?'c_wa':k==='qr'?'e_qr':'c_'+k)?.closest('label');l?.classList.remove('ai-filled');l?.querySelector('.aitag')?.remove();}};
+  EXTRA_FIELDS.forEach(([k])=>$('#c_'+k).oninput=e=>{S.copy[k]=e.target.value;unmark(k);counters();drawLive();saveDraft();});counters();
+  $('#c_wa').oninput=e=>{S.waMsg=e.target.value;unmark('mensaje');drawLive();saveDraft();};
+  $('#cas').oninput=e=>S.casilla=e.target.value;$('#interp').onclick=interpret;
+  document.querySelectorAll('canvas[data-vis]').forEach(c=>{const ctx=c.getContext('2d');const sc=SCHEMES.oscuro;ctx.fillStyle=sc.bg;ctx.fillRect(0,0,240,160);const v=c.dataset.vis;
+    if(isIllus(v)){const im=ILUS_IMG[v]?.oscuro;if(im)contain(ctx,im,30,8,180,144);}
+    else if(v==='producto'){if(S.extras.producto){rr(ctx,50,40,140,110,16);ctx.fillStyle=C.green;ctx.fill();contain(ctx,S.extras.producto,60,10,120,140);}else{rr(ctx,50,40,140,110,16);ctx.fillStyle=C.green;ctx.fill();ctx.fillStyle=C.navy;ctx.font=ft(700,14);ctx.textAlign='center';ctx.fillText('Sube tu PNG',120,100);}}
+    else ribbon(ctx,[[70,0],[70,120],[170,120],[170,0]],22,40,C.green);});
+  document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{S.extras.visual=b.dataset.v;saveDraft();drawMain();drawLive();});
+  $('#e_qr').oninput=e=>{S.extras.qr=e.target.value.trim();S.extrasAI?.campos&&(S.extrasAI.campos=S.extrasAI.campos.filter(x=>x!=='qr'));saveDraft();drawLive();};
+  $('#ali').onchange=async e=>{for(const f of [...e.target.files]){if(S.extras.aliados.length>=3){toast('Máximo 3 aliados por pieza.');break;}try{S.extras.aliados.push({img:await readImg(f),name:f.name.replace(/\.\w+$/,''),white:true});}catch{toast('No se pudo leer '+f.name);}}drawMain();drawLive();};
+  $('#prod').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{S.extras.producto=await readImg(f);S.extras.visual='producto';}catch{toast('No se pudo leer la imagen.');}drawMain();drawLive();};
+  $('#rmProd')&&($('#rmProd').onclick=()=>{S.extras.producto=null;if(S.extras.visual==='producto')S.extras.visual=DEFAULTS.visual;drawMain();drawLive();});
+  document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{S.extras.aliados.splice(+b.dataset.rm,1);drawMain();drawLive();});
+  document.querySelectorAll('[data-w]').forEach(c=>c.onchange=()=>{S.extras.aliados[+c.dataset.w].white=c.checked;drawLive();});}
+async function interpret(){
+  const st=$('#st4');if(!S.casilla.trim()){st.className='status err';st.textContent='Escribe primero qué quieres agregar.';return;}
+  const t=curTpl();
+  const prompt=`Eres el director de arte de Upper (courier, Ecuador). Interpreta un pedido de elementos extra para una pieza ya diseñada con plantilla fija.
+Plantilla: ${curFormat().label} — "${t.name}" (${t.w}×${t.h}px). Copy actual: titular "${S.copy.titular}", destacado "${S.copy.destacado}".
+Archivos ya subidos: aliados [${S.extras.aliados.map(a=>a.name).join(', ')||'ninguno'}], foto de producto: ${S.extras.producto?'sí':'no'}.
+
+Sistema de diseño del Brandbook 2025 (NO negociable): solo tres colores (Upper Dark Blue #141D30, Green #CDF5A3, Cream Green #F0FFE8); titulares en Noland mayúsculas y cuerpo en Rethink Sans; logo oficial sin distorsionar, girar, sombrear, recolorear ni poner sobre fondos sobrecargados; ilustraciones oficiales de línea con bloques verdes (no se dibujan otras); cinta gruesa verde como elemento gráfico; sin emojis en la gráfica; sin fondos fotográficos completos; máximo 3 logos de aliados.
+Elementos que la plataforma SÍ puede agregar:
+- qr: una URL
+- fecha: ≤ ${LIMITS.fecha} caracteres
+- codigo: ≤ ${LIMITS.codigo} caracteres
+- legal: ≤ ${LIMITS.legal}
+- nota: complemento del destacado ≤ ${LIMITS.nota} (ej. "+IVA/libra", "de regalo")
+- mensaje: 1-2 líneas para enviar con la imagen por WhatsApp o push, con emojis y el CTA "Mira aquí"/"Descubre aquí"
+- visual: ${ILUS.map(i=>`"${i[0]}" (${i[1]})`).join(', ')}, "producto" (solo si hay foto subida) o "none"
+- logos de aliados y foto de producto: solo si se suben como archivo (si los pide y no están, ponlos en "faltan").
+Todo lo demás (otros colores, otras fuentes, mover o girar el logo, fondos con foto, sombras, gradientes, más de 3 logos, animaciones) se rechaza con motivo breve y una alternativa dentro del sistema.
+
+Pedido: """${S.casilla}"""
+
+Responde SOLO JSON: {"qr":"" o null,"fecha":"" o null,"codigo":"" o null,"nota":"" o null,"legal":"" o null,"mensaje":"" o null,"visual":"" o null,"aceptados":["frase corta de lo aplicado"],"rechazados":[{"pedido":"","motivo":"","alternativa":""}],"faltan":["archivo que debe subir"]}`;
+  $('#interp').disabled=true;st.className='status';st.textContent='Claude está revisando el pedido con el criterio de marca…';
+  try{const r=await AI.json(prompt);
+    const campos=[];
+    if(r.qr&&/^https?:\/\//.test(r.qr)){S.extras.qr=String(r.qr);campos.push('qr');}
+    ['fecha','codigo','nota','legal'].forEach(k=>{if(r[k]){S.copy[k]=String(r[k]).slice(0,LIMITS[k]);campos.push(k);}});
+    if(r.mensaje){S.waMsg=String(r.mensaje).slice(0,400);campos.push('mensaje');}
+    if(r.visual&&VISUALS.some(v=>v[0]===r.visual)&&(r.visual!=='producto'||S.extras.producto))S.extras.visual=r.visual;
+    S.extrasAI={aceptados:r.aceptados||[],rechazados:r.rechazados||[],faltan:r.faltan||[],campos};saveDraft();drawMain();drawLive();}
+  catch(e){st.className='status err';st.textContent=errMsg(e);$('#interp').disabled=false;}}
+
+/* ---------- Paso 5 ---------- */
+function step5(){const t=curTpl();
+  return `<h2>Descarga</h2><p class="lead">La pieza en las dos combinaciones aprobadas. Elige una y descárgala, o baja el kit completo adaptado a todos los formatos.</p>
+  <div class="final">${Object.entries(SCHEMES).map(([k,v])=>`<div class="card"><h3>${esc(v.name)} ${k===S.scheme?'<span class="pill">Elegida</span>':`<button class="btn sm" data-pick="${k}">Elegir</button>`}</h3><div class="stage"><canvas id="f_${k}"></canvas></div><div class="review rv-card" id="fc_${k}"></div><button class="btn primary" data-ex="${k}">Descargar ${t.w}×${t.h} PNG</button><div class="status" id="fs_${k}"></div></div>`).join('')}</div>
+  ${S.waMsg?`<div class="box"><h3>Mensaje para enviar con la imagen <button class="btn sm" id="cpwa">Copiar</button></h3><div class="wa" id="watext">${esc(S.waMsg)}</div></div>`:''}
+  <div class="box"><h3>Adaptaciones multiformato <span style="display:flex;gap:8px;align-items:center"><span class="hint">${esc(SCHEMES[S.scheme].name)}</span><button class="btn primary sm" id="zip">Descargar kit .zip</button></span></h3>
+  <p class="hint" style="margin:0">Las 12 plantillas con el mismo mensaje. Al descargar, la plataforma te avisa de las reglas que no se cumplen y el kit incluye <code>revision.txt</code>.</p>
+  <div class="status" id="zst"></div>
+  <div class="adapt" id="adapt"></div></div>
+  ${navHtml()}`;}
+function bind5(){const t=curTpl();
+  Object.keys(SCHEMES).forEach(k=>{const rv=render($('#f_'+k),t,k,Math.min(1,1100/Math.max(t.w,t.h)));$('#fc_'+k).innerHTML=reviewHtml(rv,{compact:true});});
+  document.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>exportPng(t,b.dataset.ex,$('#fs_'+b.dataset.ex)));
+  document.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{S.scheme=b.dataset.pick;saveDraft();drawMain();});
+  $('#cpwa')&&($('#cpwa').onclick=async()=>{try{await navigator.clipboard.writeText(S.waMsg);toast('Mensaje copiado');}catch{const r=document.createRange();r.selectNodeContents($('#watext'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Texto seleccionado: cópialo');}});
+  const all=Object.values(FORMATS).flatMap(f=>f.templates);
+  $('#adapt').innerHTML=all.map(tp=>`<div class="ad"><div class="thumb"><canvas data-ad="${tp.fmt}:${tp.id}"></canvas></div><b>${esc(FORMATS[tp.fmt].label)} · ${esc(tp.name)}</b><span class="dim">${tp.w}×${tp.h} px</span><span class="flag" data-fl="${tp.fmt}:${tp.id}"></span><button class="btn sm" data-dl="${tp.fmt}:${tp.id}">Descargar PNG</button><div class="status" data-ds="${tp.fmt}:${tp.id}"></div></div>`).join('');
+  all.forEach(tp=>{const key=tp.fmt+':'+tp.id;const rv=render(document.querySelector(`[data-ad="${key}"]`),tp,S.scheme,Math.min(.35,300/Math.max(tp.w,tp.h)));const sm=reviewSummary(rv);const fl=document.querySelector(`[data-fl="${key}"]`);fl.className='flag '+(sm.b?'bad':sm.w?'warn':'ok');fl.textContent=sm.b?`${sm.b} bloqueante${sm.b>1?'s':''}${sm.w?` · ${sm.w} alerta${sm.w>1?'s':''}`:''}`:sm.w?`${sm.w} alerta${sm.w>1?'s':''}`:'Cumple las reglas';fl.title=issuesOf(rv).map(r=>`${SEV[r.sev].label}: ${r.text}`).join('\n');});
+  document.querySelectorAll('[data-dl]').forEach(b=>b.onclick=()=>{const[f,id]=b.dataset.dl.split(':');exportPng(FORMATS[f].templates.find(x=>x.id===id),S.scheme,document.querySelector(`[data-ds="${b.dataset.dl}"]`));});
+  $('#zip').onclick=exportZip;}
+function slug(s){return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)||'pieza';}
+const fileName=(t,k)=>`upper_${slug(S.req.campana)}_${t.fmt}_${t.id}_${k}.png`;
+const toBlob=c=>new Promise(r=>c.toBlob(r,'image/png'));
+/* Entrega del archivo: capacidad downloads en claude.ai; descarga directa en hosting propio */
+async function deliver(blob,name,st){
+  if(downloads){try{await downloads.save({filename:name,data:blob});st.className='status';st.textContent='Descargado: '+name;return;}catch(e){if(e?.code==='cancelled'||e?.code==='declined'){st.textContent='Descarga cancelada.';return;}}}
+  const url=URL.createObjectURL(blob);
+  if(!inArtifact){const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();st.className='status';st.textContent='Descargado: '+name;setTimeout(()=>URL.revokeObjectURL(url),4000);return;}
+  if(blob.type==='image/png'){st.className='status';st.innerHTML=`La descarga directa no está disponible aquí. Mantén presionada la imagen o haz clic derecho y elige “Guardar imagen”.<br><img class="out" src="${url}" alt="Pieza a tamaño real">`;}
+  else{st.className='status err';st.textContent='La descarga no está disponible en esta vista. Ábrela desde el hosting propio.';}
+}
+async function exportPng(t,k,st){const g=await gate([t],k);if(!g.go){st.className='status';st.textContent='Descarga detenida. Corrige la pieza en el panel de revisión.';return;}
+  await logIfNeeded(g,[t],k);const c=document.createElement('canvas');render(c,t,k,1);await deliver(await toBlob(c),fileName(t,k),st);}
+async function exportZip(){const st=$('#zst');if(typeof JSZip==='undefined'){st.className='status err';st.textContent='No cargó el compresor. Recarga la página.';return;}
+  const all=Object.values(FORMATS).flatMap(f=>f.templates);const g=await gate(all,S.scheme);
+  if(!g.go){st.className='status';st.textContent='Descarga detenida. Corrige las piezas con alertas y vuelve a intentar.';return;}
+  st.className='status';st.textContent='Generando 12 piezas…';$('#zip').disabled=true;
+  try{await logIfNeeded(g,all,S.scheme);const zip=new JSZip();for(const t of all){const c=document.createElement('canvas');render(c,t,S.scheme,1);zip.file(`${t.fmt}/`+fileName(t,S.scheme),await toBlob(c));}
+    if(S.waMsg)zip.file('mensaje.txt',S.waMsg);zip.file('revision.txt',await revisionTxt(all,S.scheme,g));
+    const blob=await zip.generateAsync({type:'blob'});await deliver(blob,`upper_${slug(S.req.campana)}_kit_${S.scheme}.zip`,st);}
+  catch{st.className='status err';st.textContent='No se pudo generar el kit. Vuelve a intentarlo.';}
+  finally{$('#zip').disabled=false;}}
+
+/* ===================== Panel de revisión (junto a la vista previa) ===================== */
+function sevBadge(sev){return `<span class="sev sev-${sev}">${SEV[sev].label}</span>`;}
+function reviewSummary(rv){const iss=issuesOf(rv);const b=iss.filter(r=>r.sev==='block').length,w=iss.length-b;const ai=rv.filter(r=>r.check==='ai'&&r.state==='pending').length;
+  return{b,w,ai,ok:rv.filter(r=>r.state==='ok'||r.state==='fixed').length,info:rv.filter(r=>r.state==='fail'&&r.sev==='info').length};}
+function reviewHtml(rv,opts={}){
+  const s=reviewSummary(rv);const order=r=>-(SEV[r.sev].n*10+(r.state==='fail'?2:1));
+  const fails=rv.filter(r=>r.state==='fail').sort((a,b)=>order(a)-order(b));
+  const manual=rv.filter(r=>r.check==='manual');const ai=rv.filter(r=>r.check==='ai');
+  const passed=rv.filter(r=>r.state==='ok'||r.state==='fixed'||r.state==='na');
+  const item=r=>`<li class="rv rv-${r.state==='fail'?r.sev:'ok'}"><div>${sevBadge(r.sev)} <span class="kind">${r.kind==='do'?'Do':'Don\'t'}</span></div><b>${esc(r.text)}</b>${r.detail?`<small>${esc(r.detail)}</small>`:''}</li>`;
+  return `<div class="rv-head"><h3>${opts.title||'Revisión de marca'}</h3>${opts.compact?'':'<button class="btn sm" data-open-rules>Editar reglas</button>'}</div>
+  <div class="rv-sum">${s.b?`<span class="chip c-block">${s.b} bloqueante${s.b>1?'s':''}</span>`:''}${s.w?`<span class="chip c-warn">${s.w} alerta${s.w>1?'s':''}</span>`:''}${!s.b&&!s.w?'<span class="chip c-ok">Sin incumplimientos</span>':''}${s.ai?`<span class="chip">${s.ai} por revisar con Claude</span>`:''}<span class="chip">${s.ok} cumplen</span></div>
+  ${fails.length?`<ul class="rv-list">${fails.map(item).join('')}</ul>`:''}
+  ${opts.compact?'':`${manual.length?`<div class="rv-block"><b class="rv-t">Confirmación del ejecutor</b>${manual.map(r=>`<label class="rv-check"><input type="checkbox" data-manual="${esc(r.id)}" ${S.manual[r.id]?'checked':''}> <span>${esc(r.text)} ${sevBadge(r.sev)}</span></label>`).join('')}</div>`:''}
+  ${ai.length?`<div class="rv-block"><b class="rv-t">Tono y contenido</b><p class="hint" style="margin:2px 0 8px">${ai.length} reglas que revisa Claude. ${s.ai?'Revísalas cada vez que cambies el copy.':'Revisadas con el copy actual.'}</p><button class="btn sm ${s.ai?'primary':''}" data-ai-review ${AI.ready()?'':'disabled'}>${s.ai?'Revisar con Claude':'Volver a revisar'}</button><div class="status" data-ai-st>${AI.ready()?'':'La IA no está conectada en esta vista.'}</div></div>`:''}
+  <details class="rv-pass"><summary>Cumple (${passed.length})</summary><ul class="rv-list">${passed.map(r=>`<li class="rv rv-ok"><b>${esc(r.text)}</b><small>${esc(r.state==='fixed'?CHECK_LABEL.fixed+'.':r.detail||'')}</small></li>`).join('')}</ul></details>`}`;
+}
+function bindReview(root){
+  root.querySelectorAll('[data-open-rules]').forEach(b=>b.onclick=()=>openRules());
+  root.querySelectorAll('[data-manual]').forEach(c=>c.onchange=()=>{S.manual[c.dataset.manual]=c.checked;drawLive();});
+  root.querySelectorAll('[data-ai-review]').forEach(b=>b.onclick=()=>aiReview(root.querySelector('[data-ai-st]'),b));
+}
+let aiCtl=null;
+async function aiReview(st,btn){
+  const rules=allRules().filter(r=>r.enabled&&r.check==='ai');if(!rules.length)return;
+  const prompt=`${VOICE}
+
+Tarea: revisa si el copy de esta pieza gráfica de Upper cumple cada regla de marca de la lista. Evalúa solo lo que está escrito; no supongas.
+Campaña: ${S.req.campana} · Objetivo: ${S.req.objetivo}
+Requerimiento: ${S.req.descripcion}
+Vigencia: ${S.req.vigencia||'no indicada'}
+
+Copy de la pieza (los asteriscos marcan el resaltado):
+${PIECE_FIELDS.concat('legal').map(f=>`- ${FIELD_LABEL[f]}: ${S.copy[f]||'(vacío)'}`).join('\n')}
+Mensaje que acompaña la imagen: ${S.waMsg||'(vacío)'}
+
+Reglas (id: regla):
+${rules.map(r=>`- ${r.id}: ${r.kind==='do'?'HACER':'NO HACER'} — ${r.text}`).join('\n')}
+
+Para cada regla responde si la pieza cumple. "motivo": una frase concreta que cite el texto. "sugerencia": solo si no cumple, una corrección lista para pegar.
+Responde SOLO JSON: {"resultados":[{"id":"","cumple":true,"motivo":"","sugerencia":""}]}`;
+  btn.disabled=true;st.className='status';st.textContent='Claude está revisando el copy con las reglas de marca…';aiCtl=new AbortController();
+  try{const r=await AI.json(prompt,{signal:aiCtl.signal});if(!r||!Array.isArray(r.resultados))throw{code:'invalid_json'};
+    const res={};r.resultados.forEach(x=>{if(x&&rules.some(q=>q.id===x.id))res[x.id]={cumple:!!x.cumple,motivo:String(x.motivo||''),sugerencia:String(x.sugerencia||'')};});
+    S.aiReview={hash:copyHash(),res,at:Date.now()};drawLive();if(S.step===5)drawMain();toast('Revisión de tono lista');}
+  catch(e){st.className='status err';st.textContent=errMsg(e);btn.disabled=false;}
+}
+
+/* ===================== Editor de reglas (compartido) ===================== */
+let rulesTab='reglas',editingRule=null,pendingChange=null;
+function openRules(){const p=$('#rules');p.hidden=false;$('#rulesBtn').setAttribute('aria-expanded','true');drawRules();p.scrollIntoView({behavior:'smooth',block:'start'});}
+function drawRules(){
+  const box=$('#rulesBody');if(!box)return;
+  $('#rulesScope').textContent=Team.scopeLabel();
+  document.querySelectorAll('[data-rtab]').forEach(b=>{b.classList.toggle('sel',b.dataset.rtab===rulesTab);b.setAttribute('aria-pressed',String(b.dataset.rtab===rulesTab));});
+  if(rulesTab==='reglas'){box.innerHTML=rulesEditorHtml();bindRulesEditor(box);}
+  else{box.innerHTML='<p class="hint">Cargando…</p>';loadLog(rulesTab,box);}
+}
+function sevOptions(r){return Object.keys(SEV).filter(k=>r.origin==='custom'||SEV[k].n<=SEV[r.baseSev].n).map(k=>`<option value="${k}" ${k===r.sev?'selected':''}>${SEV[k].label}${r.origin==='brandbook'&&k===r.baseSev?' (brandbook)':''}</option>`).join('');}
+function ruleRow(r){
+  const fixed=r.check==='fixed';const changed=r.origin==='brandbook'&&(r.sev!==r.baseSev||!r.enabled);
+  const pend=pendingChange&&pendingChange.id===r.id;
+  return `<div class="rule ${r.enabled?'':'off'}" data-rule="${esc(r.id)}">
+    <div class="rule-main"><b>${esc(r.text)}</b>
+      <div class="badges"><span class="pill">${r.origin==='brandbook'?'Brandbook':'Del equipo'}</span><span class="pill">${CHECK_LABEL[r.check]}</span>${fixed?'':sevBadge(r.sev)}${r.enabled?'':'<span class="pill">Desactivada</span>'}</div>
+      ${changed&&r.reason?`<small class="why">Ajustada: “${esc(r.reason)}”</small>`:''}</div>
+    ${fixed?'':`<div class="rule-ctrl">
+      <select data-sev aria-label="Severidad">${sevOptions(r)}</select>
+      <label class="sw-toggle"><input type="checkbox" data-en ${r.enabled?'checked':''}> Activa</label>
+      ${r.origin==='custom'?'<button class="btn sm" data-edit>Editar</button><button class="btn sm" data-del>Eliminar</button>':''}
+    </div>`}
+    ${pend?`<div class="rule-reason"><label class="f">Motivo del cambio (obligatorio para reglas del brandbook)<textarea rows="2" data-reason placeholder="Ej. El aliado exige su logo a color en esta campaña"></textarea></label><div class="row"><button class="btn sm primary" data-confirm>Guardar cambio</button><button class="btn sm" data-cancel>Cancelar</button></div></div>`:''}
+  </div>`;
+}
+function rulesEditorHtml(){
+  const rs=allRules();const col=k=>rs.filter(r=>r.kind===k).map(ruleRow).join('');
+  const e=editingRule;
+  return `<div class="rules-cols"><div><h3 class="col-h do">Do's</h3>${col('do')}</div><div><h3 class="col-h dont">Don'ts</h3>${col('dont')}</div></div>
+  <div class="box" id="ruleForm"><h3>${e?'Editar regla del equipo':'Agregar regla del equipo'}</h3>
+    <div class="fields">
+      <label class="f">Tipo<select id="nr_kind"><option value="do" ${e?.kind==='do'?'selected':''}>Do (hacer)</option><option value="dont" ${e?.kind==='dont'?'selected':''}>Don't (no hacer)</option></select></label>
+      <label class="f">Severidad<select id="nr_sev">${Object.keys(SEV).map(k=>`<option value="${k}" ${(e?.sev||'warn')===k?'selected':''}>${SEV[k].label}</option>`).join('')}</select></label>
+      <label class="f full">Regla<input type="text" id="nr_text" maxlength="160" value="${esc(e?.text||'')}" placeholder="Ej. No mencionar precios de la competencia"></label>
+      <label class="f full">Cómo se verifica<select id="nr_check"><option value="ai" ${e?.check!=='manual'?'selected':''}>La revisa Claude con el copy</option><option value="manual" ${e?.check==='manual'?'selected':''}>La confirma el ejecutor antes de descargar</option></select></label>
+    </div>
+    <div class="row" style="margin-top:10px"><button class="btn primary sm" id="nr_save">${e?'Guardar cambios':'Agregar regla'}</button>${e?'<button class="btn sm" id="nr_cancel">Cancelar</button>':''}</div>
+    <div class="status" id="nr_st"></div>
+  </div>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn sm" id="restoreRules">Restaurar reglas del brandbook</button></div>`;
+}
+function cfgClone(){return{overrides:JSON.parse(JSON.stringify(RULES.overrides)),custom:JSON.parse(JSON.stringify(RULES.custom))};}
+async function commit(cfg,change,okMsg){try{await Team.save(cfg,change);pendingChange=null;editingRule=null;toast(okMsg);drawRules();}catch(e){toast(e?.code==='not_granted'?'No tienes permiso para cambiar las reglas del equipo.':'No se pudo guardar el cambio. Vuelve a intentarlo.');}}
+function bindRulesEditor(box){
+  box.querySelectorAll('[data-rule]').forEach(row=>{const id=row.dataset.rule;const r=allRules().find(x=>x.id===id);if(!r)return;
+    const sel=row.querySelector('[data-sev]'),en=row.querySelector('[data-en]');
+    const propose=(sev,enabled)=>{
+      const loosens=r.origin==='brandbook'&&(SEV[sev].n<SEV[r.sev].n||(!enabled&&r.enabled))&&(SEV[sev].n<SEV[r.baseSev].n||!enabled);
+      const accion=!enabled&&r.enabled?'Desactivó':enabled&&!r.enabled?'Activó':`Cambió severidad a ${SEV[sev].label}`;
+      if(loosens){pendingChange={id,sev,enabled,accion};drawRules();row.parentElement.querySelector(`[data-rule="${CSS.escape(id)}"] [data-reason]`)?.focus();return;}
+      const cfg=cfgClone();
+      if(r.origin==='brandbook'){const restored=sev===r.baseSev&&enabled;if(restored)delete cfg.overrides[id];else cfg.overrides[id]={...(cfg.overrides[id]||{}),sev,enabled};}
+      else{const c=cfg.custom.find(x=>x.id===id);c.sev=sev;c.enabled=enabled;}
+      commit(cfg,{accion,regla:r.text,motivo:''},'Regla actualizada para todo el equipo');};
+    sel&&(sel.onchange=()=>propose(sel.value,en.checked));
+    en&&(en.onchange=()=>propose(sel.value,en.checked));
+    row.querySelector('[data-cancel]')&&(row.querySelector('[data-cancel]').onclick=()=>{pendingChange=null;drawRules();});
+    row.querySelector('[data-confirm]')&&(row.querySelector('[data-confirm]').onclick=()=>{const why=row.querySelector('[data-reason]').value.trim();
+      if(why.length<5){row.querySelector('[data-reason]').focus();toast('Escribe el motivo del cambio.');return;}
+      const pc=pendingChange;const cfg=cfgClone();cfg.overrides[id]={sev:pc.sev,enabled:pc.enabled,reason:why,at:Date.now()};
+      commit(cfg,{accion:pc.accion,regla:r.text,motivo:why},'Cambio guardado con su motivo');});
+    row.querySelector('[data-edit]')&&(row.querySelector('[data-edit]').onclick=()=>{editingRule=RULES.custom.find(x=>x.id===id);drawRules();$('#ruleForm').scrollIntoView({behavior:'smooth',block:'center'});});
+    row.querySelector('[data-del]')&&(row.querySelector('[data-del]').onclick=()=>{const b=row.querySelector('[data-del]');
+      if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='¿Eliminar? Confirmar';b.classList.add('danger');return;}
+      const cfg=cfgClone();cfg.custom=cfg.custom.filter(x=>x.id!==id);commit(cfg,{accion:'Eliminó',regla:r.text,motivo:''},'Regla eliminada');});
+  });
+  $('#nr_save').onclick=()=>{const text=$('#nr_text').value.trim();const st=$('#nr_st');
+    if(text.length<8){st.className='status err';st.textContent='Escribe la regla con al menos 8 caracteres.';return;}
+    const cfg=cfgClone();const data={kind:$('#nr_kind').value,sev:$('#nr_sev').value,check:$('#nr_check').value,text};
+    if(editingRule){Object.assign(cfg.custom.find(x=>x.id===editingRule.id),data);commit(cfg,{accion:'Editó',regla:text,motivo:''},'Regla actualizada para todo el equipo');}
+    else{cfg.custom.push({id:'c_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),enabled:true,...data});commit(cfg,{accion:'Agregó',regla:text,motivo:''},'Regla agregada para todo el equipo');}};
+  $('#nr_cancel')&&($('#nr_cancel').onclick=()=>{editingRule=null;drawRules();});
+  $('#restoreRules').onclick=()=>{const b=$('#restoreRules');if(!Object.keys(RULES.overrides).length){toast('Las reglas del brandbook ya están en su valor original.');return;}
+    if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='¿Restaurar? Se pierden los ajustes. Confirmar';b.classList.add('danger');return;}
+    commit({overrides:{},custom:cfgClone().custom},{accion:'Restauró las reglas del brandbook',regla:'',motivo:''},'Reglas del brandbook restauradas');};
+}
+const fmtDate=t=>t?new Date(t).toLocaleString('es-EC',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+async function loadLog(kind,box){
+  try{const items=await Team.list(kind,40);
+    if(!items.length){box.innerHTML=`<p class="hint">${kind==='cambios'?'Todavía no hay cambios en las reglas.':'Todavía no hay descargas con reglas incumplidas.'}</p>`;return;}
+    box.innerHTML=kind==='cambios'
+      ?`<ul class="log">${items.map(x=>`<li><span class="dim">${esc(fmtDate(x.at))} · ${esc(x.who)}</span><b>${esc(x.accion)}</b>${x.regla?` <span>${esc(x.regla)}</span>`:''}${x.motivo?`<small>Motivo: ${esc(x.motivo)}</small>`:''}</li>`).join('')}</ul>`
+      :`<ul class="log">${items.map(x=>`<li><span class="dim">${esc(fmtDate(x.at))} · ${esc(x.who)}</span><b>${esc(x.campana||'')}</b> <span>${esc((x.piezas||[]).slice(0,3).join(', '))}${(x.piezas||[]).length>3?` y ${x.piezas.length-3} más`:''}</span>
+        <ul class="plain">${(x.reglas||[]).map(r=>`<li>${sevBadge(SEV[r.sev]?r.sev:'warn')} ${esc(r.texto)}${r.motivo?` <small>— ${esc(r.motivo)}</small>`:''}</li>`).join('')}</ul>${x.comentario?`<small>Comentario: ${esc(x.comentario)}</small>`:''}</li>`).join('')}</ul>`;}
+  catch{box.innerHTML='<p class="status err">No se pudo cargar el registro. Vuelve a intentarlo.</p>';}
+}
+
+/* ===================== Aviso antes de descargar ===================== */
+function pieceName(t){return `${FORMATS[t.fmt].label} · ${t.name}`;}
+/* Devuelve {go, reglas, comentario}. Si no hay incumplimientos, sigue sin preguntar. */
+function gate(tpls,schemeKey){
+  const map=new Map();let aiPending=0;
+  tpls.forEach(t=>{const rv=reviewOf(t,schemeKey);aiPending=Math.max(aiPending,rv.filter(r=>r.check==='ai'&&r.state==='pending').length);
+    issuesOf(rv).forEach(r=>{const m=map.get(r.id)||{r,piezas:[],details:new Set()};m.piezas.push(pieceName(t));if(r.detail)m.details.add(r.detail);map.set(r.id,m);});});
+  const list=[...map.values()].sort((a,b)=>SEV[b.r.sev].n-SEV[a.r.sev].n);
+  if(!list.length)return Promise.resolve({go:true,reglas:[],aiPending});
+  return new Promise(res=>{
+    const dlg=$('#gate');const many=tpls.length>1;
+    dlg.innerHTML=`<form method="dialog" class="gate">
+      <h2>${list.some(x=>x.r.sev==='block')?'Esta descarga tiene reglas bloqueantes':'Esta descarga no cumple todas las reglas'}</h2>
+      <p class="lead">Puedes volver a corregir o continuar. Si continúas, la excepción queda registrada con tu nombre${list.some(x=>x.r.sev==='block')?' y debes explicar por qué en cada regla bloqueante':''}.</p>
+      <ul class="gate-list">${list.map((x,i)=>`<li class="rv rv-${x.r.sev}"><div>${sevBadge(x.r.sev)} <span class="kind">${x.r.kind==='do'?'Do':'Don\'t'}</span></div><b>${esc(x.r.text)}</b>
+        <small>${esc([...x.details].slice(0,2).join(' '))}${many?` · En ${x.piezas.length} de ${tpls.length} piezas`:''}</small>
+        ${x.r.sev==='block'?`<label class="f">Motivo para continuar (obligatorio)<input type="text" data-why="${i}" maxlength="200"></label>`:''}</li>`).join('')}</ul>
+      ${aiPending?`<p class="hint">${aiPending} reglas de tono no se revisaron con el copy actual. Puedes revisarlas en el panel de revisión.</p>`:''}
+      <label class="f">Comentario (opcional)<input type="text" id="gateNote" maxlength="200" placeholder="Ej. Aprobado por el jefe de marca"></label>
+      <div class="status" id="gateSt"></div>
+      <div class="nav" style="margin-top:14px"><button class="btn" value="back" id="gateBack">Volver a corregir</button><button class="btn primary" value="go" id="gateGo">Continuar y descargar</button></div></form>`;
+    const done=v=>{dlg.close();res(v);};
+    $('#gateBack').onclick=e=>{e.preventDefault();done({go:false});};
+    $('#gateGo').onclick=e=>{e.preventDefault();const reglas=[];let missing=null;
+      list.forEach((x,i)=>{const inp=dlg.querySelector(`[data-why="${i}"]`);const why=inp?inp.value.trim():'';if(inp&&why.length<5&&!missing)missing=inp;
+        reglas.push({id:x.r.id,texto:x.r.text,sev:x.r.sev,origen:x.r.origin,detalle:[...x.details].join(' '),piezas:x.piezas,motivo:why});});
+      if(missing){$('#gateSt').className='status err';$('#gateSt').textContent='Explica por qué continúas en cada regla bloqueante.';missing.focus();return;}
+      done({go:true,reglas,comentario:$('#gateNote').value.trim(),aiPending});};
+    dlg.oncancel=e=>{e.preventDefault();done({go:false});};
+    dlg.showModal();});
+}
+async function logIfNeeded(g,tpls,schemeKey){if(!g.reglas.length)return;
+  try{await Team.log({campana:S.req.campana,objetivo:S.req.objetivo,esquema:SCHEMES[schemeKey].name,piezas:tpls.map(pieceName),reglas:g.reglas,comentario:g.comentario||''});}
+  catch{toast('La excepción no se pudo registrar en el equipo.');}}
+/* revision.txt que viaja dentro del kit */
+async function revisionTxt(tpls,schemeKey,g){
+  const who=await Team.myName();const L=[];
+  L.push('REVISIÓN DE MARCA · UPPER STUDIO','',`Campaña: ${S.req.campana}`,`Objetivo: ${S.req.objetivo}`,`Combinación: ${SCHEMES[schemeKey].name}`,`Fecha: ${new Date().toLocaleString('es-EC')}`,`Descargado por: ${who||'(sin nombre)'}`,`Reglas: ${Team.scopeLabel().toLowerCase()}`,'');
+  tpls.forEach(t=>{const rv=reviewOf(t,schemeKey);const iss=issuesOf(rv);const inf=rv.filter(r=>r.state==='fail'&&r.sev==='info');
+    L.push(`${pieceName(t)} (${t.w}×${t.h} px): ${iss.length?iss.length+' incumplimiento(s)':'cumple'}`);
+    iss.forEach(r=>L.push(`   - [${SEV[r.sev].label}] ${r.text}${r.detail?' → '+r.detail:''}`));
+    inf.forEach(r=>L.push(`   - [Recomendación] ${r.text}${r.detail?' → '+r.detail:''}`));});
+  L.push('');
+  if(g.reglas.length){L.push('EXCEPCIONES AUTORIZADAS');g.reglas.forEach(r=>L.push(`- [${SEV[r.sev].label}] ${r.texto}${r.motivo?' · Motivo: '+r.motivo:''}`));if(g.comentario)L.push(`Comentario: ${g.comentario}`);L.push('');}
+  if(g.aiPending)L.push(`Nota: ${g.aiPending} reglas de tono no se revisaron con Claude sobre el copy final.`);
+  return L.join('\n');
+}
+
+/* ---------- Kit / fuentes ---------- */
+function drawMain(){const m=$('#main');m.innerHTML=[step1,step2,step3,step4,step5][S.step-1]();bindNav();[bind1,bind2,bind3,bind4,bind5][S.step-1]();}
+function drawKit(){
+  $('#swatches').innerHTML=PALETTE.map(([n,h,p])=>`<div class="sw"><i style="background:${h}"></i>${n}<br>${h}<br>${p}</div>`).join('');
+  $('#fontStatus').innerHTML=[['Titulares',S.fonts.display,'Noland','Anton (provisional)'],['Cuerpo',S.fonts.text,'Rethink Sans','Lexend (provisional)']].map(([r,ok,a,b])=>`<div class="fontrow"><span>${r}</span><span class="pill" style="color:${ok?'var(--ok)':'var(--warn)'}">${ok?a:b}</span></div>`).join('');}
+async function addFont(family,src,weight){const f=new FontFace(family,src,{weight:String(weight)});await f.load();document.fonts.add(f);return true;}
+async function loadFontFile(file,family,weight,key){const buf=await file.arrayBuffer();await addFont(family,buf,weight);
+  try{const b64=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(file);});store.set('font_'+key,b64);}catch{}}
+async function bootFonts(){
+  const fetchFont=async(fam,url,w)=>{try{const r=await fetch(url);if(!r.ok)return false;return await addFont(fam,await r.arrayBuffer(),w);}catch{return false;}};
+  const tryStored=async(fam,key,w)=>{const d=store.get('font_'+key);if(!d)return false;try{return await addFont(fam,`url(${d})`,w);}catch{return false;}};
+  const [d,t]=await Promise.all([
+    tryStored('UpperDisplay','d','400').then(ok=>ok||fetchFont('UpperDisplay','fonts/Noland-Bold.otf','400')),
+    tryStored('UpperText','t','100 900').then(ok=>ok||fetchFont('UpperText','fonts/RethinkSans-Variable.ttf','100 900'))]);
+  S.fonts.display=!!d;S.fonts.text=!!t;
+  try{await Promise.all(['400 40px Anton','400 40px Lexend','700 40px Lexend'].map(f=>document.fonts.load(f)));}catch{}
+}
+function refreshAll(){tintCache.clear();drawKit();drawMain();drawLive();}
+$('#rulesBtn').onclick=()=>{const p=$('#rules');if(p.hidden)openRules();else{p.hidden=true;$('#rulesBtn').setAttribute('aria-expanded','false');}};
+document.querySelectorAll('[data-rtab]').forEach(b=>b.onclick=()=>{rulesTab=b.dataset.rtab;pendingChange=null;drawRules();});
+document.querySelectorAll('#kit [data-open-rules]').forEach(b=>b.onclick=()=>openRules());
+$('#kitBtn').onclick=()=>{const k=$('#kit');k.hidden=!k.hidden;$('#kitBtn').setAttribute('aria-expanded',String(!k.hidden));};
+[['fontD','UpperDisplay','400','d','display'],['fontT','UpperText','100 900','t','text']].forEach(([id,fam,w,key,flag])=>{
+  document.getElementById(id).onchange=async e=>{const f=e.target.files[0];if(!f)return;try{await loadFontFile(f,fam,w,key);if(flag)S.fonts[flag]=true;toast('Tipografía cargada en todas las plantillas');refreshAll();}catch{toast('No se pudo leer la tipografía. Usa .woff2, .woff, .otf o .ttf.');}};});
+
+(async()=>{
+  document.getElementById('logoPath').setAttribute('d',LOGO_D);
+  loadDraft();await Promise.all([bootFonts(),loadIllus()]);drawKit();drawSteps();drawMain();drawLive();
+  Team.init();
+  if(inArtifact){setAiMode('none');
+    claude.use('sample').then(s=>{if(s){AI.sample=s;setAiMode('artifact');}}).catch(()=>{});
+    claude.use('downloads').then(d=>{downloads=d;}).catch(()=>{});}
+  else{try{const r=await fetch('api/health',{cache:'no-store'});const j=await r.json();setAiMode(j.ok?'server':'none');}catch{setAiMode('none');}}
+})();
+</script>

@@ -1,0 +1,627 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Upper Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+/* Layout: tool shell — stepper arriba, formulario a la izquierda, vista previa fija a la derecha */
+:root{
+  --bg:#F3F6FB; --panel:#FFFFFF; --fg:#111D32; --muted:#5B6782; --line:#DCE3EF;
+  --accent:#027BFF; --accent-fg:#FFFFFF; --soft:#E6F0FF; --ok:#13804B; --warn:#B45F00; --bad:#C62828;
+  --chip:#EEF2F8;
+  --f-display:"Poppins",system-ui,sans-serif; --f-body:"Inter",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0B1222; --panel:#121C31; --fg:#E8EEF8; --muted:#97A3BB; --line:#24324D;
+  --accent:#3B95FF; --accent-fg:#FFFFFF; --soft:#16284A; --ok:#4CC38A; --warn:#F2A33A; --bad:#FF6B6B; --chip:#1A2640; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B1222; --panel:#121C31; --fg:#E8EEF8; --muted:#97A3BB; --line:#24324D;
+  --accent:#3B95FF; --accent-fg:#FFFFFF; --soft:#16284A; --ok:#4CC38A; --warn:#F2A33A; --bad:#FF6B6B; --chip:#1A2640; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.5}
+.wrap{max-width:1280px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .mark{width:34px;height:34px;border-radius:9px;background:#027BFF;display:grid;place-items:center;color:#fff;font:800 15px var(--f-display)}
+.brand h1{font:700 19px/1.1 var(--f-display);margin:0}
+.brand small{display:block;color:var(--muted);font-size:12px}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:10px;padding:9px 14px;font-weight:600}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.tpl:focus-visible,.step:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:18px;counter-reset:s}
+.step{border:0;background:transparent;text-align:left;padding:8px 4px 10px;border-bottom:3px solid var(--line);color:var(--muted);min-width:0}
+.step b{display:block;font:600 13px var(--f-display);color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step span{font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.step.done{border-color:color-mix(in srgb,var(--accent) 45%,transparent);color:var(--fg)}
+.step.on{border-color:var(--accent);color:var(--accent)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,460px);gap:20px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.panel h2{font:700 18px var(--f-display);margin:0 0 4px;text-wrap:balance}
+.panel .lead{color:var(--muted);margin:0 0 18px;max-width:62ch}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fields .full{grid-column:1/-1}
+label.f{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:13px;min-width:0}
+label.f .hint{font-weight:400;color:var(--muted);font-size:12px}
+input[type=text],select,textarea{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+textarea{resize:vertical;min-height:84px}
+.counter{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;align-self:flex-end;margin-top:-2px}
+.counter.over{color:var(--bad);font-weight:600}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
+.tpls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.tpl{border:2px solid var(--line);border-radius:12px;background:var(--bg);padding:10px;text-align:left;color:var(--fg);display:flex;flex-direction:column;gap:8px;min-width:0}
+.tpl.sel{border-color:var(--accent);background:var(--soft)}
+.tpl .thumb{height:150px;display:grid;place-items:center;background:var(--chip);border-radius:8px;overflow:hidden}
+.tpl .thumb canvas{max-width:100%;max-height:140px;width:auto;height:auto;display:block;border-radius:3px}
+.tpl b{font:600 14px var(--f-display)}
+.tpl .dim{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tpl p{margin:0;font-size:12px;color:var(--muted)}
+aside.preview{position:sticky;top:max(12px,env(safe-area-inset-top,0px))}
+aside.preview .stage{background:repeating-conic-gradient(var(--chip) 0 25%,var(--panel) 0 50%) 0 0/16px 16px;border-radius:10px;padding:14px;display:grid;place-items:center;min-height:220px}
+aside.preview canvas{max-width:100%;max-height:62vh;width:auto;height:auto;box-shadow:0 6px 24px rgba(17,29,50,.18);border-radius:4px}
+.meta{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin-top:10px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border-radius:99px;padding:3px 10px;font-size:12px;font-weight:600}
+.checks{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:5px}
+.checks li{display:flex;gap:8px;align-items:flex-start;font-size:12.5px}
+.checks li::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;margin-top:6px;background:var(--ok)}
+.checks li.warn::before{background:var(--warn)}
+.checks li.bad::before{background:var(--bad)}
+.ai{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--bg);margin-top:16px}
+.ai h3{font:600 14px var(--f-display);margin:0 0 8px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.score{font:700 22px var(--f-display);font-variant-numeric:tabular-nums}
+.opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.opt{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--panel);display:flex;flex-direction:column;gap:6px;min-width:0}
+.opt.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.opt .tag{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);font-weight:700}
+.opt .d{font:800 20px var(--f-display);line-height:1.1}
+.opt .t{font:700 13px var(--f-display);text-transform:uppercase}
+.opt .s{font-size:12.5px;color:var(--muted)}
+.opt .c{font-size:12px;font-weight:600}
+.opt .btn{margin-top:auto}
+.status{font-size:13px;color:var(--muted);margin-top:10px;min-height:1.2em}
+.status.err{color:var(--bad)}
+ul.plain{margin:6px 0 0;padding-left:18px}
+ul.plain li{margin:2px 0}
+.files{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.fileitem{display:flex;align-items:center;gap:6px;background:var(--chip);border-radius:8px;padding:4px 6px 4px 4px;font-size:12px}
+.fileitem img{width:34px;height:34px;object-fit:contain;background:#027BFF;border-radius:6px;padding:3px}
+.fileitem button{border:0;background:transparent;color:var(--muted);font-size:15px;line-height:1;padding:2px 4px}
+.final{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.final .card{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--bg);display:flex;flex-direction:column;gap:10px;min-width:0}
+.final .card h3{font:700 15px var(--f-display);margin:0;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.final .stage{background:var(--chip);border-radius:8px;padding:10px;display:grid;place-items:center}
+.final canvas,.final img.out{max-width:100%;max-height:520px;width:auto;height:auto;border-radius:3px;box-shadow:0 4px 18px rgba(17,29,50,.18)}
+.wa{white-space:pre-wrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13.5px}
+.kit{margin-bottom:18px}
+.kit[hidden]{display:none!important}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.sw{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sw i{width:58px;height:40px;border-radius:8px;border:1px solid var(--line);display:block}
+.kitrow{display:grid;grid-template-columns:1.3fr 1fr;gap:20px}
+.note{font-size:12px;color:var(--muted)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;font-size:13px}
+@media (max-width:980px){.grid{grid-template-columns:1fr}aside.preview{position:static}.kitrow{grid-template-columns:1fr}}
+@media (max-width:640px){.fields,.opts,.final,.tpls{grid-template-columns:1fr}.steps{grid-template-columns:repeat(5,minmax(0,1fr))}.step b{font-size:11px}.step span{font-size:10px}.tpl .thumb{height:120px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><div class="mark">u</div><div><h1>Upper Studio</h1><small>Piezas de comunicación fieles a la marca</small></div></div>
+    <button class="btn" id="kitBtn" aria-expanded="false">Kit de marca</button>
+  </header>
+
+  <section class="panel kit" id="kit" hidden>
+    <h2>Kit de marca Upper</h2>
+    <p class="lead">Estos elementos son fijos: todas las plantillas los usan y nadie los cambia desde el flujo. Colores tomados de las piezas aprobadas.</p>
+    <div class="kitrow">
+      <div>
+        <div class="swatches" id="swatches"></div>
+        <p class="note" style="margin-top:12px">Tipografía de piezas: Poppins (800 titulares, 500 cuerpo). Si Upper usa otra fuente corporativa, se reemplaza aquí y todas las plantillas la heredan.</p>
+      </div>
+      <div>
+        <label class="f">Logo oficial (SVG o PNG con fondo transparente)
+          <input type="file" id="logoIn" accept="image/png,image/svg+xml,image/webp">
+          <span class="hint">Mientras no se cargue, las piezas usan un logotipo provisional “upper”. Se pinta en blanco sobre los fondos de marca.</span>
+        </label>
+        <div class="files" id="logoPrev"></div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="steps" id="steps" aria-label="Pasos"></nav>
+
+  <div class="grid">
+    <main class="panel" id="main"></main>
+    <aside class="preview panel" id="aside">
+      <div class="stage"><canvas id="live"></canvas></div>
+      <div class="meta"><span id="liveName"></span><span id="liveDim"></span></div>
+      <ul class="checks" id="liveChecks"></ul>
+    </aside>
+  </div>
+</div>
+<div id="qrTmp" hidden></div>
+
+<script>
+/* ===================== MARCA ===================== */
+const C={blue:'#027BFF',navy:'#111D32',lime:'#C1F598',yellow:'#FFD21F',amber:'#F5AC00',deep:'#05326E',white:'#FFFFFF'};
+const SCHEMES={
+  A:{name:'Azul Upper',bg:C.blue,card:C.navy,hi:C.lime,txt:C.white,chip:C.deep,cta:C.yellow,ctaTxt:C.navy,ring:C.lime,vis:C.deep},
+  B:{name:'Navy contraste',bg:C.navy,card:C.blue,hi:C.lime,txt:C.white,chip:C.deep,cta:C.lime,ctaTxt:C.navy,ring:C.yellow,vis:C.blue}
+};
+const PALETTE=[['Azul Upper',C.blue],['Navy',C.navy],['Lima',C.lime],['Amarillo',C.yellow],['Ámbar',C.amber],['Azul profundo',C.deep]];
+
+/* Plantillas: 3 por formato, distinto diseño y dimensión */
+const FORMATS={
+  inapp:{label:'Banner in-app',canal:'App Upper',templates:[
+    {id:'cupon',name:'Cupón central',w:1059,h:465,layout:'cupon',desc:'Oferta grande en tarjeta navy. Ideal para descuentos con código.'},
+    {id:'split',name:'Texto + visual',w:1080,h:540,layout:'split',desc:'Mensaje a la izquierda, visual de caja o producto a la derecha.'},
+    {id:'tira',name:'Tira compacta',w:1080,h:360,layout:'strip',desc:'Banner bajo para carrusel o recordatorios cortos.'}]},
+  wa:{label:'Imagen WhatsApp',canal:'WhatsApp',templates:[
+    {id:'cuadro',name:'Post cuadrado',w:1080,h:1080,layout:'cupon',desc:'Para chats y listas de difusión. Se entiende en miniatura.'},
+    {id:'estado',name:'Estado vertical',w:1080,h:1920,layout:'stack',opt:{safeTop:.12,safeBot:.16,visualFirst:false},desc:'9:16 con zonas seguras para la interfaz de WhatsApp.'},
+    {id:'vert',name:'Vertical 4:5',w:1080,h:1350,layout:'stack',opt:{safeTop:.05,safeBot:.04,visualFirst:true},desc:'Visual arriba y oferta abajo. Buen balance imagen/texto.'}]},
+  hablador:{label:'Hablador impreso',canal:'Punto de venta',print:true,templates:[
+    {id:'a5',name:'A5 vertical',w:1819,h:2551,layout:'stack',opt:{safeTop:.05,safeBot:.04,visualFirst:true},desc:'148×210 mm a 300 dpi con 3 mm de sangrado. Para mostrador.'},
+    {id:'a6',name:'A6 horizontal',w:1819,h:1311,layout:'split',desc:'148×105 mm, tent card. Visual + QR.'},
+    {id:'cuad',name:'Colgante 15 cm',w:1843,h:1843,layout:'cupon',desc:'150×150 mm para colgar o pegar en vitrina.'}]}
+};
+const LIMITS={cupon:{destacado:14,titular:26,subtitulo:70,cta:16},split:{destacado:14,titular:34,subtitulo:90,cta:18},strip:{destacado:14,titular:30,subtitulo:60,cta:14},stack:{destacado:14,titular:30,subtitulo:90,cta:18}};
+const COMMON={codigo:14,fecha:24,legal:140,sello:20};
+
+/* ===================== ESTADO ===================== */
+const S={
+  step:1,
+  req:{campana:'Libra gratis noviembre',objetivo:'Activación',canal:'inapp',descripcion:'Usuarios que descargaron la app y no han hecho su primer envío. Queremos que compren en Black Friday usando la libra gratis.',vigencia:'Hasta el 30 de noviembre'},
+  formato:'inapp',tpl:'cupon',
+  propuesta:'Te regalamos una libra gratis para tu primer envío por Black Friday, usa el código LIBRA1',
+  evalr:null,opciones:[],optSel:-1,
+  copy:{destacado:'1 LIBRA GRATIS',titular:'En tu primer envío',subtitulo:'Compra en Black Friday y tráelo con Upper en 7 días.',cta:'Úsala ya',codigo:'LIBRA1',fecha:'Hasta el 30 de nov',legal:'Aplican términos y condiciones. Válido para usuarios nuevos en la app de Upper.'},
+  waMsg:'',
+  extras:{aliados:[],producto:null,sello:'',qr:''},
+  casilla:'',extrasAI:null,
+  logo:null
+};
+const isExample=()=>S.req.campana==='Libra gratis noviembre';
+const curFormat=()=>FORMATS[S.formato];
+const curTpl=()=>curFormat().templates.find(t=>t.id===S.tpl)||curFormat().templates[0];
+
+/* ===================== DIBUJO ===================== */
+const FF='Poppins, "Helvetica Neue", Arial, sans-serif';
+function rr(ctx,x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function wrap(ctx,text,w){const words=text.split(/\s+/).filter(Boolean);const lines=[];let cur='';for(const wd of words){if(ctx.measureText(wd).width>w)return null;const t=cur?cur+' '+wd:wd;if(ctx.measureText(t).width<=w)cur=t;else{lines.push(cur);cur=wd;}}if(cur)lines.push(cur);return lines;}
+function fit(ctx,R,field,text,b,o){
+  if(!text)return{ok:true,h:0,w:0};
+  const t=o.upper?text.toUpperCase():text;const lh=o.lh||1.05;const step=Math.max(1,o.max*0.04);
+  let lines=null,size=o.max;
+  for(;size>=o.min;size-=step){ctx.font=`${o.weight} ${size}px ${FF}`;lines=wrap(ctx,t,b.w);if(lines&&lines.length<=(o.maxLines||9)&&lines.length*size*lh<=b.h)break;lines=null;}
+  let ok=true;if(!lines){ok=false;size=o.min;ctx.font=`${o.weight} ${size}px ${FF}`;lines=wrap(ctx,t,b.w)||[t];R.checks.push({lvl:'bad',msg:`“${o.label||field}” no cabe en su zona: acórtalo.`});}
+  const th=lines.length*size*lh;let y0=b.y;if(o.valign==='middle')y0=b.y+(b.h-th)/2;else if(o.valign==='bottom')y0=b.y+b.h-th;
+  ctx.save();ctx.beginPath();ctx.rect(b.x-2,b.y-size*.2,b.w+4,b.h+size*.4);ctx.clip();
+  ctx.fillStyle=o.color;ctx.textBaseline='middle';ctx.textAlign=o.align||'left';
+  const x=o.align==='center'?b.x+b.w/2:o.align==='right'?b.x+b.w:b.x;let mw=0;
+  lines.forEach((ln,i)=>{ctx.fillText(ln,x,y0+(i+.5)*size*lh+size*.04);mw=Math.max(mw,ctx.measureText(ln).width)});
+  ctx.restore();
+  if(o.fg&&o.bg)R.pairs.push({fg:o.fg,bg:o.bg,large:size>=24||(o.weight>=600&&size>=18.7),label:o.label||field});
+  return{ok,h:th,size,w:mw,y:y0};
+}
+const tintCache=new Map();
+function tinted(img,color){const k=img.src.slice(-40)+color;if(tintCache.has(k))return tintCache.get(k);const c=document.createElement('canvas');c.width=img.naturalWidth||img.width;c.height=img.naturalHeight||img.height;const x=c.getContext('2d');x.drawImage(img,0,0,c.width,c.height);x.globalCompositeOperation='source-in';x.fillStyle=color;x.fillRect(0,0,c.width,c.height);tintCache.set(k,c);return c;}
+function logoItems(ctx,h,color,withAliados){
+  const items=[];
+  if(S.logo){const im=S.logo;items.push({w:h*im.width/im.height,draw:(x,y)=>ctx.drawImage(tinted(im,color),x,y,h*im.width/im.height,h)});}
+  else{ctx.font=`800 ${h*1.18}px ${FF}`;const w=ctx.measureText('upper').width;items.push({w,draw:(x,y)=>{ctx.font=`800 ${h*1.18}px ${FF}`;ctx.fillStyle=color;ctx.textBaseline='middle';ctx.textAlign='left';ctx.fillText('upper',x,y+h*.42);}});}
+  if(withAliados)S.extras.aliados.slice(0,3).forEach(a=>{const im=a.img;const ah=h*.95;items.push({w:ah*im.width/im.height,draw:(x,y)=>ctx.drawImage(a.white?tinted(im,color):im,x,y+(h-ah)/2,ah*im.width/im.height,ah)});});
+  return items;
+}
+function logoRow(ctx,R,x,y,h,maxW,align,color){
+  let items=logoItems(ctx,h,color,true);const gap=h*.9;let tot=items.reduce((a,i)=>a+i.w,0)+gap*(items.length-1);
+  let k=1;if(tot>maxW){k=maxW/tot;}
+  if(k<1){items=logoItems(ctx,h*k,color,true);tot=items.reduce((a,i)=>a+i.w,0)+gap*k*(items.length-1);h=h*k;}
+  let cx=align==='center'?x+(maxW-tot)/2:x;
+  items.forEach((it,i)=>{it.draw(cx,y);cx+=it.w;if(i<items.length-1){ctx.fillStyle=color;ctx.globalAlpha=.85;ctx.fillRect(cx+gap*k/2-Math.max(1,h*.03),y-h*.15,Math.max(2,h*.06),h*1.3);ctx.globalAlpha=1;cx+=gap*k;}});
+  R.logo=true;
+}
+function pill(ctx,R,text,x,y,h,bg,fg,o={}){
+  if(!text)return 0;ctx.font=`${o.weight||700} ${h*.44}px ${FF}`;let fs=h*.44;let w=ctx.measureText(text).width+h*1.1;
+  if(o.maxW&&w>o.maxW){fs=fs*(o.maxW-h*1.1)/(w-h*1.1);ctx.font=`${o.weight||700} ${fs}px ${FF}`;w=o.maxW;if(fs<h*.3)R.checks.push({lvl:'warn',msg:`“${o.label||text}” queda pequeño: acórtalo.`});}
+  const px=o.center?x-w/2:o.right?x-w:x;rr(ctx,px,y,w,h,h/2);ctx.fillStyle=bg;ctx.fill();
+  if(o.stroke){ctx.lineWidth=Math.max(2,h*.04);ctx.strokeStyle=o.stroke;ctx.stroke();}
+  ctx.fillStyle=fg;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,px+w/2,y+h/2+h*.02);
+  R.pairs.push({fg,bg,large:fs>=18,label:o.label||text});return w;
+}
+function arcs(ctx,x,y,r,t,color,a0,a1){ctx.beginPath();ctx.arc(x,y,r,a0,a1);ctx.lineWidth=t;ctx.strokeStyle=color;ctx.lineCap='butt';ctx.stroke();}
+function box(ctx,cx,cy,s){
+  const w=s,h=s*.72,x=cx-w/2,y=cy-h/2+s*.08;
+  ctx.fillStyle=C.amber;ctx.beginPath();ctx.moveTo(x+w*.04,y);ctx.lineTo(x+w*.18,y-s*.2);ctx.lineTo(x+w*.82,y-s*.2);ctx.lineTo(x+w*.96,y);ctx.closePath();ctx.fill();
+  rr(ctx,x,y,w,h,s*.08);ctx.fillStyle='#FFC928';ctx.fill();
+  ctx.fillStyle='#FFE27A';ctx.fillRect(cx-w*.1,y,w*.2,h*.42);
+  ctx.fillStyle=C.navy;ctx.globalAlpha=.9;const bx=cx-w*.22,by=y+h*.55,bw=w*.44,bh=h*.2;rr(ctx,bx,by,bw,bh,bh*.3);ctx.fill();ctx.globalAlpha=1;
+  ctx.fillStyle='#E53935';ctx.beginPath();ctx.arc(x+w*.92,y-s*.12,s*.11,0,Math.PI*2);ctx.fill();
+}
+function contain(ctx,img,x,y,w,h){const k=Math.min(w/img.width,h/img.height);const iw=img.width*k,ih=img.height*k;ctx.drawImage(img,x+(w-iw)/2,y+(h-ih)/2,iw,ih);}
+function visual(ctx,R,cx,cy,r,sc){
+  ctx.fillStyle=sc.vis;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
+  arcs(ctx,cx,cy,r*1.13,r*.09,sc.ring,-Math.PI*.15,Math.PI*.55);
+  if(S.extras.producto)contain(ctx,S.extras.producto,cx-r*.85,cy-r*.85,r*1.7,r*1.7);else box(ctx,cx,cy,r*1.05);
+  R.visual=true;
+}
+function sello(ctx,R,cx,cy,d,sc){
+  if(!S.extras.sello)return;ctx.save();ctx.translate(cx,cy);ctx.rotate(-0.14);
+  const n=14,ro=d/2,ri=d*.44;ctx.beginPath();for(let i=0;i<n*2;i++){const a=i*Math.PI/n;const rad=i%2?ri:ro;ctx.lineTo(Math.cos(a)*rad,Math.sin(a)*rad);}ctx.closePath();ctx.fillStyle=C.yellow;ctx.fill();
+  fit(ctx,R,'sello',S.extras.sello,{x:-d*.33,y:-d*.3,w:d*.66,h:d*.6},{weight:800,max:d*.2,min:d*.08,color:C.navy,align:'center',valign:'middle',upper:true,lh:1,label:'Sello',fg:C.navy,bg:C.yellow});
+  ctx.restore();R.extrasUsed.push('sello');
+}
+let qrCanvasCache={k:'',c:null};
+function qrCanvas(text){
+  if(qrCanvasCache.k===text)return qrCanvasCache.c;if(typeof QRCode==='undefined')return null;
+  const el=document.getElementById('qrTmp');el.innerHTML='';try{new QRCode(el,{text,width:512,height:512,colorDark:C.navy,colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){return null}
+  const c=el.querySelector('canvas');qrCanvasCache={k:text,c};return c;
+}
+function qr(ctx,R,x,y,s,sc){
+  if(!S.extras.qr)return;const c=qrCanvas(S.extras.qr);if(!c){R.checks.push({lvl:'warn',msg:'No se pudo generar el QR.'});return;}
+  rr(ctx,x,y,s,s*1.2,s*.08);ctx.fillStyle='#fff';ctx.fill();ctx.drawImage(c,x+s*.08,y+s*.08,s*.84,s*.84);
+  ctx.fillStyle=C.navy;ctx.font=`700 ${s*.11}px ${FF}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('ESCANEA AQUÍ',x+s/2,y+s*1.07);
+  R.extrasUsed.push('qr');if(s<220)R.checks.push({lvl:'warn',msg:'El QR queda pequeño para leerse impreso a distancia.'});
+}
+
+/* ---------- Layouts ---------- */
+const L={};
+L.cupon=(ctx,W,H,d,sc,R)=>{
+  const wide=W/H>1.6;ctx.fillStyle=sc.bg;ctx.fillRect(0,0,W,H);
+  if(!wide){arcs(ctx,0,H,W*.22,W*.05,sc.ring,-Math.PI/2,0);}
+  const lh=wide?H*.09:H*.055;
+  if(wide)logoRow(ctx,R,W*.2,H*.07,lh,W*.6,'center',C.white);else logoRow(ctx,R,W*.08,H*.065,lh,W*.6,'left',C.white);
+  const card=wide?{x:W*.2,y:H*.25,w:W*.6,h:H*.34}:{x:W*.08,y:H*.2,w:W*.84,h:H*.36};
+  rr(ctx,card.x,card.y,card.w,card.h,card.h*.12);ctx.fillStyle=sc.card;ctx.fill();
+  ctx.save();rr(ctx,card.x,card.y,card.w,card.h,card.h*.12);ctx.clip();
+  arcs(ctx,card.x,card.y,card.h*.32,card.h*.13,sc.ring,0,Math.PI/2);arcs(ctx,card.x+card.w,card.y+card.h,card.h*.32,card.h*.13,sc.ring,Math.PI,Math.PI*1.5);ctx.restore();
+  if(wide){
+    fit(ctx,R,'destacado',d.destacado,{x:card.x+card.w*.08,y:card.y+card.h*.1,w:card.w*.54,h:card.h*.8},{weight:800,max:card.h*.62,min:card.h*.2,color:sc.hi,valign:'middle',align:'right',upper:true,lh:.98,label:'Destacado',fg:sc.hi,bg:sc.card});
+    fit(ctx,R,'titular',d.titular,{x:card.x+card.w*.65,y:card.y+card.h*.14,w:card.w*.3,h:card.h*.72},{weight:800,max:card.h*.24,min:card.h*.1,color:C.white,valign:'middle',upper:true,lh:1,label:'Titular',fg:C.white,bg:sc.card});
+  }else{
+    fit(ctx,R,'destacado',d.destacado,{x:card.x+card.w*.1,y:card.y+card.h*.1,w:card.w*.8,h:card.h*.52},{weight:800,max:card.h*.4,min:card.h*.12,color:sc.hi,valign:'middle',align:'center',upper:true,lh:.98,label:'Destacado',fg:sc.hi,bg:sc.card});
+    fit(ctx,R,'titular',d.titular,{x:card.x+card.w*.1,y:card.y+card.h*.64,w:card.w*.8,h:card.h*.24},{weight:800,max:card.h*.13,min:card.h*.06,color:C.white,valign:'middle',align:'center',upper:true,label:'Titular',fg:C.white,bg:sc.card});
+  }
+  const ph=wide?H*.1:H*.065;
+  if(d.codigo)pill(ctx,R,'CÓDIGO: '+d.codigo,card.x+card.w/2,card.y+card.h-ph*.45,ph,sc.card,C.white,{center:true,stroke:'rgba(255,255,255,.75)',maxW:card.w*.7,label:'Código'});
+  if(wide){
+    const yB=H*.71,hB=H*.13;
+    if(d.fecha)pill(ctx,R,d.fecha,W*.06,yB+hB*.15,hB*.7,sc.chip,C.white,{maxW:W*.24,label:'Fecha'});
+    fit(ctx,R,'subtitulo',d.subtitulo,{x:W*.32,y:yB,w:W*.4,h:hB},{weight:600,max:hB*.36,min:hB*.18,color:C.white,align:'center',valign:'middle',lh:1.15,label:'Subtítulo',fg:C.white,bg:sc.bg});
+    if(S.extras.sello)sello(ctx,R,W*.86,yB+hB*.45,H*.24,sc);
+    else if(S.extras.qr)qr(ctx,R,W*.95-H*.2,H*.6,H*.2,sc);
+    else if(d.cta)pill(ctx,R,d.cta,W*.94,yB+hB*.12,hB*.76,sc.cta,sc.ctaTxt,{right:true,maxW:W*.22,label:'CTA'});
+    if(S.extras.sello&&S.extras.qr)R.checks.push({lvl:'warn',msg:'Esta plantilla admite un solo elemento extra a la vez (sello o QR). Se muestra el sello.'});
+    fit(ctx,R,'legal',d.legal,{x:W*.12,y:H*.885,w:W*.76,h:H*.08},{weight:400,max:H*.032,min:H*.022,color:'rgba(255,255,255,.88)',align:'center',valign:'middle',lh:1.2,maxLines:2,label:'Legal'});
+  }else{
+    fit(ctx,R,'subtitulo',d.subtitulo,{x:W*.1,y:H*.62,w:W*.8,h:H*.11},{weight:600,max:H*.042,min:H*.022,color:C.white,align:'center',valign:'middle',lh:1.2,label:'Subtítulo',fg:C.white,bg:sc.bg});
+    const ry=H*.765,rh=H*.075;let w1=0,w2=0;ctx.font=`700 ${rh*.44}px ${FF}`;
+    const fw=d.fecha?Math.min(W*.4,ctx.measureText(d.fecha).width+rh*1.1):0,cw=d.cta?Math.min(W*.4,ctx.measureText(d.cta).width+rh*1.1):0;const gap=fw&&cw?W*.03:0;let sx=(W-(fw+cw+gap))/2;
+    if(d.fecha){pill(ctx,R,d.fecha,sx,ry,rh,sc.chip,C.white,{maxW:W*.4,label:'Fecha'});sx+=fw+gap;}
+    if(d.cta)pill(ctx,R,d.cta,sx,ry,rh,sc.cta,sc.ctaTxt,{maxW:W*.4,label:'CTA'});
+    if(S.extras.sello)sello(ctx,R,W*.83,H*.12,W*.2,sc);
+    if(S.extras.qr)qr(ctx,R,W*.8,H*.64,W*.15,sc);
+    fit(ctx,R,'legal',d.legal,{x:W*.1,y:H*.885,w:W*.8,h:H*.08},{weight:400,max:H*.02,min:H*.013,color:'rgba(255,255,255,.88)',align:'center',valign:'middle',lh:1.25,maxLines:3,label:'Legal'});
+  }
+  if(S.extras.producto)R.checks.push({lvl:'warn',msg:'Esta plantilla no tiene zona de imagen; la foto de producto no se usa. Prueba “Texto + visual” o una vertical.'});
+};
+L.split=(ctx,W,H,d,sc,R)=>{
+  ctx.fillStyle=sc.bg;ctx.fillRect(0,0,W,H);
+  visual(ctx,R,W*.78,H*.52,H*.34,sc);
+  const x0=W*.06,cw=W*.5;
+  logoRow(ctx,R,x0,H*.08,H*.075,cw,'left',C.white);
+  fit(ctx,R,'destacado',d.destacado,{x:x0,y:H*.21,w:cw,h:H*.25},{weight:800,max:H*.2,min:H*.08,color:sc.hi,valign:'bottom',upper:true,lh:.98,label:'Destacado',fg:sc.hi,bg:sc.bg});
+  fit(ctx,R,'titular',d.titular,{x:x0,y:H*.48,w:cw,h:H*.13},{weight:800,max:H*.065,min:H*.035,color:C.white,valign:'top',upper:true,lh:1.05,label:'Titular',fg:C.white,bg:sc.bg});
+  fit(ctx,R,'subtitulo',d.subtitulo,{x:x0,y:H*.62,w:cw,h:H*.13},{weight:500,max:H*.045,min:H*.026,color:C.white,valign:'top',lh:1.25,label:'Subtítulo',fg:C.white,bg:sc.bg});
+  const py=H*.78,ph=H*.09;let w=0;
+  if(d.cta)w=pill(ctx,R,d.cta,x0,py,ph,sc.cta,sc.ctaTxt,{maxW:cw*.5,label:'CTA'});
+  if(d.codigo)pill(ctx,R,d.codigo,x0+w+(w?W*.015:0),py,ph,'transparent',C.white,{stroke:C.white,maxW:cw*.45,label:'Código',weight:700});
+  if(d.fecha)pill(ctx,R,d.fecha,W*.96,H*.07,H*.075,sc.chip,C.white,{right:true,maxW:W*.3,label:'Fecha'});
+  if(S.extras.sello)sello(ctx,R,W*.62,H*.3,H*.22,sc);
+  if(S.extras.qr)qr(ctx,R,W*.955-H*.22,H*.6,H*.22,sc);
+  fit(ctx,R,'legal',d.legal,{x:x0,y:H*.905,w:W*.88,h:H*.07},{weight:400,max:H*.028,min:H*.018,color:'rgba(255,255,255,.88)',valign:'middle',lh:1.2,maxLines:2,label:'Legal'});
+};
+L.strip=(ctx,W,H,d,sc,R)=>{
+  ctx.fillStyle=sc.bg;ctx.fillRect(0,0,W,H);
+  const p={x:W*.025,y:H*.1,w:W*.36,h:H*.8};rr(ctx,p.x,p.y,p.w,p.h,H*.1);ctx.fillStyle=sc.card;ctx.fill();
+  ctx.save();rr(ctx,p.x,p.y,p.w,p.h,H*.1);ctx.clip();arcs(ctx,p.x+p.w,p.y,p.h*.3,p.h*.11,sc.ring,Math.PI/2,Math.PI);ctx.restore();
+  logoRow(ctx,R,p.x+p.w*.08,p.y+p.h*.12,p.h*.13,p.w*.7,'left',C.white);
+  fit(ctx,R,'destacado',d.destacado,{x:p.x+p.w*.08,y:p.y+p.h*.36,w:p.w*.84,h:p.h*.54},{weight:800,max:p.h*.42,min:p.h*.15,color:sc.hi,valign:'middle',upper:true,lh:.98,label:'Destacado',fg:sc.hi,bg:sc.card});
+  const mx=W*.41,mw=W*.34;
+  fit(ctx,R,'titular',d.titular,{x:mx,y:H*.12,w:mw,h:H*.3},{weight:800,max:H*.13,min:H*.07,color:C.white,valign:'bottom',upper:true,lh:1.02,label:'Titular',fg:C.white,bg:sc.bg});
+  fit(ctx,R,'subtitulo',d.subtitulo,{x:mx,y:H*.45,w:mw,h:H*.24},{weight:500,max:H*.085,min:H*.05,color:C.white,valign:'top',lh:1.2,label:'Subtítulo',fg:C.white,bg:sc.bg});
+  if(d.fecha)pill(ctx,R,d.fecha,mx,H*.71,H*.12,sc.chip,C.white,{maxW:mw,label:'Fecha'});
+  const rx=W*.87;
+  if(S.extras.sello){sello(ctx,R,rx,H*.32,H*.42,sc);}
+  else if(d.cta)pill(ctx,R,d.cta,rx,H*.22,H*.2,sc.cta,sc.ctaTxt,{center:true,maxW:W*.2,label:'CTA'});
+  if(d.codigo)pill(ctx,R,d.codigo,rx,H*.58,H*.16,'transparent',C.white,{center:true,stroke:C.white,maxW:W*.2,label:'Código'});
+  if(S.extras.qr)R.checks.push({lvl:'warn',msg:'La tira compacta no tiene espacio legible para un QR. Usa otra plantilla.'});
+  if(S.extras.producto)R.checks.push({lvl:'warn',msg:'La tira compacta no tiene zona de imagen de producto.'});
+  fit(ctx,R,'legal',d.legal,{x:mx,y:H*.86,w:W*.56,h:H*.11},{weight:400,max:H*.045,min:H*.03,color:'rgba(255,255,255,.88)',valign:'middle',lh:1.15,maxLines:2,label:'Legal'});
+};
+L.stack=(ctx,W,H,d,sc,R,o)=>{
+  ctx.fillStyle=sc.bg;ctx.fillRect(0,0,W,H);
+  arcs(ctx,W,0,W*.22,W*.06,sc.ring,Math.PI/2,Math.PI);
+  const top=H*o.safeTop,A=H*(1-o.safeTop-o.safeBot);let y=top;const pad=W*.08,iw=W-pad*2;
+  const lh=A*.05;logoRow(ctx,R,pad,y,lh,iw*.75,'left',C.white);
+  if(d.fecha)pill(ctx,R,d.fecha,W-pad,y-lh*.1,lh*1.2,sc.chip,C.white,{right:true,maxW:iw*.45,label:'Fecha'});
+  y+=lh+A*.035;
+  const drawVis=()=>{const vh=A*.26;const r=Math.min(vh*.48,iw*.3);visual(ctx,R,W/2,y+vh/2,r,sc);if(S.extras.sello)sello(ctx,R,W/2+r*1.25,y+vh*.25,Math.min(vh*.42,iw*.3),sc);y+=vh+A*.03;};
+  const drawCard=()=>{const ch=A*.27;rr(ctx,pad,y,iw,ch,ch*.1);ctx.fillStyle=sc.card;ctx.fill();
+    ctx.save();rr(ctx,pad,y,iw,ch,ch*.1);ctx.clip();arcs(ctx,pad,y,ch*.3,ch*.11,sc.ring,0,Math.PI/2);arcs(ctx,pad+iw,y+ch,ch*.3,ch*.11,sc.ring,Math.PI,Math.PI*1.5);ctx.restore();
+    fit(ctx,R,'destacado',d.destacado,{x:pad+iw*.08,y:y+ch*.08,w:iw*.84,h:ch*.56},{weight:800,max:ch*.42,min:ch*.12,color:sc.hi,valign:'middle',align:'center',upper:true,lh:.98,label:'Destacado',fg:sc.hi,bg:sc.card});
+    fit(ctx,R,'titular',d.titular,{x:pad+iw*.08,y:y+ch*.66,w:iw*.84,h:ch*.24},{weight:800,max:ch*.13,min:ch*.06,color:C.white,valign:'middle',align:'center',upper:true,label:'Titular',fg:C.white,bg:sc.card});
+    const ph=A*.045;if(d.codigo)pill(ctx,R,'CÓDIGO: '+d.codigo,W/2,y+ch-ph*.45,ph,sc.card,C.white,{center:true,stroke:'rgba(255,255,255,.75)',maxW:iw*.7,label:'Código'});
+    y+=ch+A*.05;};
+  if(o.visualFirst){drawVis();drawCard();}else{drawCard();drawVis();}
+  fit(ctx,R,'subtitulo',d.subtitulo,{x:pad,y,w:iw,h:A*.1},{weight:600,max:A*.032,min:A*.018,color:C.white,align:'center',valign:'middle',lh:1.25,label:'Subtítulo',fg:C.white,bg:sc.bg});y+=A*.115;
+  const rh=A*.065;
+  if(S.extras.qr){const qs=A*.11;const cw=d.cta?pill(ctx,R,d.cta,pad,y+(qs*1.2-rh)/2,rh,sc.cta,sc.ctaTxt,{maxW:iw*.6,label:'CTA'}):0;qr(ctx,R,W-pad-qs,y,qs,sc);y+=qs*1.2+A*.02;}
+  else{if(d.cta)pill(ctx,R,d.cta,W/2,y,rh,sc.cta,sc.ctaTxt,{center:true,maxW:iw*.7,label:'CTA'});y+=rh+A*.03;}
+  const lgH=Math.max(A*.05,top+A-y);
+  fit(ctx,R,'legal',d.legal,{x:pad,y:Math.min(y,top+A-A*.05),w:iw,h:Math.min(lgH,A*.07)},{weight:400,max:A*.017,min:A*.011,color:'rgba(255,255,255,.88)',align:'center',valign:'middle',lh:1.25,maxLines:3,label:'Legal'});
+};
+
+function lum(hex){if(!hex||hex[0]!=='#')return null;const n=parseInt(hex.slice(1),16);const c=[n>>16&255,n>>8&255,n&255].map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*c[0]+.7152*c[1]+.0722*c[2];}
+function ratio(a,b){const A=lum(a),B=lum(b);if(A==null||B==null)return null;return (Math.max(A,B)+.05)/(Math.min(A,B)+.05);}
+
+function render(canvas,tpl,schemeKey,k){
+  const sc=SCHEMES[schemeKey];const W=tpl.w,H=tpl.h;canvas.width=Math.round(W*k);canvas.height=Math.round(H*k);
+  const ctx=canvas.getContext('2d');ctx.setTransform(k,0,0,k,0,0);ctx.clearRect(0,0,W,H);
+  const R={checks:[],pairs:[],extrasUsed:[],logo:false,visual:false};
+  L[tpl.layout](ctx,W,H,S.copy,sc,R,tpl.opt||{});
+  // Revisión automática de marca
+  const out=[];const lim={...LIMITS[tpl.layout],...COMMON};
+  ['destacado','titular','subtitulo','cta','codigo','fecha','legal'].forEach(f=>{const v=S.copy[f]||'';if(v.length>lim[f])out.push({lvl:'warn',msg:`${f[0].toUpperCase()+f.slice(1)}: ${v.length}/${lim[f]} caracteres.`});});
+  if(/\p{Extended_Pictographic}/u.test(Object.values(S.copy).join(' ')))out.push({lvl:'warn',msg:'Hay emojis en la pieza. En gráficas no se usan; van en el mensaje de WhatsApp.'});
+  const bad=R.pairs.filter(p=>{const r=ratio(p.fg,p.bg);return r!=null&&r<(p.large?3:4.5)});
+  out.push(bad.length?{lvl:'warn',msg:'Contraste bajo en: '+[...new Set(bad.map(b=>b.label))].join(', ')+'.'}:{lvl:'ok',msg:'Contraste de textos dentro de la norma (WCAG AA).'});
+  out.push(R.logo?{lvl:'ok',msg:S.logo?'Logo oficial presente.':'Logo presente (provisional: carga el oficial en Kit de marca).'}:{lvl:'bad',msg:'Falta el logo.'});
+  if(!S.copy.destacado&&!S.copy.titular)out.push({lvl:'bad',msg:'La pieza no tiene mensaje principal.'});
+  if(curFormat().print)out.push({lvl:'ok',msg:'Exporta a 300 dpi con 3 mm de sangrado.'});
+  if(tpl.id==='estado')out.push({lvl:'ok',msg:'Textos fuera de las zonas que tapa la interfaz de WhatsApp.'});
+  const fitBad=R.checks;const fitOk=!fitBad.some(c=>c.lvl==='bad');
+  if(fitOk)out.unshift({lvl:'ok',msg:'Todos los textos caben en su zona.'});
+  return [...fitBad,...out];
+}
+
+/* ===================== UI ===================== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const STEPS=['Requerimiento','Formato','Mensaje','Extras','Propuestas'];
+let sample=null,downloads=null;
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600);}
+
+function drawSteps(){
+  $('#steps').innerHTML=STEPS.map((n,i)=>`<button class="step ${i+1===S.step?'on':i+1<S.step?'done':''}" data-s="${i+1}" ${i+1===S.step?'aria-current="step"':''}><span>Paso ${i+1}</span><b>${n}</b></button>`).join('');
+  $('#steps').querySelectorAll('.step').forEach(b=>b.onclick=()=>go(+b.dataset.s));
+}
+function go(n){S.step=Math.max(1,Math.min(5,n));drawSteps();drawMain();drawLive();window.scrollTo({top:0,behavior:'smooth'});}
+function navHtml(nextLabel){return `<div class="nav">${S.step>1?'<button class="btn" id="prev">Atrás</button>':'<span></span>'}${S.step<5?`<button class="btn primary" id="next">${nextLabel||'Siguiente'}</button>`:'<button class="btn" id="restart">Nueva pieza</button>'}</div>`;}
+function bindNav(){$('#prev')&&($('#prev').onclick=()=>go(S.step-1));$('#next')&&($('#next').onclick=()=>go(S.step+1));$('#restart')&&($('#restart').onclick=()=>{S.optSel=-1;S.opciones=[];S.evalr=null;S.extrasAI=null;go(1);});}
+
+function drawLive(){
+  const aside=$('#aside');aside.hidden=S.step===1||S.step===5;if(aside.hidden){$('.grid').style.gridTemplateColumns='1fr';return;}
+  $('.grid').style.gridTemplateColumns='';
+  const t=curTpl();const cv=$('#live');const k=Math.min(1,900/Math.max(t.w,t.h));
+  const checks=render(cv,t,'A',k);
+  $('#liveName').innerHTML=`<span class="pill">${esc(curFormat().label)}</span> ${esc(t.name)}`;$('#liveDim').textContent=`${t.w}×${t.h}px`;
+  $('#liveChecks').innerHTML=checks.map(c=>`<li class="${c.lvl}">${esc(c.msg)}</li>`).join('');
+}
+
+/* ---------- Paso 1 ---------- */
+function step1(){
+  const r=S.req;
+  return `<h2>Requerimiento</h2><p class="lead">Cuéntale a la plataforma qué necesitas comunicar. ${isExample()?'<span class="pill">Ejemplo cargado: reemplázalo con tu caso</span>':''}</p>
+  <div class="fields">
+    <label class="f">Nombre de la campaña<input type="text" id="r_campana" value="${esc(r.campana)}"></label>
+    <label class="f">Objetivo<select id="r_objetivo">${['Activación','Retención','Activación y retención','Referidos','Promoción con aliado','Informativo'].map(o=>`<option ${o===r.objetivo?'selected':''}>${o}</option>`).join('')}</select></label>
+    <label class="f">Canal<select id="r_canal">${Object.entries(FORMATS).map(([k,f])=>`<option value="${k}" ${k===r.canal?'selected':''}>${f.canal}</option>`).join('')}</select></label>
+    <label class="f">Vigencia<input type="text" id="r_vigencia" value="${esc(r.vigencia)}" placeholder="Ej. Del 23 al 26 de junio"></label>
+    <label class="f full">Qué necesitas comunicar y a quién<textarea id="r_descripcion" rows="4">${esc(r.descripcion)}</textarea><span class="hint">Incluye segmento, incentivo, tienda o aliado y cualquier restricción.</span></label>
+  </div>${navHtml('Elegir formato')}`;
+}
+function bind1(){
+  ['campana','vigencia','descripcion'].forEach(k=>$('#r_'+k).oninput=e=>S.req[k]=e.target.value);
+  $('#r_objetivo').onchange=e=>S.req.objetivo=e.target.value;
+  $('#r_canal').onchange=e=>{S.req.canal=e.target.value;S.formato=e.target.value;S.tpl=FORMATS[S.formato].templates[0].id;};
+  $('#next').onclick=()=>{if(!S.copy.fecha&&S.req.vigencia)S.copy.fecha=S.req.vigencia;go(2);};
+}
+
+/* ---------- Paso 2 ---------- */
+function step2(){
+  const f=curFormat();
+  return `<h2>Formato y plantilla</h2><p class="lead">Elige el formato de ejecución y una de sus tres plantillas. Cada una cambia composición y medidas, pero comparte colores, tipografía y reglas de Upper.</p>
+  <div class="fields"><label class="f">Formato de ejecución<select id="fmt">${Object.entries(FORMATS).map(([k,v])=>`<option value="${k}" ${k===S.formato?'selected':''}>${v.label} · ${v.canal}</option>`).join('')}</select></label>
+  <div class="f" style="justify-content:flex-end"><span class="hint">${f.print?'Salida para imprenta (PNG 300 dpi con sangrado).':'Salida digital en PNG a tamaño real.'}</span></div></div>
+  <div class="tpls" style="margin-top:16px">${f.templates.map(t=>`<button class="tpl ${t.id===S.tpl?'sel':''}" data-t="${t.id}" aria-pressed="${t.id===S.tpl}"><div class="thumb"><canvas data-th="${t.id}"></canvas></div><b>${esc(t.name)}</b><span class="dim">${t.w}×${t.h}px</span><p>${esc(t.desc)}</p></button>`).join('')}</div>
+  ${navHtml('Escribir mensaje')}`;
+}
+function bind2(){
+  $('#fmt').onchange=e=>{S.formato=e.target.value;S.tpl=FORMATS[S.formato].templates[0].id;drawMain();drawLive();};
+  curFormat().templates.forEach(t=>{const c=document.querySelector(`canvas[data-th="${t.id}"]`);render(c,t,'A',Math.min(.4,320/Math.max(t.w,t.h)));});
+  document.querySelectorAll('.tpl').forEach(b=>b.onclick=()=>{S.tpl=b.dataset.t;drawMain();drawLive();});
+}
+
+/* ---------- Paso 3 ---------- */
+const FIELDS=[['destacado','Destacado (lo más grande)','Ej. $10 OFF, 1 LIBRA GRATIS'],['titular','Titular','Frase corta que acompaña'],['subtitulo','Subtítulo','Beneficio o explicación'],['cta','Llamado a la acción','Verbo + acción'],['codigo','Código promocional','Opcional'],['fecha','Fecha / vigencia','Opcional'],['legal','Texto legal','Términos y condiciones']];
+function limitsNow(){return {...LIMITS[curTpl().layout],...COMMON};}
+function step3(){
+  const lim=limitsNow();const ai=sample?'':'<p class="status">La validación con Claude se activa al abrir esta página en claude.ai. Mientras tanto, la revisión de marca funciona igual en la vista previa.</p>';
+  return `<h2>Mensaje</h2><p class="lead">Escribe tu propuesta con tus palabras. Claude la evalúa con las reglas de tono de Upper y propone tres versiones que caben en la plantilla elegida.</p>
+  <label class="f">Tu propuesta de mensaje<textarea id="prop" rows="3">${esc(S.propuesta)}</textarea></label>
+  <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap"><button class="btn primary" id="val" ${sample?'':'disabled'}>Validar con Claude</button><button class="btn" id="stop" hidden>Detener</button></div>
+  <div class="status" id="st"></div>${ai}
+  <div id="aiOut">${aiHtml()}</div>
+  <div class="ai"><h3>Copy final de la pieza <span class="note">Edita libremente; la vista previa se actualiza</span></h3>
+  <div class="fields">${FIELDS.map(([k,l,ph])=>`<label class="f ${k==='subtitulo'||k==='legal'?'full':''}">${l}<input type="text" id="c_${k}" value="${esc(S.copy[k])}" placeholder="${ph}"><span class="counter" id="n_${k}"></span></label>`).join('')}
+  ${S.formato==='wa'?`<label class="f full">Mensaje que acompaña la imagen en WhatsApp<textarea id="c_wa" rows="3" placeholder="Aquí sí van emojis">${esc(S.waMsg)}</textarea></label>`:''}</div></div>
+  ${navHtml('Agregar extras')}`;
+}
+function aiHtml(){
+  if(!S.evalr&&!S.opciones.length)return '';
+  const e=S.evalr||{};
+  return `<div class="ai"><h3>Evaluación de tu propuesta <span class="score">${esc(e.puntaje??'–')}<small style="font-size:13px;color:var(--muted)">/10</small></span></h3>
+  ${e.fortalezas?.length?`<b style="font-size:12px">Funciona</b><ul class="plain">${e.fortalezas.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+  ${e.problemas?.length?`<b style="font-size:12px;display:block;margin-top:6px">Ajustar</b><ul class="plain">${e.problemas.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+  <div class="opts">${S.opciones.map((o,i)=>`<div class="opt ${i===S.optSel?'sel':''}"><span class="tag">${esc(o.enfoque||'Opción '+(i+1))}</span><div class="d">${esc(o.destacado)}</div><div class="t">${esc(o.titular)}</div><div class="s">${esc(o.subtitulo)}</div><div class="c">CTA: ${esc(o.cta)}</div><button class="btn ${i===S.optSel?'primary':''}" data-o="${i}">${i===S.optSel?'En uso':'Usar esta'}</button></div>`).join('')}</div></div>`;
+}
+function counters(){const lim=limitsNow();FIELDS.forEach(([k])=>{const n=$('#n_'+k);if(!n)return;const l=(S.copy[k]||'').length;n.textContent=`${l}/${lim[k]}`;n.classList.toggle('over',l>lim[k]);});}
+let ctl=null;
+function bind3(){
+  $('#prop').oninput=e=>S.propuesta=e.target.value;
+  FIELDS.forEach(([k])=>$('#c_'+k).oninput=e=>{S.copy[k]=e.target.value;counters();drawLive();});
+  $('#c_wa')&&($('#c_wa').oninput=e=>S.waMsg=e.target.value);
+  counters();bindOpts();
+  $('#val').onclick=validate;$('#stop').onclick=()=>ctl?.abort();
+}
+function bindOpts(){document.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{const o=S.opciones[+b.dataset.o];S.optSel=+b.dataset.o;['destacado','titular','subtitulo','cta'].forEach(k=>S.copy[k]=o[k]||'');if(o.legal)S.copy.legal=o.legal;if(o.mensajeWhatsApp)S.waMsg=o.mensajeWhatsApp;drawMain();drawLive();});}
+const VOICE=`Upper es el courier internacional líder en Ecuador: el usuario compra en tiendas de USA (Amazon, SHEIN, TEMU, Apple...) y Upper se lo trae en 7 días.
+Tono: joven, directo, cómplice y con energía; suena a alguien que te da un tip, no a una empresa.
+Reglas: tuteo siempre (nunca "usted"); verbos de acción inmediata (Compra ya, Aprovecha, Tráelo, Usa el código, Refiere); urgencia real con fecha si hay límite; "en 7 días" como diferenciador cuando aplique; sin jerga logística en piezas de marketing; prohibido "Te invitamos a", "Puedes", "Recuerda que puedes".
+En la PIEZA GRÁFICA no van emojis. Los emojis solo van en el mensaje de WhatsApp que acompaña la imagen.`;
+async function validate(){
+  const st=$('#st');const t=curTpl();const lim=limitsNow();
+  const prompt=`${VOICE}
+
+Tarea: evalúa la propuesta de mensaje y escribe 3 opciones de copy para una pieza gráfica.
+Campaña: ${S.req.campana}
+Objetivo: ${S.req.objetivo}
+Canal: ${curFormat().canal} — formato ${curFormat().label}, plantilla "${t.name}" (${t.w}×${t.h}px)
+Contexto del requerimiento: ${S.req.descripcion}
+Vigencia: ${S.req.vigencia||'no indicada'}
+Código promocional actual: ${S.copy.codigo||'ninguno'}
+Propuesta del usuario: """${S.propuesta}"""
+
+Límites ESTRICTOS de caracteres (cuenta espacios): destacado ≤ ${lim.destacado} (lo más grande: cifra u oferta, ej "$10 OFF", "1 LIBRA GRATIS"), titular ≤ ${lim.titular}, subtitulo ≤ ${lim.subtitulo}, cta ≤ ${lim.cta}, legal ≤ ${lim.legal}.
+Las 3 opciones deben tener enfoques distintos (por ejemplo: directo a la oferta, urgencia, cómplice/sorpresa). Mantén la oferta y los datos reales de la propuesta; no inventes descuentos, montos ni fechas.
+${S.formato==='wa'?'Incluye en cada opción "mensajeWhatsApp": 1-2 líneas para enviar junto a la imagen, con emojis y CTA "Mira aquí"/"Descubre aquí".':''}
+
+Responde SOLO con JSON con esta forma:
+{"evaluacion":{"puntaje":0-10,"fortalezas":["..."],"problemas":["..."]},"opciones":[{"enfoque":"2-3 palabras","destacado":"","titular":"","subtitulo":"","cta":"","legal":""${S.formato==='wa'?',"mensajeWhatsApp":""':''}}]}`;
+  $('#val').disabled=true;$('#stop').hidden=false;st.className='status';st.textContent='Claude está revisando tu mensaje…';
+  ctl=new AbortController();
+  try{
+    const r=await sample.json(prompt,{signal:ctl.signal,modelTier:'default'});
+    if(!r||!Array.isArray(r.opciones))throw{code:'invalid_json'};
+    S.evalr=r.evaluacion||null;S.opciones=r.opciones.slice(0,3).map(o=>{const c={...o};['destacado','titular','subtitulo','cta','legal'].forEach(k=>{if(c[k]&&c[k].length>lim[k])c[k]=c[k].slice(0,lim[k]).trim();});return c;});S.optSel=-1;
+    $('#aiOut').innerHTML=aiHtml();bindOpts();st.textContent='Listo. Elige una opción o edita el copy final.';
+  }catch(e){st.className='status err';st.textContent=errMsg(e);}
+  finally{$('#val').disabled=false;$('#stop').hidden=true;}
+}
+function errMsg(e){const m={cancelled:'Revisión detenida.',not_granted:'No se dio permiso para usar Claude en esta página. Puedes escribir el copy a mano.',rate_limited:'Demasiadas consultas seguidas. Espera un minuto y vuelve a intentar.',invalid_json:'Claude respondió en un formato inesperado. Vuelve a intentarlo.'};return m[e?.code]||'No se pudo completar la consulta. Vuelve a intentarlo.';}
+
+/* ---------- Paso 4 ---------- */
+function step4(){
+  const x=S.extras;const a=S.extrasAI;
+  return `<h2>Elementos adicionales</h2><p class="lead">Pide lo que la plantilla base no trae. Claude lo interpreta con el criterio de diseño de Upper: lo que encaja se ubica en zonas reservadas y lo que rompe la marca se rechaza con una alternativa.</p>
+  <label class="f">¿Qué más necesitas en la pieza?<textarea id="cas" rows="3" placeholder="Ej. Agregar logo de Banco Pichincha, un sello de 'Solo por 72 horas' y un QR a upper.ec/blackfriday">${esc(S.casilla)}</textarea></label>
+  <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap"><button class="btn primary" id="interp" ${sample?'':'disabled'}>Interpretar con Claude</button></div>
+  <div class="status" id="st4"></div>
+  ${a?`<div class="ai"><h3>Criterio aplicado</h3>${a.aceptados?.length?`<b style="font-size:12px">Se agregó</b><ul class="plain">${a.aceptados.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}${a.rechazados?.length?`<b style="font-size:12px;display:block;margin-top:6px">No se aplicó</b><ul class="plain">${a.rechazados.map(r=>`<li><b>${esc(r.pedido)}</b>: ${esc(r.motivo)}${r.alternativa?` <span class="note">→ ${esc(r.alternativa)}</span>`:''}</li>`).join('')}</ul>`:''}${a.faltan?.length?`<b style="font-size:12px;display:block;margin-top:6px">Falta que subas</b><ul class="plain">${a.faltan.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}</div>`:''}
+  <div class="ai"><h3>Elementos permitidos <span class="note">Zonas reservadas en cada plantilla</span></h3>
+  <div class="fields">
+    <label class="f">Logos de aliados (máx. 3)<input type="file" id="ali" accept="image/png,image/svg+xml,image/webp,image/jpeg" multiple><span class="hint">Se ubican junto al logo de Upper, separados por línea. PNG o SVG transparente.</span><div class="files" id="aliList">${x.aliados.map((al,i)=>`<span class="fileitem"><img src="${al.img.src}" alt=""> ${esc(al.name.slice(0,18))} <label style="display:flex;gap:3px;align-items:center"><input type="checkbox" data-w="${i}" ${al.white?'checked':''}>blanco</label><button data-rm="${i}" aria-label="Quitar">×</button></span>`).join('')}</div></label>
+    <label class="f">Imagen de producto<input type="file" id="prod" accept="image/png,image/webp,image/jpeg"><span class="hint">Reemplaza la caja Upper en plantillas con visual. Ideal: PNG recortado.</span><div class="files">${x.producto?`<span class="fileitem"><img src="${x.producto.src}" alt=""> producto <button id="rmProd" aria-label="Quitar">×</button></span>`:''}</div></label>
+    <label class="f">Sello / badge<input type="text" id="e_sello" value="${esc(x.sello)}" placeholder="Ej. Solo 72 horas"><span class="counter" id="n_sello"></span></label>
+    <label class="f">QR (enlace)<input type="text" id="e_qr" value="${esc(x.qr)}" placeholder="https://..."></label>
+  </div></div>
+  ${navHtml('Ver propuestas')}`;
+}
+function readImg(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=fr.result;};fr.onerror=rej;fr.readAsDataURL(file);});}
+function bind4(){
+  $('#cas').oninput=e=>S.casilla=e.target.value;
+  $('#interp').onclick=interpret;
+  const sl=()=>{const n=$('#n_sello');const l=S.extras.sello.length;n.textContent=`${l}/${COMMON.sello}`;n.classList.toggle('over',l>COMMON.sello);};sl();
+  $('#e_sello').oninput=e=>{S.extras.sello=e.target.value;sl();drawLive();};
+  $('#e_qr').oninput=e=>{S.extras.qr=e.target.value.trim();drawLive();};
+  $('#ali').onchange=async e=>{for(const f of [...e.target.files]){if(S.extras.aliados.length>=3){toast('Máximo 3 aliados por pieza.');break;}try{S.extras.aliados.push({img:await readImg(f),name:f.name.replace(/\.\w+$/,''),white:true});}catch{toast('No se pudo leer '+f.name);}}drawMain();drawLive();};
+  $('#prod').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{S.extras.producto=await readImg(f);}catch{toast('No se pudo leer la imagen.');}drawMain();drawLive();};
+  $('#rmProd')&&($('#rmProd').onclick=()=>{S.extras.producto=null;drawMain();drawLive();});
+  document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{S.extras.aliados.splice(+b.dataset.rm,1);drawMain();drawLive();});
+  document.querySelectorAll('[data-w]').forEach(c=>c.onchange=()=>{S.extras.aliados[+c.dataset.w].white=c.checked;drawLive();});
+}
+async function interpret(){
+  const st=$('#st4');if(!S.casilla.trim()){st.className='status err';st.textContent='Escribe primero qué quieres agregar.';return;}
+  const t=curTpl();
+  const prompt=`Eres el director de arte de Upper (courier, Ecuador). Interpreta un pedido de elementos extra para una pieza ya diseñada con plantilla fija.
+Plantilla: ${curFormat().label} — "${t.name}" (${t.w}×${t.h}px). Copy actual: destacado "${S.copy.destacado}", titular "${S.copy.titular}".
+Archivos ya subidos: aliados [${S.extras.aliados.map(a=>a.name).join(', ')||'ninguno'}], imagen de producto: ${S.extras.producto?'sí':'no'}.
+
+Sistema de diseño (NO negociable): paleta solo azul #027BFF, navy #111D32, lima #C1F598, amarillo #FFD21F, ámbar #F5AC00; tipografía única Poppins; logo de Upper siempre visible y sin deformar; sin emojis en la gráfica; sin fondos fotográficos completos; máximo 3 logos de aliados; un solo sello por pieza.
+Elementos que la plataforma SÍ puede agregar en zonas reservadas:
+- sello: texto corto ≤ ${COMMON.sello} caracteres en un badge amarillo
+- qr: una URL
+- fecha: ≤ ${COMMON.fecha} caracteres
+- codigo: código promocional ≤ ${COMMON.codigo} caracteres
+- legal: ≤ ${COMMON.legal} caracteres
+- logos de aliados e imagen de producto: solo si el usuario los sube como archivo (si los pide y no están, ponlos en "faltan").
+Todo lo demás (cambiar colores, otras fuentes, mover el logo, fondos con foto, ilustraciones nuevas, más de 3 logos, animaciones) se rechaza con motivo breve y una alternativa dentro del sistema.
+
+Pedido: """${S.casilla}"""
+
+Responde SOLO JSON: {"sello":"" o null,"qr":"" o null,"fecha":"" o null,"codigo":"" o null,"legal":"" o null,"aceptados":["frase corta de lo aplicado"],"rechazados":[{"pedido":"","motivo":"","alternativa":""}],"faltan":["archivo que debe subir"]}`;
+  $('#interp').disabled=true;st.className='status';st.textContent='Claude está revisando el pedido con el criterio de marca…';
+  try{
+    const r=await sample.json(prompt,{modelTier:'default'});
+    if(r.sello)S.extras.sello=String(r.sello).slice(0,COMMON.sello);
+    if(r.qr)S.extras.qr=String(r.qr);
+    ['fecha','codigo','legal'].forEach(k=>{if(r[k])S.copy[k]=String(r[k]).slice(0,COMMON[k]);});
+    S.extrasAI={aceptados:r.aceptados||[],rechazados:r.rechazados||[],faltan:r.faltan||[]};
+    drawMain();drawLive();
+  }catch(e){st.className='status err';st.textContent=errMsg(e);$('#interp').disabled=false;}
+}
+
+/* ---------- Paso 5 ---------- */
+function step5(){
+  const t=curTpl();
+  return `<h2>Propuestas</h2><p class="lead">Dos opciones con el mismo copy, formato y canal, en las dos combinaciones de color aprobadas. Revisa los controles de marca y exporta la que elijas.</p>
+  <div class="final">${['A','B'].map(k=>`<div class="card"><h3>Opción ${k} <span class="pill">${SCHEMES[k].name}</span></h3><div class="stage"><canvas id="f_${k}"></canvas></div><ul class="checks" id="fc_${k}"></ul><button class="btn primary" data-ex="${k}">Exportar opción ${k} · ${t.w}×${t.h} PNG</button><div class="status" id="fs_${k}"></div></div>`).join('')}</div>
+  ${S.formato==='wa'&&S.waMsg?`<div class="ai"><h3>Mensaje para enviar con la imagen <button class="btn" id="cpwa">Copiar</button></h3><div class="wa" id="watext">${esc(S.waMsg)}</div></div>`:''}
+  ${navHtml()}`;
+}
+function bind5(){
+  const t=curTpl();
+  ['A','B'].forEach(k=>{const c=$('#f_'+k);const ch=render(c,t,k,Math.min(1,1100/Math.max(t.w,t.h)));$('#fc_'+k).innerHTML=ch.map(x=>`<li class="${x.lvl}">${esc(x.msg)}</li>`).join('');});
+  document.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>exportPng(b.dataset.ex));
+  $('#cpwa')&&($('#cpwa').onclick=async()=>{try{await navigator.clipboard.writeText(S.waMsg);toast('Mensaje copiado');}catch{const r=document.createRange();r.selectNodeContents($('#watext'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Texto seleccionado: cópialo');}});
+}
+function slug(s){return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)||'pieza';}
+async function exportPng(k){
+  const t=curTpl();const c=document.createElement('canvas');render(c,t,k,1);const st=$('#fs_'+k);
+  const name=`upper_${slug(S.req.campana)}_${S.formato}_${t.id}_opcion-${k}.png`;
+  const blob=await new Promise(r=>c.toBlob(r,'image/png'));
+  if(downloads){try{await downloads.save({filename:name,data:blob});st.className='status';st.textContent='Exportado: '+name;return;}catch(e){if(e?.code==='cancelled'||e?.code==='declined'){st.textContent='Exportación cancelada.';return;}}}
+  const url=URL.createObjectURL(blob);st.className='status';st.innerHTML=`Descarga directa no disponible aquí. Haz clic derecho en la imagen y elige “Guardar imagen”.<br><img class="out" src="${url}" alt="Opción ${k} a tamaño real" style="margin-top:8px">`;
+}
+
+/* ---------- Main ---------- */
+function drawMain(){
+  const m=$('#main');m.innerHTML=[step1,step2,step3,step4,step5][S.step-1]();
+  bindNav();[bind1,bind2,bind3,bind4,bind5][S.step-1]();
+}
+function drawKit(){
+  $('#swatches').innerHTML=PALETTE.map(([n,h])=>`<div class="sw"><i style="background:${h}"></i>${n}<br>${h}</div>`).join('');
+  $('#logoPrev').innerHTML=S.logo?`<span class="fileitem"><img src="${S.logo.src}" alt="Logo cargado"> Logo oficial <button id="rmLogo" aria-label="Quitar logo">×</button></span>`:'';
+  $('#rmLogo')&&($('#rmLogo').onclick=()=>{S.logo=null;try{localStorage.removeItem('upper_logo')}catch{}drawKit();drawLive();if(S.step===2||S.step===5)drawMain();});
+}
+$('#kitBtn').onclick=()=>{const k=$('#kit');k.hidden=!k.hidden;$('#kitBtn').setAttribute('aria-expanded',String(!k.hidden));};
+$('#logoIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const im=await readImg(f);S.logo=im;try{localStorage.setItem('upper_logo',im.src)}catch{}tintCache.clear();drawKit();drawLive();if(S.step===2||S.step===5)drawMain();toast('Logo cargado en todas las plantillas');}catch{toast('No se pudo leer el archivo.');}};
+
+(async()=>{
+  try{const s=localStorage.getItem('upper_logo');if(s){const im=new Image();im.src=s;await im.decode();S.logo=im;}}catch{}
+  try{await Promise.all([400,500,600,700,800].map(w=>document.fonts.load(`${w} 40px Poppins`)));}catch{}
+  drawKit();drawSteps();drawMain();drawLive();
+  if(window.claude?.use){
+    claude.use('sample').then(s=>{sample=s;if(s&&(S.step===3||S.step===4))drawMain();}).catch(()=>{});
+    claude.use('downloads').then(d=>{downloads=d;}).catch(()=>{});
+  }
+})();
+</script>
+
+</body></html>

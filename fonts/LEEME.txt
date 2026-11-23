@@ -1,0 +1,7 @@
+Tipografías de Upper que usa la app:
+
+  Noland-Bold.otf            titulares (siempre en mayúsculas)
+  RethinkSans-Variable.ttf   cuerpo, botones y etiquetas (todos los pesos)
+  Noland-Variable.ttf        reserva, no se usa todavía
+
+Si se reemplaza un archivo, mantener el mismo nombre. Si falta alguno, la app usa Anton o Lexend y lo avisa en cada pieza.
