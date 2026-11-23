@@ -6,7 +6,7 @@ Antes de cambiar algo, lee esta guía completa. Las decisiones de abajo las tom�
 
 ## Flujo (orden fijo)
 1. **Requerimiento:** país (Ecuador o Colombia), campaña, objetivo, canal, vigencia y descripción.
-2. **Formato:** formato y una de sus 3 composiciones. Cada una muestra un **mockup de ejemplo** (mensaje de muestra `SAMPLE`, en su contexto: app, feed, chat, historia, mostrador o vitrina) y, opcionalmente, su **esquema neutro**. El diseño con el copy del ejecutor solo se ve en el paso 4.
+2. **Formato:** formato y una de sus 3 composiciones. Cada una muestra un **mockup de ejemplo** (mensaje de muestra `SAMPLE`, en su contexto: app, feed, chat, historia, mostrador o vitrina) y, opcionalmente, su **esquema neutro**. El mockup de Banner in-app recrea la pantalla de inicio real de la app (`drawAppHome`, referencia en `docs/referencias/app-inicio-ecuador.png`) y cambia textos y casilleros según el país. El diseño con el copy del ejecutor solo se ve en el paso 4.
 3. **Mensaje:** el ejecutor escribe su propuesta → "Validar con Claude" evalúa y **completa los 5 campos del copy** (marcados "Completado por Claude"; la marca desaparece al editarlos) y ofrece 2 versiones alternativas. Al costado, solo la revisión de reglas de texto.
 4. **Diseño**, en este orden: propuesta inicial (vista previa grande) → Visual de la pieza → "¿Qué más necesita la pieza?" (pedido abierto que Claude interpreta) → Elementos permitidos → Revisión de marca.
 5. **Descarga:** las dos combinaciones de color, PNG por pieza y kit .zip de 12 formatos con `revision.txt`.
