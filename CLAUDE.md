@@ -6,7 +6,7 @@ Antes de cambiar algo, lee esta guía completa. Las decisiones de abajo las tom�
 
 ## Flujo (orden fijo)
 1. **Requerimiento:** país (Ecuador o Colombia), campaña, objetivo, canal, vigencia y descripción.
-2. **Formato:** formato y una de sus 3 composiciones. Se muestran **esquemas neutros**, nunca el diseño con copy: el diseño condiciona la ejecución y solo se ve en el paso 4.
+2. **Formato:** formato y una de sus 3 composiciones. Cada una muestra un **mockup de ejemplo** (mensaje de muestra `SAMPLE`, en su contexto: app, feed, chat, historia, mostrador o vitrina) y, opcionalmente, su **esquema neutro**. El diseño con el copy del ejecutor solo se ve en el paso 4.
 3. **Mensaje:** el ejecutor escribe su propuesta → "Validar con Claude" evalúa y **completa los 5 campos del copy** (marcados "Completado por Claude"; la marca desaparece al editarlos) y ofrece 2 versiones alternativas. Al costado, solo la revisión de reglas de texto.
 4. **Diseño**, en este orden: propuesta inicial (vista previa grande) → Visual de la pieza → "¿Qué más necesita la pieza?" (pedido abierto que Claude interpreta) → Elementos permitidos → Revisión de marca.
 5. **Descarga:** las dos combinaciones de color, PNG por pieza y kit .zip de 12 formatos con `revision.txt`.
@@ -29,7 +29,7 @@ Antes de cambiar algo, lee esta guía completa. Las decisiones de abajo las tom�
 - Panel "Conocimiento de marca" con dos pestañas: Ecuador y Colombia. Base inicial en `KB_DEFAULT` (`index.html`), tomada de upper.com.ec/ayudaecuador y upperlogistics.com/es/ayuda; copia de referencia en `docs/conocimiento/`.
 - El país del Requerimiento decide qué conocimiento y qué reglas aplica Claude: `knowledgeBlock()` se agrega a los prompts de validar mensaje, revisar tono e interpretar pedidos. Claude no debe afirmar datos que no estén ahí.
 - Diferencias clave: Ecuador tiene bodegas en Miami y Madrid, tarifas con "+ IVA", tasa de USD 20 por orden (la cobra el gobierno), 4x4 y retiro en 4 agencias (domicilio cuesta USD 3,50 + IVA). Colombia solo tiene bodega en Miami (Doral), USD 5 por libra con entrega a la puerta incluida e impuestos desde USD 200.
-- Tiempos de Ecuador: la portada de ayuda dice "5 a 7 días hábiles" y la respuesta detallada "7 a 10 días hábiles desde Miami". Se usa 7 a 10 hasta que el equipo confirme. Ya no se promete "en 7 días" fijo.
+- Tiempos de Ecuador: el dato operativo es de 7 a 10 días hábiles desde Miami (confirmado por el equipo). "En 7 días" se mantiene como claim de marketing aprobado para Ecuador; en Colombia solo se usan los tiempos publicados.
 - Lo editado se guarda compartido: `config/conocimiento` en el artifact y `conocimiento.json` en `DATA_DIR`. Los cambios quedan en el historial.
 
 ## Revisión de marca
@@ -51,6 +51,5 @@ Antes de cambiar algo, lee esta guía completa. Las decisiones de abajo las tom�
 - ¿Suavizar una regla del brandbook debe requerir aprobación de un rol de marca?
 - Severidades por defecto y el límite de 30 palabras están por validar con el equipo.
 - Imprenta: marcas de corte, PDF y zona de sangrado visible.
-- Confirmar con el equipo el tiempo de entrega de Ecuador (5 a 7 o 7 a 10 días hábiles) y si se mantiene el claim "en 7 días" del skill de tono.
 - Formatos por sumar: header de newsletter, banners de anuncios de la app y piezas animadas.
 - La composición "Welcome to the Upper Club" (páginas 3 y 4 del .ai) no se usa todavía.

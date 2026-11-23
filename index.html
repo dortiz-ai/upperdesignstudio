@@ -120,6 +120,9 @@ img.out{max-width:100%;border-radius:4px;margin-top:8px}
 .adapt{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:12px}
 .ad{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--panel);display:flex;flex-direction:column;gap:6px;min-width:0}
 .ad .thumb{height:150px}
+.thumb.mock{height:auto;aspect-ratio:600/420;padding:0}
+.thumb.mock canvas{max-height:none;width:100%;height:auto;border-radius:10px}
+.mock-tag{font-size:11px;color:var(--muted);letter-spacing:.02em}
 .ad b{font-size:13px}
 .ad .flag{font-size:12px}
 .ad .flag.warn{color:var(--warn)} .ad .flag.bad{color:var(--bad)} .ad .flag.ok{color:var(--ok)}
@@ -624,7 +627,7 @@ const BRAND_RULES=[
   {id:'d_verbs',kind:'do',check:'ai',sev:'warn',text:'CTA con verbo de acción inmediata: Compra ya, Aprovecha, Tráelo, Usa el código, Refiere.'},
   {id:'d_title_alone',kind:'do',check:'ai',sev:'info',text:'El titular funciona solo: si nadie lee más, igual queda el mensaje principal.'},
   {id:'d_urgency',kind:'do',check:'auto',sev:'warn',text:'Si hay fecha límite, ponla: la urgencia es real, nunca fingida.'},
-  {id:'d_7dias',kind:'do',check:'ai',sev:'info',text:'Usar el tiempo de entrega como diferenciador cuando aplique, con el dato publicado para el país (nunca uno más corto).'},
+  {id:'d_7dias',kind:'do',pais:'ec',check:'ai',sev:'info',text:'Usar "en 7 días" como diferenciador de Upper cuando aplique (claim aprobado por marketing).'},
   {id:'d_msg',kind:'do',check:'auto',sev:'info',text:'El mensaje que acompaña la pieza lleva emojis y el CTA dentro del texto: "Mira aquí", "Descubre aquí" o "Encuentra aquí".'},
   // Don'ts
   {id:'n_title7',kind:'dont',check:'auto',sev:'warn',text:'Titulares de más de 7 palabras.'},
@@ -672,7 +675,7 @@ Frases de marca publicadas: "Más fácil, imposible." · "Todo lo que necesitas,
  {id:'ec_tiempos',titulo:'Tiempos de entrega',texto:`- Desde Miami: de 7 a 10 días hábiles en promedio, desde que el paquete vuela.
 - Desde Madrid: unos 10 días hábiles desde la salida del vuelo.
 - Seguimiento en tiempo real en la app, con aviso en cada etapa.
-Nota: la portada del centro de ayuda muestra "5 a 7 días hábiles"; la respuesta detallada dice 7 a 10. Usar 7 a 10 hasta que el equipo confirme.`},
+- Claim de marketing aprobado: "en 7 días". Es la frase de marca; el dato operativo publicado es de 7 a 10 días hábiles.`},
  {id:'ec_traer',titulo:'Qué se puede traer',texto:`Sí: ropa, zapatos, accesorios, maquillaje y cuidado personal, tecnología nueva, juguetes, libros y cosas para la casa.
 Con restricciones (material peligroso): perfumes en spray de más de 100 ml por unidad o 300 ml en total; aerosoles, artículos con gas o aire comprimido, esmalte de uñas y acetona; baterías de litio, power banks y cargadores inalámbricos; laptops y tablets con tarjeta SIM.
 Con documentos de control previo: celulares (uno por persona al año); licores y decodificadores satelitales; televisores y ciertos tipos de ropa a partir de la segunda importación del año.
@@ -740,7 +743,7 @@ const BUSINESS_RULES=[
  {id:'b_dato_oficial',kind:'dont',pais:'all',check:'ai',sev:'warn',text:'Afirmar tarifas, tiempos, impuestos o condiciones que no estén en el conocimiento de marca del país.'},
  {id:'b_ec_tarifa',kind:'do',pais:'ec',check:'ai',sev:'warn',text:'Tarifas de Ecuador tal como se publican: USD 5 + IVA por libra desde EE. UU. y USD 7 + IVA desde España, siempre con "+ IVA".'},
  {id:'b_ec_tasa',kind:'dont',pais:'ec',check:'ai',sev:'warn',text:'Presentar la tasa de USD 20 como cobro de Upper, u omitirla al hablar del costo total: la cobra el gobierno por cada orden (Categoría B).'},
- {id:'b_ec_tiempo',kind:'dont',pais:'ec',check:'ai',sev:'warn',text:'Prometer tiempos distintos a los publicados: desde Miami, de 7 a 10 días hábiles desde que vuela; desde Madrid, unos 10 días hábiles.'},
+ {id:'b_ec_tiempo',kind:'dont',pais:'ec',check:'ai',sev:'warn',text:'Prometer tiempos distintos a los publicados (desde Miami, de 7 a 10 días hábiles desde que vuela; desde Madrid, unos 10). El claim aprobado "en 7 días" sí se puede usar.'},
  {id:'b_ec_4x4',kind:'do',pais:'ec',check:'ai',sev:'info',text:'Si la pieza dice "sin impuestos", precisar el 4x4: paquetes de hasta 8.5 lb y USD 400, con cupo anual de USD 1.600.'},
  {id:'b_ec_domicilio',kind:'dont',pais:'ec',check:'ai',sev:'warn',text:'Decir que la entrega a domicilio es gratis: cuesta USD 3,50 + IVA por guía (Galápagos USD 15 + IVA). Gratis es el retiro en agencia.'},
  {id:'b_ec_restringidos',kind:'dont',pais:'ec',check:'ai',sev:'warn',text:'Promocionar productos que no se pueden traer a Ecuador: celulares usados, renovados u open box, ropa o calzado usados, electrónicos refurbished, medicinas sin receta o armas.'},
@@ -862,7 +865,7 @@ Tono: joven, directo, cómplice y con energía. Suena a alguien que te da un tip
 - Activación (aún no compran): sorpresivo, casi travieso; habla como si se perdieran algo que ya les pertenece ("¡ALERTA DE REGALO!", "No preguntes cómo, solo úsala").
 - Retención (compraron y están inactivos): contextual y cómplice; conecta con una tienda, temporada, quincena o feriado y da el empujón.
 - Referidos: social, "tus amigos te dan libras gratis".
-Reglas: tuteo siempre (nunca "usted"); verbos de acción inmediata (Compra ya, Aprovecha, Tráelo, Usa el código, Refiere); urgencia real con fecha si hay límite; el tiempo de entrega como diferenciador cuando aplique, con el dato publicado del país (nunca uno más corto); el titular funciona solo; sin jerga logística en piezas de marketing; prohibido "Te invitamos a", "Puedes", "Recuerda que puedes".
+Reglas: tuteo siempre (nunca "usted"); verbos de acción inmediata (Compra ya, Aprovecha, Tráelo, Usa el código, Refiere); urgencia real con fecha si hay límite; "en 7 días" como diferenciador cuando aplique en Ecuador (claim aprobado por marketing); en otros países, solo el tiempo publicado del país, nunca uno más corto; el titular funciona solo; sin jerga logística en piezas de marketing; prohibido "Te invitamos a", "Puedes", "Recuerda que puedes".
 En la PIEZA GRÁFICA no van emojis. Los emojis van en el mensaje de WhatsApp o push que acompaña la imagen (en título y cuerpo), con el CTA dentro del texto: "Mira aquí", "Descubre aquí", "Encuentra aquí".
 Límites de la pieza: titular de máximo 7 palabras; subtítulo de máximo 15 palabras; un solo CTA por pieza; no sobreinformar (máximo 30 palabras de mensaje sin contar fecha, código ni legal).
 El titular se compone en Noland, en mayúsculas. Marca entre asteriscos *así* la palabra o frase corta que debe resaltarse en verde (una sola por titular).`;
@@ -912,14 +915,72 @@ function bind1(){['campana','vigencia','descripcion'].forEach(k=>$('#r_'+k).onin
 
 /* ---------- Paso 2 ---------- */
 function step2(){const f=curFormat();
-  return `<h2>Formato y plantilla</h2><p class="lead">Elige el formato y una de sus tres composiciones. Los esquemas muestran dónde va cada elemento; después escribes el mensaje y ves el diseño en el paso Diseño.</p>
+  const v=S.fmtView==='esquema'?'esquema':'mockup';
+  return `<h2>Formato y plantilla</h2><p class="lead">Elige el formato y una de sus tres composiciones. El mockup muestra cómo se ve el resultado final con un mensaje de ejemplo; el esquema, dónde va cada elemento. Tu diseño con tu mensaje lo verás en el paso Diseño.</p>
   <div class="fmts">${Object.entries(FORMATS).map(([k,v])=>`<button class="fmt ${k===S.formato?'sel':''}" data-f="${k}" aria-pressed="${k===S.formato}">${v.label}</button>`).join('')}</div>
-  <p class="hint" style="margin:0 0 12px">${f.print?'Salida para imprenta: PNG a 300 dpi con 3 mm de sangrado.':'Salida digital en PNG a tamaño real.'}</p>
-  <div class="tpls">${f.templates.map(t=>`<button class="tpl ${t.id===S.tpl?'sel':''}" data-t="${t.id}" aria-pressed="${t.id===S.tpl}"><div class="thumb"><canvas data-th="${t.id}"></canvas></div><b>${esc(t.name)}</b><span class="dim">${t.w}×${t.h} px</span><p>${esc(t.desc)}</p></button>`).join('')}</div>
+  <div class="row" style="justify-content:space-between;margin:0 0 12px"><p class="hint" style="margin:0">${f.print?'Salida para imprenta: PNG a 300 dpi con 3 mm de sangrado.':'Salida digital en PNG a tamaño real.'}</p>
+  <div class="fmts" role="group" aria-label="Vista" style="margin:0"><button class="fmt ${v==='mockup'?'sel':''}" data-view="mockup" aria-pressed="${v==='mockup'}">Mockup</button><button class="fmt ${v==='esquema'?'sel':''}" data-view="esquema" aria-pressed="${v==='esquema'}">Esquema</button></div></div>
+  <div class="tpls">${f.templates.map(t=>`<button class="tpl ${t.id===S.tpl?'sel':''}" data-t="${t.id}" aria-pressed="${t.id===S.tpl}"><div class="thumb ${v==="mockup"?"mock":""}"><canvas data-th="${t.id}" aria-label="${v==="mockup"?"Mockup de ejemplo":"Esquema"} de ${esc(t.name)}"></canvas></div>${v==="mockup"?'<span class="mock-tag">Ejemplo con mensaje de muestra</span>':''}<b>${esc(t.name)}</b><span class="dim">${t.w}×${t.h} px</span><p>${esc(t.desc)}</p></button>`).join('')}</div>
   ${navHtml('Escribir mensaje')}`;}
 function bind2(){document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{S.formato=b.dataset.f;S.tpl=FORMATS[S.formato].templates[0].id;drawMain();drawLive();saveDraft();});
-  curFormat().templates.forEach(t=>drawWire(document.querySelector(`canvas[data-th="${t.id}"]`),t));
+  curFormat().templates.forEach(t=>{const c=document.querySelector(`canvas[data-th="${t.id}"]`);S.fmtView==='esquema'?drawWire(c,t):drawMockup(c,t);});
+  document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{S.fmtView=b.dataset.view;drawMain();});
   document.querySelectorAll('.tpl').forEach(b=>b.onclick=()=>{S.tpl=b.dataset.t;drawMain();drawLive();saveDraft();});}
+
+/* Mockup de ejemplo: la composición con un mensaje de muestra, puesta en su contexto real (app, feed, chat, mostrador) */
+const SAMPLE={copy:{eyebrow:'Compra desde USA',titular:'Tus compras, *sin fronteras*',subtitulo:'Compra en tus tiendas favoritas y tráelo con Upper.',destacado:'10 USD',cta:'Compra ya',nota:'de regalo',codigo:'',fecha:'',legal:''},visual:'celular-bolsa'};
+const MOCK_KIND={inapp:{hero:'app',tab:'app',cupon:'app'},social:{feed:'feed',story:'story',sq:'feed'},wa:{wsq:'chat',estado:'story',wv:'chat'},hablador:{a5:'stand',a6:'stand',colg:'hang'}};
+function renderSample(t,k){const keep={copy:S.copy,visual:S.extras.visual,qr:S.extras.qr,aliados:S.extras.aliados,producto:S.extras.producto};
+  S.copy={...SAMPLE.copy};S.extras.visual=SAMPLE.visual;S.extras.qr='';S.extras.aliados=[];S.extras.producto=null;
+  const c=document.createElement('canvas');try{render(c,t,S.scheme,k);}finally{S.copy=keep.copy;S.extras.visual=keep.visual;S.extras.qr=keep.qr;S.extras.aliados=keep.aliados;S.extras.producto=keep.producto;}return c;}
+function mkPhone(x,cx,cy,h){const w=h*.49,px=cx-w/2,py=cy-h/2;x.save();x.shadowColor='rgba(0,0,0,.28)';x.shadowBlur=h*.05;x.shadowOffsetY=h*.02;rr(x,px,py,w,h,w*.14);x.fillStyle='#16181D';x.fill();x.restore();
+  const b=w*.04;const s={x:px+b,y:py+b,w:w-2*b,h:h-2*b,r:w*.11};return s;}
+function phoneNotch(x,s){rr(x,s.x+s.w*.35,s.y+s.h*.012,s.w*.3,s.h*.028,s.h*.014);x.fillStyle='#16181D';x.fill();}
+function clipRR(x,s){rr(x,s.x,s.y,s.w,s.h,s.r);x.clip();}
+function imgRR(x,img,dx,dy,dw,dh,r){x.save();rr(x,dx,dy,dw,dh,r);x.clip();x.drawImage(img,dx,dy,dw,dh);x.restore();}
+function bars(x,X,Y,w,n,h,g,col){x.fillStyle=col;for(let i=0;i<n;i++){rr(x,X,Y+i*(h+g),w*(i===n-1?.62:1),h,h/2);x.fill();}}
+function drawMockup(c,t){
+  const W=600,H=420;c.width=W;c.height=H;const x=c.getContext('2d');const kind=MOCK_KIND[t.fmt]?.[t.id]||'app';
+  x.fillStyle='#E8ECE4';x.fillRect(0,0,W,H);
+  const piece=renderSample(t,Math.min(.6,900/Math.max(t.w,t.h)));const ar=t.w/t.h;
+  if(kind==='app'||kind==='feed'||kind==='chat'||kind==='story'){
+    const zoom=kind!=='story';const ph=zoom?H*1.38:H*.94;const s=mkPhone(x,W/2,zoom?ph/2+H*.04:H/2,ph);x.save();clipRR(x,s);
+    if(kind==='app'){x.fillStyle=C.navy;x.fillRect(s.x,s.y,s.w,s.h);drawLogo(x,s.x+s.w*.08,s.y+s.h*.075,s.h*.035,C.green);
+      const bw=s.w*.88,bh=bw/ar;imgRR(x,piece,s.x+s.w*.06,s.y+s.h*.14,bw,bh,s.w*.04);
+      let y=s.y+s.h*.16+bh;x.fillStyle=C.cream;x.font=fd(s.h*.034);x.textBaseline='top';x.fillText('COMPRA INTERNACIONAL',s.x+s.w*.08,y);
+      bars(x,s.x+s.w*.08,y+s.h*.07,s.w*.7,2,s.h*.014,s.h*.014,'rgba(240,255,232,.35)');
+      for(let i=0;i<3;i++){const yy=y+s.h*.16+i*s.h*.11;x.beginPath();x.arc(s.x+s.w*.15,yy,s.w*.06,0,Math.PI*2);x.fillStyle=C.green;x.fill();bars(x,s.x+s.w*.26,yy-s.h*.015,s.w*.5,2,s.h*.012,s.h*.01,'rgba(240,255,232,.3)');}
+      rr(x,s.x+s.w*.06,s.y+s.h*.9,s.w*.88,s.h*.07,s.h*.035);x.fillStyle='#1E2A42';x.fill();}
+    else if(kind==='feed'){x.fillStyle='#FFFFFF';x.fillRect(s.x,s.y,s.w,s.h);const top=s.y+s.h*.07;
+      x.beginPath();x.arc(s.x+s.w*.09,top+s.h*.03,s.w*.045,0,Math.PI*2);x.fillStyle=C.navy;x.fill();drawLogo(x,s.x+s.w*.065,top+s.h*.025,s.h*.009,C.green);
+      x.fillStyle='#1A1A1A';x.font=ft(700,s.h*.024);x.textBaseline='middle';x.fillText('upper.ec',s.x+s.w*.16,top+s.h*.03);
+      const iw=s.w,ih=iw/ar;x.drawImage(piece,s.x,top+s.h*.07,iw,ih);let y=top+s.h*.08+ih;
+      x.strokeStyle='#1A1A1A';x.lineWidth=s.w*.008;[.07,.17,.27].forEach(f=>{x.beginPath();x.arc(s.x+s.w*f,y+s.h*.03,s.w*.03,0,Math.PI*2);x.stroke();});
+      bars(x,s.x+s.w*.05,y+s.h*.075,s.w*.8,3,s.h*.012,s.h*.012,'#D9D9D9');}
+    else if(kind==='chat'){x.fillStyle='#ECE8E1';x.fillRect(s.x,s.y,s.w,s.h);x.fillStyle='#F7F7F7';x.fillRect(s.x,s.y,s.w,s.h*.11);
+      x.beginPath();x.arc(s.x+s.w*.12,s.y+s.h*.075,s.w*.05,0,Math.PI*2);x.fillStyle=C.navy;x.fill();drawLogo(x,s.x+s.w*.093,s.y+s.h*.07,s.h*.009,C.green);
+      x.fillStyle='#1A1A1A';x.font=ft(700,s.h*.026);x.textBaseline='middle';x.fillText('Upper',s.x+s.w*.21,s.y+s.h*.075);
+      const bw=s.w*.78,iw=bw-s.w*.04,ih=iw/ar,bh=ih+s.h*.12;const bx=s.x+s.w*.05,by=s.y+s.h*.16;
+      rr(x,bx,by,bw,bh,s.w*.035);x.fillStyle='#FFFFFF';x.fill();imgRR(x,piece,bx+s.w*.02,by+s.w*.02,iw,ih,s.w*.025);
+      bars(x,bx+s.w*.04,by+s.w*.02+ih+s.h*.025,bw*.82,2,s.h*.013,s.h*.012,'#CFCFCF');
+      rr(x,s.x+s.w*.04,s.y+s.h*.915,s.w*.92,s.h*.06,s.h*.03);x.fillStyle='#FFFFFF';x.fill();}
+    else{const iw=s.w,ih=iw/ar;x.fillStyle=t.layout==='cupon'?SCHEMES[S.scheme].cuponBg:SCHEMES[S.scheme].bg;x.fillRect(s.x,s.y,s.w,s.h);x.drawImage(piece,s.x,s.y+(s.h-ih)/2,iw,ih);
+      for(let i=0;i<3;i++){rr(x,s.x+s.w*.04+i*s.w*.31,s.y+s.h*.035,s.w*.29,s.h*.006,s.h*.003);x.fillStyle=i===0?'#FFFFFF':'rgba(255,255,255,.45)';x.fill();}
+      rr(x,s.x+s.w*.05,s.y+s.h*.925,s.w*.9,s.h*.05,s.h*.025);x.strokeStyle='rgba(255,255,255,.8)';x.lineWidth=s.w*.006;x.stroke();}
+    x.restore();phoneNotch(x,s);
+  }else if(kind==='stand'){
+    x.fillStyle='#D9D2C7';x.fillRect(0,H*.78,W,H*.22);
+    const maxH=H*.66,maxW=W*.62;let ph=maxH,pw=ph*ar;if(pw>maxW){pw=maxW;ph=pw/ar;}const px=(W-pw)/2,py=H*.8-ph;
+    x.save();x.fillStyle='rgba(0,0,0,.18)';x.beginPath();x.ellipse(W/2,H*.81,pw*.62,H*.025,0,0,Math.PI*2);x.fill();x.restore();
+    x.save();x.shadowColor='rgba(0,0,0,.25)';x.shadowBlur=14;x.shadowOffsetY=6;x.drawImage(piece,px,py,pw,ph);x.restore();
+    x.strokeStyle='rgba(255,255,255,.7)';x.lineWidth=3;x.strokeRect(px-4,py-4,pw+8,ph+8);
+    rr(x,px-pw*.06,H*.79,pw*1.12,H*.035,4);x.fillStyle='rgba(255,255,255,.75)';x.fill();
+  }else{
+    x.fillStyle='#DDE3DA';x.fillRect(0,0,W,H);const ps=H*.62,px=(W-ps)/2,py=H*.24;
+    x.strokeStyle='#8A8F86';x.lineWidth=2;x.beginPath();x.moveTo(W/2-ps*.25,0);x.lineTo(px+ps*.1,py);x.moveTo(W/2+ps*.25,0);x.lineTo(px+ps*.9,py);x.stroke();
+    x.save();x.shadowColor='rgba(0,0,0,.25)';x.shadowBlur=16;x.shadowOffsetY=8;x.drawImage(piece,px,py,ps,ps);x.restore();
+  }
+}
 
 /* Esquema de la composición (sin diseño): zonas de logo, textos, visual y CTA */
 function drawWire(c,t){const k=Math.min(.4,340/Math.max(t.w,t.h));const W=t.w,H=t.h;c.width=Math.round(W*k);c.height=Math.round(H*k);const x=c.getContext('2d');x.setTransform(k,0,0,k,0,0);

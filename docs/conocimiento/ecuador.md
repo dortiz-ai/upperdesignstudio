@@ -41,7 +41,7 @@ Frases de marca publicadas: "Más fácil, imposible." · "Todo lo que necesitas,
 - Desde Miami: de 7 a 10 días hábiles en promedio, desde que el paquete vuela.
 - Desde Madrid: unos 10 días hábiles desde la salida del vuelo.
 - Seguimiento en tiempo real en la app, con aviso en cada etapa.
-Nota: la portada del centro de ayuda muestra "5 a 7 días hábiles"; la respuesta detallada dice 7 a 10. Usar 7 a 10 hasta que el equipo confirme.
+- Claim de marketing aprobado: "en 7 días". Es la frase de marca; el dato operativo publicado es de 7 a 10 días hábiles.
 
 ## Qué se puede traer
 
@@ -76,7 +76,7 @@ A domicilio con Servientrega a todo el país (ver Tarifas).
 - Don't: Afirmar tarifas, tiempos, impuestos o condiciones que no estén en el conocimiento de marca del país.
 - Do: Tarifas de Ecuador tal como se publican: USD 5 + IVA por libra desde EE. UU. y USD 7 + IVA desde España, siempre con "+ IVA".
 - Don't: Presentar la tasa de USD 20 como cobro de Upper, u omitirla al hablar del costo total: la cobra el gobierno por cada orden (Categoría B).
-- Don't: Prometer tiempos distintos a los publicados: desde Miami, de 7 a 10 días hábiles desde que vuela; desde Madrid, unos 10 días hábiles.
+- Don't: Prometer tiempos distintos a los publicados (desde Miami, de 7 a 10 días hábiles desde que vuela; desde Madrid, unos 10). El claim aprobado "en 7 días" sí se puede usar.
 - Do: Si la pieza dice "sin impuestos", precisar el 4x4: paquetes de hasta 8.5 lb y USD 400, con cupo anual de USD 1.600.
 - Don't: Decir que la entrega a domicilio es gratis: cuesta USD 3,50 + IVA por guía (Galápagos USD 15 + IVA). Gratis es el retiro en agencia.
 - Don't: Promocionar productos que no se pueden traer a Ecuador: celulares usados, renovados u open box, ropa o calzado usados, electrónicos refurbished, medicinas sin receta o armas.
