@@ -43,6 +43,7 @@ Antes de cambiar algo, lee esta guía completa. Las decisiones de abajo las tom�
 ## Técnica
 - `index.html`: app completa y autocontenida, escrita como fragmento (sin `<html>`/`<head>`), formato que exige el artifact de claude.ai. `server.js` le agrega el esqueleto al servirla.
 - El artifact publicado vive en https://claude.ai/artifact/PVXfvYdm6SMJGQyHL5gZqo. Capacidades: `sample`, `downloads`, `db`, `user` (perfil).
+- Vercel (`upperdesignstudio.vercel.app`): `npm run build` (`scripts/build.mjs`) genera `public/` con la página envuelta por `lib/pagina.js`; `server.js` queda como función solo para `/api`; `proxy.js` (Routing Middleware) pide usuario y contraseña con `STUDIO_USERS`. Sin almacenamiento externo, en Vercel los endpoints de reglas y conocimiento responden 404 y la app usa el navegador. No sirvas archivos estáticos desde `server.js` en Vercel: no se incluyen en la función.
 - `server.js`: Node 20+, SDK `@anthropic-ai/sdk`, modelo por defecto `claude-opus-5-5`. Usuarios en `STUDIO_USERS="nombre:clave,…"`. La API key nunca llega al navegador.
 - Plantillas: 3 composiciones adaptables (`L.hero`, `L.tab`, `L.cupon`) × 4 formatos = 12 piezas. Las medidas se calculan en proporción al lienzo.
 - Para verificar cambios visuales, renderiza las 12 plantillas en ambas combinaciones con Playwright y revisa que pasen la revisión de marca.

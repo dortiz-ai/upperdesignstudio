@@ -4,7 +4,15 @@
   "private": true,
   "description": "Workflow de diseño de piezas Upper con revisión de marca y copy asistido por Claude",
   "type": "module",
-  "scripts": { "start": "node server.js" },
-  "engines": { "node": ">=20" },
-  "dependencies": { "@anthropic-ai/sdk": "1.6.0" }
+  "scripts": {
+    "start": "node server.js",
+    "build": "node scripts/build.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.6.0",
+    "@vercel/functions": "3.11.0"
+  }
 }

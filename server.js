@@ -11,6 +11,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { timingSafeEqual } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
+import { wrapPage } from "./lib/pagina.js";
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT || 8080);
@@ -176,16 +177,15 @@ async function serveStatic(req, res) {
 }
 
 // index.html está escrito como fragmento (formato de claude.ai); aquí se le pone el esqueleto HTML completo.
-function wrapPage(html) {
-  if (/^\s*<!doctype/i.test(html)) return html;
-  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="icon" href="assets/Logo_Upper.svg"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body>${html}</body></html>`;
-}
 
 http.createServer(async (req, res) => {
   const user = authUser(req);
   if (!user) { res.writeHead(401, { "www-authenticate": 'Basic realm="Upper Studio"' }); return res.end(); }
   const url = new URL(req.url, "http://x");
-  if (["/api/reglas", "/api/conocimiento", "/api/cambios", "/api/excepciones"].includes(url.pathname)) return handleData(req, res, user, url);
+  // En Vercel el disco no es persistente: sin almacenamiento externo, las reglas y el conocimiento
+  // quedan en el navegador de cada persona (la app lo indica). Ver README, sección Vercel.
+  if (["/api/reglas", "/api/conocimiento", "/api/cambios", "/api/excepciones"].includes(url.pathname))
+    return process.env.VERCEL ? send(res, 404, { code: "sin_almacenamiento" }) : handleData(req, res, user, url);
   if (req.url === "/api/health") return send(res, 200, { ok: !!process.env.ANTHROPIC_API_KEY, model: MODEL });
   if (req.url === "/api/claude" && req.method === "POST") return handleClaude(req, res);
   if (req.method === "GET") return serveStatic(req, res);

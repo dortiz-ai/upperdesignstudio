@@ -55,6 +55,23 @@ Cada pieza se revisa contra Do's y Don'ts en vivo, junto a la vista previa.
 - **Al descargar:** si algo no cumple, aparece un aviso con la opción de volver a corregir o continuar. Las excepciones se registran con nombre, fecha y motivo, y el .zip incluye `revision.txt`.
 - **Compartidas:** en el servidor propio se guardan en `DATA_DIR`; en claude.ai, en la base de datos del artifact. Sin ninguna de las dos, quedan solo en el navegador y el panel lo indica.
 
+## Desplegar en Vercel
+
+El repositorio ya trae la configuración (`vercel.json`, `proxy.js` y `scripts/build.mjs`):
+
+- En cada despliegue, `npm run build` genera `public/` con la página, el logo, las ilustraciones y las tipografías. Vercel la sirve desde su CDN.
+- `server.js` atiende solo `/api` (Claude y estado del servidor).
+- `proxy.js` pide usuario y contraseña antes de mostrar cualquier ruta.
+
+Variables de entorno en Vercel (Settings → Environment Variables, para Production y Preview):
+
+- `ANTHROPIC_API_KEY`: activa la validación con Claude.
+- `STUDIO_USERS`: usuarios del equipo, `nombre:clave` separados por comas. **Sin esta variable, el sitio queda abierto a cualquiera con el enlace.**
+
+Después de agregarlas, vuelve a desplegar (Deployments → ⋯ → Redeploy).
+
+Limitación actual: Vercel no guarda archivos entre solicitudes, así que en Vercel las reglas, el conocimiento de marca y las excepciones quedan en el navegador de cada persona, y la app lo indica. Para compartirlos hay que conectar un almacenamiento externo (por ejemplo Upstash Redis desde el Marketplace de Vercel); en el servidor propio (`npm start` o Docker) ya se comparten.
+
 ## Tipografías
 
 `fonts/` trae Noland Bold y Rethink Sans variable. Noland es una fuente con licencia: no publiques la carpeta en un repositorio público. Si falta algún archivo, la app usa Anton o Lexend y cada pieza muestra la alerta "Tipografía provisional".
