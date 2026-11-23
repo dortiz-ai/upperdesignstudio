@@ -142,6 +142,13 @@ img.out{max-width:100%;border-radius:4px;margin-top:8px}
 :root[data-theme="dark"]{--block:#FF8A80;--block-bg:#3A1F24;--warnc:#F2B35A;--warn-bg:#3A3020;--info-bg:#22351F}
 .review{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
 .rv-card{margin-top:0;border-top:0;padding-top:0}
+.kb-list{display:grid;gap:8px}
+.kb-sec{border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.kb-sec summary{cursor:pointer;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.kb-sec summary b{font-weight:700}
+.kb-edit{padding:0 12px 12px;display:grid;gap:10px}
+.kb-edit textarea{font-size:13px;line-height:1.5}
+.pill.pais{background:var(--info-bg);color:var(--fg)}
 .design{margin:4px 0 4px}
 .design .stage canvas{max-height:70vh}
 .review-box .review{margin-top:0;border-top:0;padding-top:0}
@@ -218,6 +225,7 @@ dialog#gate::backdrop{background:rgba(20,29,48,.55)}
     </div>
     <div class="hdr-actions">
       <span class="mode" id="aiMode"><i></i><span>IA: comprobando…</span></span>
+      <button class="btn sm" id="kbBtn" aria-expanded="false">Conocimiento de marca</button>
       <button class="btn sm" id="rulesBtn" aria-expanded="false">Reglas de marca</button>
       <button class="btn sm" id="kitBtn" aria-expanded="false">Kit de marca</button>
     </div>
@@ -257,6 +265,13 @@ dialog#gate::backdrop{background:rgba(20,29,48,.55)}
         </ul>
       </div>
     </div>
+  </section>
+
+  <section class="panel kit" id="kb" hidden>
+    <div class="rules-top"><div><h2>Conocimiento de marca</h2><p class="lead" style="margin-bottom:6px">Servicios, tarifas, tiempos, impuestos y condiciones de cada país. Claude solo afirma datos que estén aquí, así que las propuestas de mensaje salen con información correcta.</p>
+      <span class="pill" id="kbScope"></span></div>
+      <div class="fmts" role="group" aria-label="País"><button class="fmt" data-ktab="ec">Ecuador</button><button class="fmt" data-ktab="co">Colombia</button></div></div>
+    <div id="kbBody"></div>
   </section>
 
   <section class="panel kit" id="rules" hidden>
@@ -322,7 +337,7 @@ const LIMITS={eyebrow:28,titular:40,subtitulo:100,destacado:12,nota:18,cta:20,co
 
 /* ===================== ESTADO ===================== */
 const DEFAULTS={
-  req:{campana:'Regalo 10 USD noviembre',objetivo:'Activación',canal:'inapp',descripcion:'Usuarios que descargaron la app y no han hecho su primer pedido. Les regalamos 10 USD para su primera compra en tiendas de USA durante noviembre.',vigencia:'Hasta el 30 de noviembre'},
+  req:{pais:'ec',campana:'Regalo 10 USD noviembre',objetivo:'Activación',canal:'inapp',descripcion:'Usuarios que descargaron la app y no han hecho su primer pedido. Les regalamos 10 USD para su primera compra en tiendas de USA durante noviembre.',vigencia:'Hasta el 30 de noviembre'},
   propuesta:'Te regalamos 10 dólares para tu primer pedido, compra en USA y te lo traemos en 7 días',
   copy:{eyebrow:'',titular:'',subtitulo:'',destacado:'',cta:'',nota:'',codigo:'',fecha:'',legal:''},
   waMsg:'',
@@ -609,7 +624,7 @@ const BRAND_RULES=[
   {id:'d_verbs',kind:'do',check:'ai',sev:'warn',text:'CTA con verbo de acción inmediata: Compra ya, Aprovecha, Tráelo, Usa el código, Refiere.'},
   {id:'d_title_alone',kind:'do',check:'ai',sev:'info',text:'El titular funciona solo: si nadie lee más, igual queda el mensaje principal.'},
   {id:'d_urgency',kind:'do',check:'auto',sev:'warn',text:'Si hay fecha límite, ponla: la urgencia es real, nunca fingida.'},
-  {id:'d_7dias',kind:'do',check:'ai',sev:'info',text:'Usar "en 7 días" como diferenciador de Upper cuando aplique.'},
+  {id:'d_7dias',kind:'do',check:'ai',sev:'info',text:'Usar el tiempo de entrega como diferenciador cuando aplique, con el dato publicado para el país (nunca uno más corto).'},
   {id:'d_msg',kind:'do',check:'auto',sev:'info',text:'El mensaje que acompaña la pieza lleva emojis y el CTA dentro del texto: "Mira aquí", "Descubre aquí" o "Encuentra aquí".'},
   // Don'ts
   {id:'n_title7',kind:'dont',check:'auto',sev:'warn',text:'Titulares de más de 7 palabras.'},
@@ -626,18 +641,139 @@ const BRAND_RULES=[
   {id:'n_effects',kind:'dont',check:'fixed',sev:'block',text:'Gradientes, sombras o efectos en textos y logo.'},
   {id:'n_aliados',kind:'dont',check:'fixed',sev:'block',text:'Más de 3 logos de aliados en una pieza.'},
 ];
+/* ===================== CONOCIMIENTO DE MARCA POR PAÍS ===================== */
+/* Base inicial tomada de los centros de ayuda oficiales (consultados el 23 de noviembre de 2026).
+   El equipo la edita desde "Conocimiento de marca"; lo editado se guarda en el almacenamiento compartido. */
+const PAISES={ec:{nombre:'Ecuador',fuente:'https://upper.com.ec/ayudaecuador'},co:{nombre:'Colombia',fuente:'https://upperlogistics.com/es/ayuda'}};
+const KB_DEFAULT={
+ec:[
+ {id:'ec_que',titulo:'Qué es Upper Ecuador',texto:`Tu compra de EE. UU. o España, hasta tu puerta en Ecuador. Upper se encarga de la bodega en Miami o Madrid, el vuelo, la aduana y la entrega.
+El casillero es gratis y se crea en la app en un minuto; cada usuario tiene un código de casillero UEC.
+Frases de marca publicadas: "Más fácil, imposible." · "Todo lo que necesitas, a un pedido de distancia." · "Trae más, paga menos." · "Cada pedido es una oportunidad para ahorrar."`},
+ {id:'ec_como',titulo:'Cómo funciona',texto:`1. Descarga la app y crea tu casillero (gratis): ahí ves tu código UEC y tus direcciones en Miami y Madrid.
+2. Compra en una tienda de EE. UU. o España (por ejemplo Amazon, Best Buy o Shein) con la dirección de tu casillero y tu código UEC.
+3. Cuando llega a la bodega, aparece en tu casillero en la app. La app agrupa tus compras gratis.
+4. Sube la factura, elige Retiro en agencia o Envío a domicilio y confirma el embarque en el próximo vuelo.
+5. Recíbela en Ecuador: retira en una agencia o te la llevamos a casa.`},
+ {id:'ec_tarifas',titulo:'Tarifas',texto:`- Desde EE. UU.: USD 5 + IVA por libra.
+- Desde España: USD 7 + IVA por libra.
+- Tasa de USD 20 por orden de compras personales (Categoría B). La cobra el gobierno, no Upper; Upper la gestiona.
+- Sin pedido mínimo. Juntar (consolidar) compras es gratis.
+- Retiro en agencia: sin costo adicional.
+- Envío a domicilio con Servientrega: USD 3,50 + IVA a todo el país; Galápagos USD 15 + IVA. Se cobra por cada guía.
+- Dividir un paquete: USD 5 + IVA por cada paquete separado.
+- Aviso publicado: "Valores referenciales; el cobro final aparece en tu app."`},
+ {id:'ec_4x4',titulo:'Impuestos y categoría 4x4',texto:`- Compra personal (Categoría B o 4x4): paquete de hasta 8.5 lb (4 kg) y hasta USD 400.
+- Cada orden paga una tasa fija de USD 20, sin importar cuántos artículos traiga.
+- Hasta 3 productos iguales por envío no tributan.
+- Cupo anual de USD 1.600 por persona como compra personal; se reinicia el 1 de enero.
+- Si el paquete pasa de 8.5 lb o USD 400, sale del 4x4 y paga impuestos de aduana; si trae varios productos, se puede dividir.
+- La app agrupa compras en órdenes de hasta 8 lb para respetar el 4x4.`},
+ {id:'ec_tiempos',titulo:'Tiempos de entrega',texto:`- Desde Miami: de 7 a 10 días hábiles en promedio, desde que el paquete vuela.
+- Desde Madrid: unos 10 días hábiles desde la salida del vuelo.
+- Seguimiento en tiempo real en la app, con aviso en cada etapa.
+Nota: la portada del centro de ayuda muestra "5 a 7 días hábiles"; la respuesta detallada dice 7 a 10. Usar 7 a 10 hasta que el equipo confirme.`},
+ {id:'ec_traer',titulo:'Qué se puede traer',texto:`Sí: ropa, zapatos, accesorios, maquillaje y cuidado personal, tecnología nueva, juguetes, libros y cosas para la casa.
+Con restricciones (material peligroso): perfumes en spray de más de 100 ml por unidad o 300 ml en total; aerosoles, artículos con gas o aire comprimido, esmalte de uñas y acetona; baterías de litio, power banks y cargadores inalámbricos; laptops y tablets con tarjeta SIM.
+Con documentos de control previo: celulares (uno por persona al año); licores y decodificadores satelitales; televisores y ciertos tipos de ropa a partir de la segunda importación del año.
+No: armas (incluidas paintball y airsoft) y sus partes; drogas, sustancias tóxicas, explosivos, municiones y fuegos artificiales; ropa y calzado usados; celulares usados, renovados u open box; electrónicos refurbished; animales vivos, semillas, plantas y madera sin procesar; medicinas sin receta.`},
+ {id:'ec_celulares',titulo:'Celulares',texto:`- La aduana permite un celular por persona al año, con documentos de control previo. Escribir a Upper antes de comprar.
+- Usados, renovados u open box no se pueden importar: el celular debe ser nuevo y sellado.`},
+ {id:'ec_entrega',titulo:'Retiro y entrega',texto:`4 agencias con smart lockers, retiro sin costo:
+- Guayaquil: Las Cámaras (Av. Francisco de Orellana, Edificio Las Cámaras, Torre A, Oficina S1; lunes a sábado, 8:30 a 17:00) y Aventura Plaza (Av. Carlos Julio Arosemena; lunes a viernes, 8:30 a 17:00).
+- Quito: La Carolina (Edificio Matter Park, calles Pereira y Japón, locales 1 al 5; lunes a sábado, 8:30 a 17:00).
+- Cuenca: Los Totems (Calle Esmeraldas 2-06 y Av. Remigio Crespo; lunes a viernes, 8:30 a 17:00).
+A domicilio con Servientrega a todo el país (ver Tarifas).`},
+ {id:'ec_casillero',titulo:'Casillero y bodegas',texto:`- Miami: 1997 NW 87 Ave, Suite E + código UEC, Miami (Doral), FL 33172. Recibe de lunes a viernes, 8:30 a 17:00 (hora de Miami).
+- Madrid: Oficina E + código UEC. Recibe de lunes a viernes, 9:00 a 17:00 (hora de Madrid).
+- En Amazon, tipo de dirección: "Muelle de carga".
+- "Entregado" en la tienda significa que llegó a la bodega, no a la casa del cliente.`},
+],
+co:[
+ {id:'co_que',titulo:'Qué es Upper Colombia',texto:`Tu compra de EE. UU., hasta tu puerta en Colombia. Upper (Upper Express Colombia) se encarga de la bodega en Miami, el vuelo, la aduana y la entrega.
+Solo hay bodega en EE. UU. (Doral, Miami): no hay casillero en España ni otros países.
+Cada usuario tiene un código de casillero UCO.
+Frases de marca publicadas: "Tu compra de EE. UU., hasta tu puerta en Colombia." · "Te lo llevamos a la puerta."`},
+ {id:'co_como',titulo:'Cómo funciona',texto:`1. Compra en cualquier tienda que envíe dentro de EE. UU. (por ejemplo Amazon, Sephora o ShopSimon).
+2. Envíala a tu casillero en Doral con tu nombre y tu código UCO.
+3. Al llegar a la bodega aparece en "Mi Casillero" de la app en 24 a 48 horas hábiles.
+4. Sube la factura, elige la dirección en Colombia y toca "Embarcar".
+5. El botón de pago se activa cuando el envío ya va en el vuelo. Te lo llevamos a la puerta.`},
+ {id:'co_tarifas',titulo:'Tarifas',texto:`- USD 5 por libra, cobrada por fracción, sin redondear: 2.6 lb son USD 13.
+- Cuenta el peso con el que el paquete llega a la bodega de Miami, con la caja.
+- La entrega a la puerta está incluida en el flete.
+- Empaque: mínimo 1 lb si es frágil y cerca de un 10 % más si es pesado.
+- Dividir una compra: USD 5 por cada paquete nuevo; el flete de cada uno se cobra aparte.
+- Seguro opcional: USD 1 si la compra vale hasta USD 200; por encima, el 1 % del valor declarado. Cubre daño o pérdida desde que el paquete aparece en la app hasta la entrega.
+- Juntar compras y el almacenaje en bodega mientras no se embarque son gratis.
+- La calculadora muestra flete, impuestos y total en dólares y pesos. Aviso publicado: "Valores estimados; el cobro final aparece en tu app."`},
+ {id:'co_impuestos',titulo:'Impuestos',texto:`- Compras de hasta USD 200: no pagan impuestos, solo el flete. Por encima: arancel del 10 % e IVA del 19 %.
+- Celulares y tablets: hasta 22 UVT (≈ USD 333) no pagan impuestos; por encima, solo IVA del 19 %, nunca arancel.
+- Portátiles y computadores: hasta 50 UVT (≈ USD 756) no pagan impuestos; por encima, solo IVA del 19 %, nunca arancel.
+- Relojes inteligentes: como cualquier compra (límite USD 200).
+- El valor que cuenta es lo cobrado en la tarjeta: producto, envío de la tienda e impuestos de EE. UU.
+- Recomendación de Upper: dividir compras grandes en paquetes de máximo USD 180.`},
+ {id:'co_tiempos',titulo:'Tiempos de entrega',texto:`- El vuelo cierra dos días antes a las 3:00 p. m. (hora de Colombia); lo que se embarque después va en el vuelo siguiente.
+- Aduana: hasta 3 días hábiles.
+- Bogotá: 4 a 7 días hábiles después del vuelo.
+- Resto del país: 5 a 10 días hábiles.
+- Trayectos especiales: hasta 15 días.`},
+ {id:'co_traer',titulo:'Qué se puede traer',texto:`Sí: ropa, zapatos, accesorios, maquillaje y cuidado personal, tecnología, juguetes, libros y cosas para la casa. Power banks y electrónicos usados también.
+Límite: hasta 6 unidades de productos parecidos por envío. Perfumes: límite 6, se recomienda máximo 5.
+Preguntar antes: medicamentos y alimentos.
+No: baterías sueltas, drones, vapes, cannabis, armas, dinero, falsificaciones, artículos militares y productos bajo investigación del INVIMA.`},
+ {id:'co_celulares',titulo:'Celulares',texto:`- Un solo celular por paquete, sin otros productos en la caja.
+- Factura de compra, modelo homologable ante la CRC e IMEI visible; el IMEI se registra en la app antes de embarcar.
+- Impuestos: hasta 22 UVT (≈ USD 333) sin impuestos; por encima, solo IVA del 19 %.
+- Usados o reacondicionados: oficialmente prohibidos (Upper los trae si vienen en caja nueva). No promocionarlos.`},
+ {id:'co_pagos',titulo:'Pagos',texto:`- Se paga en la app cuando el envío queda confirmado en el vuelo; antes no hay nada que pagar.
+- Medios: Bold con transferencia Bre-B, Botón Bancolombia, PSE o Nequi.`},
+ {id:'co_casillero',titulo:'Casillero y bodega',texto:`- Dirección: 1997 NW 87 Ave, Suite C + código UCO, Doral, FL 33172. Teléfono 3056409860.
+- La bodega recibe de lunes a viernes, 8:30 a 17:00 (hora de Miami).
+- En Amazon, tipo de dirección: "Muelle de carga".
+- "Entregado" en la tienda significa que llegó a la bodega de Doral, no a la casa del cliente.`},
+],
+};
+/* Reglas de negocio por país (complementan a BRAND_RULES; las revisa Claude con el conocimiento del país) */
+const BUSINESS_RULES=[
+ {id:'b_precios_ref',kind:'do',pais:'all',check:'ai',sev:'info',text:'Si la pieza muestra tarifas o precios, el texto legal aclara que son valores referenciales y que el cobro final aparece en la app.'},
+ {id:'b_dato_oficial',kind:'dont',pais:'all',check:'ai',sev:'warn',text:'Afirmar tarifas, tiempos, impuestos o condiciones que no estén en el conocimiento de marca del país.'},
+ {id:'b_ec_tarifa',kind:'do',pais:'ec',check:'ai',sev:'warn',text:'Tarifas de Ecuador tal como se publican: USD 5 + IVA por libra desde EE. UU. y USD 7 + IVA desde España, siempre con "+ IVA".'},
+ {id:'b_ec_tasa',kind:'dont',pais:'ec',check:'ai',sev:'warn',text:'Presentar la tasa de USD 20 como cobro de Upper, u omitirla al hablar del costo total: la cobra el gobierno por cada orden (Categoría B).'},
+ {id:'b_ec_tiempo',kind:'dont',pais:'ec',check:'ai',sev:'warn',text:'Prometer tiempos distintos a los publicados: desde Miami, de 7 a 10 días hábiles desde que vuela; desde Madrid, unos 10 días hábiles.'},
+ {id:'b_ec_4x4',kind:'do',pais:'ec',check:'ai',sev:'info',text:'Si la pieza dice "sin impuestos", precisar el 4x4: paquetes de hasta 8.5 lb y USD 400, con cupo anual de USD 1.600.'},
+ {id:'b_ec_domicilio',kind:'dont',pais:'ec',check:'ai',sev:'warn',text:'Decir que la entrega a domicilio es gratis: cuesta USD 3,50 + IVA por guía (Galápagos USD 15 + IVA). Gratis es el retiro en agencia.'},
+ {id:'b_ec_restringidos',kind:'dont',pais:'ec',check:'ai',sev:'warn',text:'Promocionar productos que no se pueden traer a Ecuador: celulares usados, renovados u open box, ropa o calzado usados, electrónicos refurbished, medicinas sin receta o armas.'},
+ {id:'b_ec_celular',kind:'do',pais:'ec',check:'ai',sev:'info',text:'Si la pieza habla de celulares: uno por persona al año, nuevo y sellado, con documentos de control previo.'},
+ {id:'b_co_tarifa',kind:'do',pais:'co',check:'ai',sev:'warn',text:'Tarifa de Colombia tal como se publica: USD 5 por libra, cobrada por fracción, con entrega a la puerta incluida.'},
+ {id:'b_co_impuestos',kind:'dont',pais:'co',check:'ai',sev:'warn',text:'Decir "sin impuestos" sin condición: aplica a compras de hasta USD 200 (celulares y tablets hasta 22 UVT; portátiles hasta 50 UVT).'},
+ {id:'b_co_tiempo',kind:'dont',pais:'co',check:'ai',sev:'warn',text:'Prometer tiempos distintos a los publicados: aduana hasta 3 días hábiles; Bogotá 4 a 7 días hábiles después del vuelo; resto del país 5 a 10.'},
+ {id:'b_co_origen',kind:'dont',pais:'co',check:'ai',sev:'warn',text:'Mencionar compras desde España u otros países, o retiro en agencia: en Colombia solo hay bodega en Miami (Doral) y la entrega es a la puerta.'},
+ {id:'b_co_restringidos',kind:'dont',pais:'co',check:'ai',sev:'warn',text:'Promocionar productos que no se traen a Colombia o requieren consulta: baterías sueltas, drones, vapes, medicamentos, alimentos, falsificaciones o celulares reacondicionados.'},
+ {id:'b_co_celular',kind:'do',pais:'co',check:'ai',sev:'info',text:'Si la pieza habla de celulares: uno por paquete, con factura e IMEI registrado en la app antes de embarcar.'},
+];
+const KB={data:{},updatedAt:0};
+function kbOf(p){const s=KB.data?.[p];return Array.isArray(s)&&s.length?s:KB_DEFAULT[p];}
+function kbIsEdited(p){return Array.isArray(KB.data?.[p]);}
+function applyKb(d){KB.data=d&&typeof d==='object'?{ec:d.ec,co:d.co}:{};KB.updatedAt=d?.updatedAt||0;try{if(!$('#kb').hidden)drawKb();}catch{}}
+const paisActual=()=>PAISES[S.req.pais]?S.req.pais:'ec';
+function kbText(p=paisActual()){return kbOf(p).map(s=>`## ${s.titulo}\n${s.texto}`).join('\n\n');}
+function knowledgeBlock(){const p=paisActual();return `CONOCIMIENTO DE NEGOCIO DE UPPER ${PAISES[p].nombre.toUpperCase()} (fuente oficial; es la única base válida para tarifas, tiempos, impuestos, servicios y condiciones. Si un dato no está aquí, no lo afirmes):
+${kbText(p)}`;}
+
 const RULES={overrides:{},custom:[],updatedAt:0};
 function applyRules(cfg){RULES.overrides=cfg?.overrides&&typeof cfg.overrides==='object'?cfg.overrides:{};RULES.custom=Array.isArray(cfg?.custom)?cfg.custom.filter(r=>r&&r.id&&r.text):[];RULES.updatedAt=cfg?.updatedAt||0;
   try{drawLive();if(!$('#rules').hidden)drawRules();if(S.step===5)drawMain();}catch{}}
 function allRules(){
-  const base=BRAND_RULES.map(r=>{const o=RULES.overrides[r.id]||{};const sev=r.check==='fixed'?r.sev:(SEV[o.sev]&&SEV[o.sev].n<=SEV[r.sev].n?o.sev:r.sev);
-    return{...r,scope:COPY_RULES.has(r.id)?'copy':'design',origin:'brandbook',baseSev:r.sev,sev,enabled:r.check==='fixed'?true:o.enabled!==false,reason:o.reason||'',by:o.by||null,at:o.at||0};});
-  return[...base,...RULES.custom.map(r=>({...r,scope:r.check==='manual'?'design':'copy',origin:'custom',baseSev:r.sev,enabled:r.enabled!==false,check:r.check==='manual'?'manual':'ai',sev:SEV[r.sev]?r.sev:'warn'}))];
+  const base=[...BRAND_RULES,...BUSINESS_RULES].map(r=>{const o=RULES.overrides[r.id]||{};const sev=r.check==='fixed'?r.sev:(SEV[o.sev]&&SEV[o.sev].n<=SEV[r.sev].n?o.sev:r.sev);
+    return{...r,pais:r.pais||'all',scope:COPY_RULES.has(r.id)||r.id.startsWith('b_')?'copy':'design',origin:r.id.startsWith('b_')?'negocio':'brandbook',baseSev:r.sev,sev,enabled:r.check==='fixed'?true:o.enabled!==false,reason:o.reason||'',by:o.by||null,at:o.at||0};});
+  return[...base,...RULES.custom.map(r=>({...r,pais:PAISES[r.pais]?r.pais:'all',scope:r.check==='manual'?'design':'copy',origin:'custom',baseSev:r.sev,enabled:r.enabled!==false,check:r.check==='manual'?'manual':'ai',sev:SEV[r.sev]?r.sev:'warn'}))];
 }
+const activeRules=()=>allRules().filter(r=>r.pais==='all'||r.pais===paisActual());
 const words=s=>String(s||'').replace(/\*/g,'').split(/\s+/).filter(Boolean);
 const PIECE_FIELDS=['eyebrow','titular','subtitulo','destacado','nota','cta','codigo','fecha'];
 const FORBIDDEN=/\b(te invitamos a|recuerda que puedes|puedes)\b/i;
-function copyHash(){return JSON.stringify([S.copy,S.waMsg,S.req.descripcion,S.req.vigencia]);}
+function copyHash(){return JSON.stringify([S.copy,S.waMsg,S.req.descripcion,S.req.vigencia,paisActual(),KB.updatedAt]);}
 /* Evalúa todas las reglas activas sobre una pieza ya dibujada */
 function evaluate(R,tpl){
   const d=S.copy,fmt=FORMATS[tpl.fmt];
@@ -665,7 +801,7 @@ function evaluate(R,tpl){
     n_phrases:()=>{const t=PIECE_FIELDS.map(f=>d[f]).join(' · ')+' · '+S.waMsg;const m=t.match(FORBIDDEN);return m?fail(`Aparece "${m[0]}". Usa un verbo de acción directo.`):ok();},
   };
   const aiFresh=S.aiReview&&S.aiReview.hash===copyHash();
-  const res=allRules().filter(r=>r.enabled).map(r=>{let v;
+  const res=activeRules().filter(r=>r.enabled).map(r=>{let v;
     if(r.check==='fixed')v={state:'fixed',detail:''};
     else if(r.check==='auto')v=AUTO[r.id]?AUTO[r.id]():{state:'na',detail:''};
     else if(r.check==='manual')v=S.manual[r.id]?{state:'ok',detail:'Confirmada por el ejecutor.'}:{state:'pending',detail:'Falta confirmarla.'};
@@ -680,9 +816,15 @@ const issuesOf=rv=>rv.filter(r=>(r.state==='fail'||(r.state==='pending'&&r.check
 const Team={mode:'local',db:null,user:null,meId:null,me:'',loaded:false,
   async init(){
     if(inArtifact){try{const[db,user]=await Promise.all([claude.use('db'),claude.use('user')]);this.user=user;
-        if(db){this.db=db;this.mode='db';this.meId=user?await user.id():null;this.subscribe();return;}}catch{}}
-    else{try{const r=await fetch('api/reglas',{cache:'no-store'});if(r.ok){const j=await r.json();this.mode='server';this.me=j.me||'';this.loaded=true;applyRules(j.config);return;}}catch{}}
-    this.mode='local';this.loaded=true;applyRules(store.get('reglas'));},
+        if(db){this.db=db;this.mode='db';this.meId=user?await user.id():null;this.subscribe();this.subscribeKb();return;}}catch{}}
+    else{try{const r=await fetch('api/reglas',{cache:'no-store'});if(r.ok){const j=await r.json();this.mode='server';this.me=j.me||'';this.loaded=true;applyRules(j.config);
+      try{const k=await fetch('api/conocimiento',{cache:'no-store'});if(k.ok)applyKb((await k.json()).config);}catch{}return;}}catch{}}
+    this.mode='local';this.loaded=true;applyRules(store.get('reglas'));applyKb(store.get('conocimiento'));},
+  subscribeKb(){this.db.doc('config/conocimiento').onSnapshot(s=>applyKb(s.exists?s.data():null),()=>{});},
+  async saveKb(cfg,change){cfg.updatedAt=Date.now();const entry={...change,at:Date.now()};
+    if(this.mode==='db'){await this.db.doc('config/conocimiento').set(cfg);await this.db.collection('cambios').add({...entry,by:this.meId});return;}
+    if(this.mode==='server'){const r=await fetch('api/conocimiento',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({config:cfg,change:entry})});if(!r.ok)throw{code:'server'};applyKb(cfg);return;}
+    store.set('conocimiento',cfg);const hist=store.get('cambios')||[];hist.unshift({...entry,by:'Tú'});store.set('cambios',hist.slice(0,100));applyKb(cfg);},
   subscribe(){const t=setTimeout(()=>{if(!this.loaded)setRulesStatus('No se pudo conectar con las reglas del equipo. Se aplican las del brandbook.');},10000);
     this.db.doc('config/reglas').onSnapshot(s=>{clearTimeout(t);this.loaded=true;setRulesStatus('');applyRules(s.exists?s.data():null);},
       e=>{clearTimeout(t);setRulesStatus(e?.code==='not_granted'?'Inicia sesión para ver las reglas del equipo. Se aplican las del brandbook.':'No se pudo conectar con las reglas del equipo. Se aplican las del brandbook.');});},
@@ -714,13 +856,13 @@ const AI={mode:'none',sample:null,
     throw{code:'unavailable'};},
   ready(){return this.mode!=='none'}};
 function setAiMode(m){AI.mode=m;const el=document.getElementById('aiMode');el.classList.toggle('on',m!=='none');el.querySelector('span').textContent=m==='artifact'?'IA: Claude en claude.ai':m==='server'?'IA: servidor propio':'IA: sin conexión';if(S.step===3||S.step===4)drawMain();}
-const VOICE=`Upper es el courier internacional líder en Ecuador: el usuario compra en tiendas de USA (Amazon, SHEIN, TEMU, Apple…) y Upper se lo trae en 7 días. También tiene casillero en Miami y Madrid.
+const VOICE=`Upper es un courier internacional: el usuario compra en tiendas del exterior (Amazon, SHEIN, TEMU, Apple…) y Upper se lo trae. Orígenes, tarifas, tiempos, impuestos y servicios cambian por país: usa solo el conocimiento de negocio del país incluido abajo.
 Taglines de marca: "Tus compras, sin fronteras", "Sin fronteras, así de simple", "Todo a un pedido de distancia", "Tú lo compras, nosotros lo traemos", "Hola, soy tu pedido".
 Tono: joven, directo, cómplice y con energía. Suena a alguien que te da un tip, no a una empresa.
 - Activación (aún no compran): sorpresivo, casi travieso; habla como si se perdieran algo que ya les pertenece ("¡ALERTA DE REGALO!", "No preguntes cómo, solo úsala").
 - Retención (compraron y están inactivos): contextual y cómplice; conecta con una tienda, temporada, quincena o feriado y da el empujón.
 - Referidos: social, "tus amigos te dan libras gratis".
-Reglas: tuteo siempre (nunca "usted"); verbos de acción inmediata (Compra ya, Aprovecha, Tráelo, Usa el código, Refiere); urgencia real con fecha si hay límite; "en 7 días" como diferenciador cuando aplique; el titular funciona solo; sin jerga logística en piezas de marketing; prohibido "Te invitamos a", "Puedes", "Recuerda que puedes".
+Reglas: tuteo siempre (nunca "usted"); verbos de acción inmediata (Compra ya, Aprovecha, Tráelo, Usa el código, Refiere); urgencia real con fecha si hay límite; el tiempo de entrega como diferenciador cuando aplique, con el dato publicado del país (nunca uno más corto); el titular funciona solo; sin jerga logística en piezas de marketing; prohibido "Te invitamos a", "Puedes", "Recuerda que puedes".
 En la PIEZA GRÁFICA no van emojis. Los emojis van en el mensaje de WhatsApp o push que acompaña la imagen (en título y cuerpo), con el CTA dentro del texto: "Mira aquí", "Descubre aquí", "Encuentra aquí".
 Límites de la pieza: titular de máximo 7 palabras; subtítulo de máximo 15 palabras; un solo CTA por pieza; no sobreinformar (máximo 30 palabras de mensaje sin contar fecha, código ni legal).
 El titular se compone en Noland, en mayúsculas. Marca entre asteriscos *así* la palabra o frase corta que debe resaltarse en verde (una sola por titular).`;
@@ -755,6 +897,7 @@ function drawLive(){
 function step1(){const r=S.req;
   return `<h2>Requerimiento</h2><p class="lead">Cuéntale a la plataforma qué necesitas comunicar. ${isExample()?'<span class="pill">Ejemplo cargado: reemplázalo con tu caso</span>':''}</p>
   <div class="fields">
+    <label class="f">País de la campaña<select id="r_pais">${Object.entries(PAISES).map(([k,v])=>`<option value="${k}" ${k===paisActual()?'selected':''}>${v.nombre}</option>`).join('')}</select><span class="hint">Define el conocimiento de negocio y las reglas que aplica Claude.</span></label>
     <label class="f">Nombre de la campaña<input type="text" id="r_campana" value="${esc(r.campana)}"></label>
     <label class="f">Objetivo<select id="r_objetivo">${['Activación','Retención','Activación y retención','Referidos','Promoción con aliado','Informativo'].map(o=>`<option ${o===r.objetivo?'selected':''}>${o}</option>`).join('')}</select></label>
     <label class="f">Canal principal<select id="r_canal">${Object.entries(FORMATS).map(([k,f])=>`<option value="${k}" ${k===r.canal?'selected':''}>${f.canal}</option>`).join('')}</select></label>
@@ -763,6 +906,7 @@ function step1(){const r=S.req;
   </div>${navHtml('Elegir formato')}`;}
 function bind1(){['campana','vigencia','descripcion'].forEach(k=>$('#r_'+k).oninput=e=>{S.req[k]=e.target.value;saveDraft();});
   $('#r_objetivo').onchange=e=>S.req.objetivo=e.target.value;
+  $('#r_pais').onchange=e=>{S.req.pais=e.target.value;saveDraft();};
   $('#r_canal').onchange=e=>{S.req.canal=e.target.value;S.formato=e.target.value;S.tpl=FORMATS[S.formato].templates[0].id;};
   $('#next').onclick=()=>go(2);}
 
@@ -828,7 +972,10 @@ async function validate(){
   const st=$('#st');const t=curTpl();
   const prompt=`${VOICE}
 
+${knowledgeBlock()}
+
 Tarea: evalúa la propuesta de mensaje y escribe 3 versiones de copy para una pieza gráfica de Upper. La primera es tu recomendación: se aplicará directamente en la pieza.
+País: ${PAISES[paisActual()].nombre}
 Campaña: ${S.req.campana}
 Objetivo: ${S.req.objetivo}
 Formato: ${curFormat().label} (${curFormat().canal}), plantilla "${t.name}" ${t.w}×${t.h}px
@@ -843,7 +990,7 @@ Campos de la pieza y límites ESTRICTOS de caracteres (cuenta espacios, sin cont
 - destacado ≤ ${LIMITS.destacado}: la cifra u oferta (ej. "$5", "10 USD", "1 LIBRA"); vacío si no hay oferta.
 - cta ≤ ${LIMITS.cta}: un solo verbo + acción.
 No escribas fecha, código, nota, legal ni mensaje de WhatsApp: son datos opcionales que decide el ejecutor.
-Las 3 versiones deben tener enfoques distintos (directo a la oferta, urgencia, cómplice/sorpresa). Mantén la oferta y los datos reales; no inventes montos, descuentos ni fechas.\nRespeta además estas reglas de marca del equipo:\n${allRules().filter(r=>r.enabled&&r.check!=='fixed').map(r=>`- ${r.kind==='do'?'HACER':'NO HACER'}: ${r.text}`).join('\n')}
+Las 3 versiones deben tener enfoques distintos (directo a la oferta, urgencia, cómplice/sorpresa). Mantén la oferta y los datos reales; no inventes montos, descuentos ni fechas.\nRespeta además estas reglas de marca del equipo:\n${activeRules().filter(r=>r.enabled&&r.check!=='fixed').map(r=>`- ${r.kind==='do'?'HACER':'NO HACER'}: ${r.text}`).join('\n')}
 
 Responde SOLO con JSON con esta forma:
 {"evaluacion":{"puntaje":0-10,"fortalezas":["lo que funciona de la propuesta"],"problemas":["lo que ajustaste y por qué"]},"opciones":[{"enfoque":"2-3 palabras","eyebrow":"","titular":"","subtitulo":"","destacado":"","cta":""}]}`;
@@ -904,7 +1051,11 @@ function bind4(){
 async function interpret(){
   const st=$('#st4');if(!S.casilla.trim()){st.className='status err';st.textContent='Escribe primero qué quieres agregar.';return;}
   const t=curTpl();
-  const prompt=`Eres el director de arte de Upper (courier, Ecuador). Interpreta un pedido de elementos extra para una pieza ya diseñada con plantilla fija.
+  const prompt=`Eres el director de arte de Upper (courier, ${PAISES[paisActual()].nombre}). Interpreta un pedido de elementos extra para una pieza ya diseñada con plantilla fija.
+
+${knowledgeBlock()}
+Si el pedido pide un dato de negocio (tarifa, tiempo, condición) que contradice ese conocimiento, recházalo y propone el dato correcto.
+
 Plantilla: ${curFormat().label} — "${t.name}" (${t.w}×${t.h}px). Copy actual: titular "${S.copy.titular}", destacado "${S.copy.destacado}".
 Archivos ya subidos: aliados [${S.extras.aliados.map(a=>a.name).join(', ')||'ninguno'}], foto de producto: ${S.extras.producto?'sí':'no'}.
 
@@ -1000,11 +1151,13 @@ function bindReview(root){
 }
 let aiCtl=null;
 async function aiReview(st,btn){
-  const rules=allRules().filter(r=>r.enabled&&r.check==='ai');if(!rules.length)return;
+  const rules=activeRules().filter(r=>r.enabled&&r.check==='ai');if(!rules.length)return;
   const prompt=`${VOICE}
 
+${knowledgeBlock()}
+
 Tarea: revisa si el copy de esta pieza gráfica de Upper cumple cada regla de marca de la lista. Evalúa solo lo que está escrito; no supongas.
-Campaña: ${S.req.campana} · Objetivo: ${S.req.objetivo}
+País: ${PAISES[paisActual()].nombre} · Campaña: ${S.req.campana} · Objetivo: ${S.req.objetivo}
 Requerimiento: ${S.req.descripcion}
 Vigencia: ${S.req.vigencia||'no indicada'}
 
@@ -1025,7 +1178,7 @@ Responde SOLO JSON: {"resultados":[{"id":"","cumple":true,"motivo":"","sugerenci
 }
 
 /* ===================== Editor de reglas (compartido) ===================== */
-let rulesTab='reglas',editingRule=null,pendingChange=null;
+let rulesTab='reglas',editingRule=null,pendingChange=null,rulesPais='all';
 function openRules(){const p=$('#rules');p.hidden=false;$('#rulesBtn').setAttribute('aria-expanded','true');drawRules();p.scrollIntoView({behavior:'smooth',block:'start'});}
 function drawRules(){
   const box=$('#rulesBody');if(!box)return;
@@ -1034,13 +1187,13 @@ function drawRules(){
   if(rulesTab==='reglas'){box.innerHTML=rulesEditorHtml();bindRulesEditor(box);}
   else{box.innerHTML='<p class="hint">Cargando…</p>';loadLog(rulesTab,box);}
 }
-function sevOptions(r){return Object.keys(SEV).filter(k=>r.origin==='custom'||SEV[k].n<=SEV[r.baseSev].n).map(k=>`<option value="${k}" ${k===r.sev?'selected':''}>${SEV[k].label}${r.origin==='brandbook'&&k===r.baseSev?' (brandbook)':''}</option>`).join('');}
+function sevOptions(r){return Object.keys(SEV).filter(k=>r.origin==='custom'||SEV[k].n<=SEV[r.baseSev].n).map(k=>`<option value="${k}" ${k===r.sev?'selected':''}>${SEV[k].label}${(r.origin==='brandbook'||r.origin==='negocio')&&k===r.baseSev?' (brandbook)':''}</option>`).join('');}
 function ruleRow(r){
-  const fixed=r.check==='fixed';const changed=r.origin==='brandbook'&&(r.sev!==r.baseSev||!r.enabled);
+  const fixed=r.check==='fixed';const changed=(r.origin==='brandbook'||r.origin==='negocio')&&(r.sev!==r.baseSev||!r.enabled);
   const pend=pendingChange&&pendingChange.id===r.id;
   return `<div class="rule ${r.enabled?'':'off'}" data-rule="${esc(r.id)}">
     <div class="rule-main"><b>${esc(r.text)}</b>
-      <div class="badges"><span class="pill">${r.origin==='brandbook'?'Brandbook':'Del equipo'}</span><span class="pill">${CHECK_LABEL[r.check]}</span>${fixed?'':sevBadge(r.sev)}${r.enabled?'':'<span class="pill">Desactivada</span>'}</div>
+      <div class="badges"><span class="pill">${r.origin==='brandbook'?'Brandbook':r.origin==='negocio'?'Negocio':'Del equipo'}</span>${r.pais!=='all'?`<span class="pill pais">${PAISES[r.pais].nombre}</span>`:''}<span class="pill">${CHECK_LABEL[r.check]}</span>${fixed?'':sevBadge(r.sev)}${r.enabled?'':'<span class="pill">Desactivada</span>'}</div>
       ${changed&&r.reason?`<small class="why">Ajustada: “${esc(r.reason)}”</small>`:''}</div>
     ${fixed?'':`<div class="rule-ctrl">
       <select data-sev aria-label="Severidad">${sevOptions(r)}</select>
@@ -1051,13 +1204,15 @@ function ruleRow(r){
   </div>`;
 }
 function rulesEditorHtml(){
-  const rs=allRules();const col=k=>rs.filter(r=>r.kind===k).map(ruleRow).join('');
+  const rs=allRules().filter(r=>rulesPais==='all'||r.pais==='all'||r.pais===rulesPais);const col=k=>rs.filter(r=>r.kind===k).map(ruleRow).join('');
   const e=editingRule;
-  return `<div class="rules-cols"><div><h3 class="col-h do">Do's</h3>${col('do')}</div><div><h3 class="col-h dont">Don'ts</h3>${col('dont')}</div></div>
+  return `<div class="row" style="margin-bottom:12px"><label class="f" style="flex-direction:row;align-items:center;gap:8px">Mostrar reglas de<select id="rulesPais" style="width:auto"><option value="all" ${rulesPais==='all'?'selected':''}>Todos los países</option>${Object.entries(PAISES).map(([k,v])=>`<option value="${k}" ${rulesPais===k?'selected':''}>${v.nombre} (y generales)</option>`).join('')}</select></label></div>
+  <div class="rules-cols"><div><h3 class="col-h do">Do's</h3>${col('do')}</div><div><h3 class="col-h dont">Don'ts</h3>${col('dont')}</div></div>
   <div class="box" id="ruleForm"><h3>${e?'Editar regla del equipo':'Agregar regla del equipo'}</h3>
     <div class="fields">
       <label class="f">Tipo<select id="nr_kind"><option value="do" ${e?.kind==='do'?'selected':''}>Do (hacer)</option><option value="dont" ${e?.kind==='dont'?'selected':''}>Don't (no hacer)</option></select></label>
       <label class="f">Severidad<select id="nr_sev">${Object.keys(SEV).map(k=>`<option value="${k}" ${(e?.sev||'warn')===k?'selected':''}>${SEV[k].label}</option>`).join('')}</select></label>
+      <label class="f">País<select id="nr_pais"><option value="all" ${(e?.pais||'all')==='all'?'selected':''}>Todos</option>${Object.entries(PAISES).map(([k,v])=>`<option value="${k}" ${e?.pais===k?'selected':''}>${v.nombre}</option>`).join('')}</select></label>
       <label class="f full">Regla<input type="text" id="nr_text" maxlength="160" value="${esc(e?.text||'')}" placeholder="Ej. No mencionar precios de la competencia"></label>
       <label class="f full">Cómo se verifica<select id="nr_check"><option value="ai" ${e?.check!=='manual'?'selected':''}>La revisa Claude con el copy</option><option value="manual" ${e?.check==='manual'?'selected':''}>La confirma el ejecutor antes de descargar</option></select></label>
     </div>
@@ -1072,11 +1227,11 @@ function bindRulesEditor(box){
   box.querySelectorAll('[data-rule]').forEach(row=>{const id=row.dataset.rule;const r=allRules().find(x=>x.id===id);if(!r)return;
     const sel=row.querySelector('[data-sev]'),en=row.querySelector('[data-en]');
     const propose=(sev,enabled)=>{
-      const loosens=r.origin==='brandbook'&&(SEV[sev].n<SEV[r.sev].n||(!enabled&&r.enabled))&&(SEV[sev].n<SEV[r.baseSev].n||!enabled);
+      const loosens=(r.origin==='brandbook'||r.origin==='negocio')&&(SEV[sev].n<SEV[r.sev].n||(!enabled&&r.enabled))&&(SEV[sev].n<SEV[r.baseSev].n||!enabled);
       const accion=!enabled&&r.enabled?'Desactivó':enabled&&!r.enabled?'Activó':`Cambió severidad a ${SEV[sev].label}`;
       if(loosens){pendingChange={id,sev,enabled,accion};drawRules();row.parentElement.querySelector(`[data-rule="${CSS.escape(id)}"] [data-reason]`)?.focus();return;}
       const cfg=cfgClone();
-      if(r.origin==='brandbook'){const restored=sev===r.baseSev&&enabled;if(restored)delete cfg.overrides[id];else cfg.overrides[id]={...(cfg.overrides[id]||{}),sev,enabled};}
+      if((r.origin==='brandbook'||r.origin==='negocio')){const restored=sev===r.baseSev&&enabled;if(restored)delete cfg.overrides[id];else cfg.overrides[id]={...(cfg.overrides[id]||{}),sev,enabled};}
       else{const c=cfg.custom.find(x=>x.id===id);c.sev=sev;c.enabled=enabled;}
       commit(cfg,{accion,regla:r.text,motivo:''},'Regla actualizada para todo el equipo');};
     sel&&(sel.onchange=()=>propose(sel.value,en.checked));
@@ -1091,9 +1246,10 @@ function bindRulesEditor(box){
       if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='¿Eliminar? Confirmar';b.classList.add('danger');return;}
       const cfg=cfgClone();cfg.custom=cfg.custom.filter(x=>x.id!==id);commit(cfg,{accion:'Eliminó',regla:r.text,motivo:''},'Regla eliminada');});
   });
+  $('#rulesPais')&&($('#rulesPais').onchange=e=>{rulesPais=e.target.value;drawRules();});
   $('#nr_save').onclick=()=>{const text=$('#nr_text').value.trim();const st=$('#nr_st');
     if(text.length<8){st.className='status err';st.textContent='Escribe la regla con al menos 8 caracteres.';return;}
-    const cfg=cfgClone();const data={kind:$('#nr_kind').value,sev:$('#nr_sev').value,check:$('#nr_check').value,text};
+    const cfg=cfgClone();const data={kind:$('#nr_kind').value,sev:$('#nr_sev').value,check:$('#nr_check').value,pais:$('#nr_pais').value,text};
     if(editingRule){Object.assign(cfg.custom.find(x=>x.id===editingRule.id),data);commit(cfg,{accion:'Editó',regla:text,motivo:''},'Regla actualizada para todo el equipo');}
     else{cfg.custom.push({id:'c_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),enabled:true,...data});commit(cfg,{accion:'Agregó',regla:text,motivo:''},'Regla agregada para todo el equipo');}};
   $('#nr_cancel')&&($('#nr_cancel').onclick=()=>{editingRule=null;drawRules();});
@@ -1144,12 +1300,12 @@ function gate(tpls,schemeKey){
     dlg.showModal();});
 }
 async function logIfNeeded(g,tpls,schemeKey){if(!g.reglas.length)return;
-  try{await Team.log({campana:S.req.campana,objetivo:S.req.objetivo,esquema:SCHEMES[schemeKey].name,piezas:tpls.map(pieceName),reglas:g.reglas,comentario:g.comentario||''});}
+  try{await Team.log({pais:PAISES[paisActual()].nombre,campana:S.req.campana,objetivo:S.req.objetivo,esquema:SCHEMES[schemeKey].name,piezas:tpls.map(pieceName),reglas:g.reglas,comentario:g.comentario||''});}
   catch{toast('La excepción no se pudo registrar en el equipo.');}}
 /* revision.txt que viaja dentro del kit */
 async function revisionTxt(tpls,schemeKey,g){
   const who=await Team.myName();const L=[];
-  L.push('REVISIÓN DE MARCA · UPPER STUDIO','',`Campaña: ${S.req.campana}`,`Objetivo: ${S.req.objetivo}`,`Combinación: ${SCHEMES[schemeKey].name}`,`Fecha: ${new Date().toLocaleString('es-EC')}`,`Descargado por: ${who||'(sin nombre)'}`,`Reglas: ${Team.scopeLabel().toLowerCase()}`,'');
+  L.push('REVISIÓN DE MARCA · UPPER STUDIO','',`País: ${PAISES[paisActual()].nombre}`,`Campaña: ${S.req.campana}`,`Objetivo: ${S.req.objetivo}`,`Combinación: ${SCHEMES[schemeKey].name}`,`Fecha: ${new Date().toLocaleString('es-EC')}`,`Descargado por: ${who||'(sin nombre)'}`,`Reglas: ${Team.scopeLabel().toLowerCase()}`,'');
   tpls.forEach(t=>{const rv=reviewOf(t,schemeKey);const iss=issuesOf(rv);const inf=rv.filter(r=>r.state==='fail'&&r.sev==='info');
     L.push(`${pieceName(t)} (${t.w}×${t.h} px): ${iss.length?iss.length+' incumplimiento(s)':'cumple'}`);
     iss.forEach(r=>L.push(`   - [${SEV[r.sev].label}] ${r.text}${r.detail?' → '+r.detail:''}`));
@@ -1159,6 +1315,33 @@ async function revisionTxt(tpls,schemeKey,g){
   if(g.aiPending)L.push(`Nota: ${g.aiPending} reglas de tono no se revisaron con Claude sobre el copy final.`);
   return L.join('\n');
 }
+
+/* ===================== Editor de conocimiento de marca (compartido) ===================== */
+let kbTab='ec';
+function openKb(){const p=$('#kb');p.hidden=false;$('#kbBtn').setAttribute('aria-expanded','true');drawKb();p.scrollIntoView({behavior:'smooth',block:'start'});}
+function drawKb(){
+  const box=$('#kbBody');if(!box)return;const p=kbTab,P=PAISES[p];const secs=kbOf(p);
+  $('#kbScope').textContent=Team.scopeLabel();
+  document.querySelectorAll('[data-ktab]').forEach(b=>{b.classList.toggle('sel',b.dataset.ktab===p);b.setAttribute('aria-pressed',String(b.dataset.ktab===p));});
+  box.innerHTML=`<p class="hint" style="margin:0 0 12px">Base inicial: <a href="${P.fuente}" target="_blank" rel="noopener">${esc(P.fuente.replace(/^https:\/\//,''))}</a> · ${kbIsEdited(p)?'con cambios del equipo':'sin cambios del equipo'}. Claude usa este texto al validar mensajes, revisar el tono e interpretar pedidos en campañas de ${P.nombre}.</p>
+  <div class="kb-list">${secs.map((s,i)=>`<details class="kb-sec" data-i="${i}" ${i===0?'open':''}><summary><b>${esc(s.titulo)}</b><span class="hint">${esc((s.texto||'').split('\n')[0].slice(0,90))}${(s.texto||'').length>90?'…':''}</span></summary>
+    <div class="kb-edit"><label class="f">Título<input type="text" data-kt maxlength="80" value="${esc(s.titulo)}"></label>
+    <label class="f">Contenido<textarea data-kx rows="${Math.min(16,Math.max(4,(s.texto||'').split('\n').length+2))}">${esc(s.texto)}</textarea></label>
+    <div class="row"><button class="btn sm primary" data-ksave>Guardar sección</button><button class="btn sm" data-kdel>Eliminar sección</button></div></div></details>`).join('')}</div>
+  <div class="row" style="margin-top:12px"><button class="btn sm" id="kbAdd">Agregar sección</button>${kbIsEdited(p)?'<button class="btn sm" id="kbRestore">Restaurar la base inicial</button>':''}</div>`;
+  box.querySelectorAll('.kb-sec').forEach(d=>{const i=+d.dataset.i;
+    d.querySelector('[data-ksave]').onclick=()=>{const titulo=d.querySelector('[data-kt]').value.trim(),texto=d.querySelector('[data-kx]').value.trim();
+      if(titulo.length<3||texto.length<10){toast('Escribe un título y un contenido.');return;}
+      const s=JSON.parse(JSON.stringify(kbOf(p)));s[i]={...s[i],titulo,texto};commitKb(p,s,{accion:'Editó conocimiento',regla:`${P.nombre} · ${titulo}`},'Sección guardada para todo el equipo');};
+    const del=d.querySelector('[data-kdel]');del.onclick=()=>{if(del.dataset.sure!=='1'){del.dataset.sure='1';del.textContent='¿Eliminar? Confirmar';del.classList.add('danger');return;}
+      const s=kbOf(p).filter((_,j)=>j!==i);commitKb(p,s,{accion:'Eliminó conocimiento',regla:`${P.nombre} · ${kbOf(p)[i].titulo}`},'Sección eliminada');};});
+  $('#kbAdd').onclick=()=>{const s=JSON.parse(JSON.stringify(kbOf(p)));s.push({id:'k_'+Date.now().toString(36),titulo:'Nueva sección',texto:'Escribe aquí el lineamiento de negocio.'});
+    commitKb(p,s,{accion:'Agregó conocimiento',regla:`${P.nombre} · Nueva sección`},'Sección agregada: complétala y guárdala').then(()=>{const last=[...document.querySelectorAll('.kb-sec')].pop();if(last){last.open=true;last.scrollIntoView({block:'center'});last.querySelector('[data-kx]')?.select();}});};
+  const rs=$('#kbRestore');rs&&(rs.onclick=()=>{if(rs.dataset.sure!=='1'){rs.dataset.sure='1';rs.textContent='¿Restaurar? Se pierden los cambios del equipo. Confirmar';rs.classList.add('danger');return;}
+    commitKb(p,null,{accion:'Restauró la base inicial de conocimiento',regla:P.nombre},'Base inicial restaurada');});
+}
+async function commitKb(p,secs,change,msg){const cfg={ec:KB.data.ec??null,co:KB.data.co??null};cfg[p]=secs;
+  try{await Team.saveKb(cfg,change);toast(msg);drawKb();}catch(e){toast(e?.code==='not_granted'?'No tienes permiso para cambiar el conocimiento del equipo.':'No se pudo guardar. Vuelve a intentarlo.');}}
 
 /* ---------- Kit / fuentes ---------- */
 function drawMain(){const m=$('#main');m.innerHTML=[step1,step2,step3,step4,step5][S.step-1]();bindNav();[bind1,bind2,bind3,bind4,bind5][S.step-1]();}
@@ -1178,6 +1361,8 @@ async function bootFonts(){
   try{await Promise.all(['400 40px Anton','400 40px Lexend','700 40px Lexend'].map(f=>document.fonts.load(f)));}catch{}
 }
 function refreshAll(){tintCache.clear();drawKit();drawMain();drawLive();}
+$('#kbBtn').onclick=()=>{const p=$('#kb');if(p.hidden)openKb();else{p.hidden=true;$('#kbBtn').setAttribute('aria-expanded','false');}};
+document.querySelectorAll('[data-ktab]').forEach(b=>b.onclick=()=>{kbTab=b.dataset.ktab;drawKb();});
 $('#rulesBtn').onclick=()=>{const p=$('#rules');if(p.hidden)openRules();else{p.hidden=true;$('#rulesBtn').setAttribute('aria-expanded','false');}};
 document.querySelectorAll('[data-rtab]').forEach(b=>b.onclick=()=>{rulesTab=b.dataset.rtab;pendingChange=null;drawRules();});
 document.querySelectorAll('#kit [data-open-rules]').forEach(b=>b.onclick=()=>openRules());

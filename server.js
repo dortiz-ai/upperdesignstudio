@@ -61,10 +61,19 @@ function cleanRules(c) {
   }
   const custom = (Array.isArray(c?.custom) ? c.custom : []).slice(0, 100).filter((r) => r && r.text).map((r) => ({
     id: clip(r.id, 40), kind: r.kind === "dont" ? "dont" : "do", text: clip(r.text, 160), check: r.check === "manual" ? "manual" : "ai",
-    sev: SEVS.has(r.sev) ? r.sev : "warn", enabled: r.enabled !== false,
+    sev: SEVS.has(r.sev) ? r.sev : "warn", enabled: r.enabled !== false, pais: ["ec", "co"].includes(r.pais) ? r.pais : "all",
   }));
   return { overrides, custom, updatedAt: Date.now() };
 }
+async function readKb() { try { return JSON.parse(await readFile(path.join(DATA, "conocimiento.json"), "utf8")); } catch { return { updatedAt: 0 }; } }
+function cleanKb(c) {
+  const out = { updatedAt: Date.now() };
+  for (const p of ["ec", "co"]) {
+    out[p] = Array.isArray(c?.[p]) ? c[p].slice(0, 60).filter((s) => s && s.titulo).map((s) => ({ id: clip(s.id, 40), titulo: clip(s.titulo, 80), texto: clip(s.texto, 6000) })) : null;
+  }
+  return out;
+}
+async function writeJson(name, data) { await mkdir(DATA, { recursive: true }); const tmp = path.join(DATA, name + ".tmp"); await writeFile(tmp, JSON.stringify(data, null, 2)); await rename(tmp, path.join(DATA, name)); }
 async function appendLog(name, entry) { await mkdir(DATA, { recursive: true }); await appendFile(path.join(DATA, name + ".jsonl"), JSON.stringify(entry) + "\n"); }
 async function readLog(name, n) {
   try { const lines = (await readFile(path.join(DATA, name + ".jsonl"), "utf8")).trim().split("\n"); return lines.slice(-n).reverse().map((l) => JSON.parse(l)); }
@@ -72,7 +81,7 @@ async function readLog(name, n) {
 }
 function cleanException(e, by) {
   return {
-    at: Date.now(), by, campana: clip(e.campana, 120), objetivo: clip(e.objetivo, 60), esquema: clip(e.esquema, 60), comentario: clip(e.comentario, 300),
+    at: Date.now(), by, pais: clip(e.pais, 40), campana: clip(e.campana, 120), objetivo: clip(e.objetivo, 60), esquema: clip(e.esquema, 60), comentario: clip(e.comentario, 300),
     piezas: (Array.isArray(e.piezas) ? e.piezas : []).slice(0, 20).map((x) => clip(x, 80)),
     reglas: (Array.isArray(e.reglas) ? e.reglas : []).slice(0, 60).map((r) => ({ id: clip(r.id, 40), texto: clip(r.texto, 200), sev: SEVS.has(r.sev) ? r.sev : "warn", detalle: clip(r.detalle, 400), motivo: clip(r.motivo, 300) })),
   };
@@ -87,6 +96,14 @@ async function handleData(req, res, user, url) {
       await mkdir(DATA, { recursive: true });
       const tmp = path.join(DATA, "reglas.json.tmp");
       await writeFile(tmp, JSON.stringify(cfg, null, 2)); await rename(tmp, path.join(DATA, "reglas.json"));
+      const ch = body.change || {};
+      await appendLog("cambios", { at: Date.now(), by: user, accion: clip(ch.accion, 80), regla: clip(ch.regla, 200), motivo: clip(ch.motivo, 300) });
+      return send(res, 200, { ok: true });
+    }
+    if (url.pathname === "/api/conocimiento" && req.method === "GET") return send(res, 200, { config: await readKb() });
+    if (url.pathname === "/api/conocimiento" && req.method === "PUT") {
+      const body = await readBody(req, 512 * 1024);
+      await writeJson("conocimiento.json", cleanKb(body.config));
       const ch = body.change || {};
       await appendLog("cambios", { at: Date.now(), by: user, accion: clip(ch.accion, 80), regla: clip(ch.regla, 200), motivo: clip(ch.motivo, 300) });
       return send(res, 200, { ok: true });
@@ -168,7 +185,7 @@ http.createServer(async (req, res) => {
   const user = authUser(req);
   if (!user) { res.writeHead(401, { "www-authenticate": 'Basic realm="Upper Studio"' }); return res.end(); }
   const url = new URL(req.url, "http://x");
-  if (["/api/reglas", "/api/cambios", "/api/excepciones"].includes(url.pathname)) return handleData(req, res, user, url);
+  if (["/api/reglas", "/api/conocimiento", "/api/cambios", "/api/excepciones"].includes(url.pathname)) return handleData(req, res, user, url);
   if (req.url === "/api/health") return send(res, 200, { ok: !!process.env.ANTHROPIC_API_KEY, model: MODEL });
   if (req.url === "/api/claude" && req.method === "POST") return handleClaude(req, res);
   if (req.method === "GET") return serveStatic(req, res);

@@ -5,7 +5,7 @@ Workflow web para que el equipo de Upper (courier internacional, Ecuador) produz
 Antes de cambiar algo, lee esta guía completa. Las decisiones de abajo las tomó el equipo de marca: no las reviertas sin que lo pidan.
 
 ## Flujo (orden fijo)
-1. **Requerimiento:** campaña, objetivo, canal, vigencia y descripción.
+1. **Requerimiento:** país (Ecuador o Colombia), campaña, objetivo, canal, vigencia y descripción.
 2. **Formato:** formato y una de sus 3 composiciones. Se muestran **esquemas neutros**, nunca el diseño con copy: el diseño condiciona la ejecución y solo se ve en el paso 4.
 3. **Mensaje:** el ejecutor escribe su propuesta → "Validar con Claude" evalúa y **completa los 5 campos del copy** (marcados "Completado por Claude"; la marca desaparece al editarlos) y ofrece 2 versiones alternativas. Al costado, solo la revisión de reglas de texto.
 4. **Diseño**, en este orden: propuesta inicial (vista previa grande) → Visual de la pieza → "¿Qué más necesita la pieza?" (pedido abierto que Claude interpreta) → Elementos permitidos → Revisión de marca.
@@ -25,8 +25,16 @@ Antes de cambiar algo, lee esta guía completa. Las decisiones de abajo las tom�
 - **Un solo bloque redondeado con texto por pieza: el CTA.** Antetítulo, destacado, fecha y código van como texto, sin cajas ni contornos.
 - Sin emojis en la gráfica (van en el mensaje que acompaña la pieza), sin gradientes, sombras ni fondos fotográficos completos.
 
+## Conocimiento de marca por país
+- Panel "Conocimiento de marca" con dos pestañas: Ecuador y Colombia. Base inicial en `KB_DEFAULT` (`index.html`), tomada de upper.com.ec/ayudaecuador y upperlogistics.com/es/ayuda; copia de referencia en `docs/conocimiento/`.
+- El país del Requerimiento decide qué conocimiento y qué reglas aplica Claude: `knowledgeBlock()` se agrega a los prompts de validar mensaje, revisar tono e interpretar pedidos. Claude no debe afirmar datos que no estén ahí.
+- Diferencias clave: Ecuador tiene bodegas en Miami y Madrid, tarifas con "+ IVA", tasa de USD 20 por orden (la cobra el gobierno), 4x4 y retiro en 4 agencias (domicilio cuesta USD 3,50 + IVA). Colombia solo tiene bodega en Miami (Doral), USD 5 por libra con entrega a la puerta incluida e impuestos desde USD 200.
+- Tiempos de Ecuador: la portada de ayuda dice "5 a 7 días hábiles" y la respuesta detallada "7 a 10 días hábiles desde Miami". Se usa 7 a 10 hasta que el equipo confirme. Ya no se promete "en 7 días" fijo.
+- Lo editado se guarda compartido: `config/conocimiento` en el artifact y `conocimiento.json` en `DATA_DIR`. Los cambios quedan en el historial.
+
 ## Revisión de marca
-- Catálogo en `BRAND_RULES` (`index.html`). Cada regla tiene tipo (Do / Don't), verificación (automática, Claude, ejecutor o garantizada por la plataforma) y severidad (Bloqueante, Alerta, Recomendación).
+- Catálogo en `BRAND_RULES` y reglas de negocio por país en `BUSINESS_RULES` (`index.html`); cada regla tiene `pais` (`all`, `ec` o `co`) y solo aplica a campañas de ese país. Las de negocio se editan igual que las del brandbook (opción B).
+- Catálogo de marca en `BRAND_RULES`. Cada regla tiene tipo (Do / Don't), verificación (automática, Claude, ejecutor o garantizada por la plataforma) y severidad (Bloqueante, Alerta, Recomendación).
 - Reglas del equipo de marca: titular ≤ 7 palabras, subtítulo ≤ 15 palabras, un solo CTA, un solo bloque, no sobreinformar (≤ 30 palabras sin fecha, código ni legal) y el tono del skill.
 - Edición (opción B): las reglas del brandbook no se borran; se pueden suavizar o desactivar **con motivo obligatorio**. Las del equipo se agregan, editan y borran libremente. Todo queda en el historial.
 - Al descargar con incumplimientos aparece un aviso: Alerta deja continuar; Bloqueante exige un motivo. Cada excepción se registra con usuario, fecha y motivo.
@@ -43,5 +51,6 @@ Antes de cambiar algo, lee esta guía completa. Las decisiones de abajo las tom�
 - ¿Suavizar una regla del brandbook debe requerir aprobación de un rol de marca?
 - Severidades por defecto y el límite de 30 palabras están por validar con el equipo.
 - Imprenta: marcas de corte, PDF y zona de sangrado visible.
+- Confirmar con el equipo el tiempo de entrega de Ecuador (5 a 7 o 7 a 10 días hábiles) y si se mantiene el claim "en 7 días" del skill de tono.
 - Formatos por sumar: header de newsletter, banners de anuncios de la app y piezas animadas.
 - La composición "Welcome to the Upper Club" (páginas 3 y 4 del .ai) no se usa todavía.
