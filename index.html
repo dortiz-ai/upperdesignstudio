@@ -675,7 +675,7 @@ const BRAND_RULES=[
   {id:'n_overinfo',kind:'dont',check:'auto',sev:'warn',text:'Sobreinformar: más de 30 palabras de mensaje (sin contar fecha, código ni legal) o demasiados elementos a la vez.'},
   {id:'n_emoji',kind:'dont',check:'auto',sev:'block',text:'Emojis en la gráfica (van en el mensaje que la acompaña).'},
   {id:'n_phrases',kind:'dont',check:'auto',sev:'warn',text:'Frases prohibidas: "Te invitamos a", "Puedes", "Recuerda que puedes".'},
-  {id:'n_jargon',kind:'dont',check:'ai',sev:'warn',text:'Jerga logística en piezas de marketing (guía aérea, consolidado, tracking, manifiesto).'},
+  {id:'n_jargon',kind:'dont',check:'auto',sev:'warn',text:'Jerga logística en piezas de marketing (guía aérea, consolidado, tracking, manifiesto).'},
   {id:'n_invent',kind:'dont',check:'ai',sev:'warn',text:'Inventar montos, descuentos o fechas que no están en el requerimiento.'},
   {id:'n_logo_mod',kind:'dont',check:'fixed',sev:'block',text:'Distorsionar, girar, sombrear o recolorear el logo.'},
   {id:'n_logo_bg',kind:'dont',check:'fixed',sev:'block',text:'Poner el logo sobre fondos sobrecargados o fotográficos.'},
@@ -799,18 +799,18 @@ Lo que NO se replica de estas referencias (manda la revisión de marca): emojis 
 const BUSINESS_RULES=[
  {id:'b_precios_ref',kind:'do',pais:'all',check:'ai',sev:'info',text:'Si la pieza muestra tarifas o precios, el texto legal aclara que son valores referenciales y que el cobro final aparece en la app.'},
  {id:'b_dato_oficial',kind:'dont',pais:'all',check:'ai',sev:'warn',text:'Afirmar tarifas, tiempos, impuestos o condiciones que no estén en el conocimiento de marca del país.'},
- {id:'b_ec_tarifa',kind:'do',pais:'ec',check:'ai',sev:'warn',text:'Tarifas de Ecuador tal como se publican: USD 5 + IVA por libra desde EE. UU. y USD 7 + IVA desde España, siempre con "+ IVA".'},
+ {id:'b_ec_tarifa',kind:'do',pais:'ec',check:'auto',sev:'warn',text:'Tarifas de Ecuador tal como se publican: USD 5 + IVA por libra desde EE. UU. y USD 7 + IVA desde España, siempre con "+ IVA".'},
  {id:'b_ec_tasa',kind:'dont',pais:'ec',check:'ai',sev:'warn',text:'Presentar la tasa de USD 20 como cobro de Upper, u omitirla al hablar del costo total: la cobra el gobierno por cada orden (Categoría B).'},
- {id:'b_ec_tiempo',kind:'dont',pais:'ec',check:'ai',sev:'warn',text:'Prometer tiempos distintos a los publicados (desde Miami, de 7 a 10 días hábiles desde que vuela; desde Madrid, unos 10). El claim aprobado "en 7 días" sí se puede usar.'},
- {id:'b_ec_4x4',kind:'do',pais:'ec',check:'ai',sev:'info',text:'Si la pieza dice "sin impuestos", precisar el 4x4: paquetes de hasta 8.5 lb y USD 400, con cupo anual de USD 1.600.'},
- {id:'b_ec_domicilio',kind:'dont',pais:'ec',check:'ai',sev:'warn',text:'Decir que la entrega a domicilio es gratis: cuesta USD 3,50 + IVA por guía (Galápagos USD 15 + IVA). Gratis es el retiro en agencia.'},
- {id:'b_ec_restringidos',kind:'dont',pais:'ec',check:'ai',sev:'warn',text:'Promocionar productos que no se pueden traer a Ecuador: celulares usados, renovados u open box, ropa o calzado usados, electrónicos refurbished, medicinas sin receta o armas.'},
+ {id:'b_ec_tiempo',kind:'dont',pais:'ec',check:'auto',sev:'warn',text:'Prometer tiempos distintos a los publicados (desde Miami, de 7 a 10 días hábiles desde que vuela; desde Madrid, unos 10). El claim aprobado "en 7 días" sí se puede usar.'},
+ {id:'b_ec_4x4',kind:'do',pais:'ec',check:'auto',sev:'info',text:'Si la pieza dice "sin impuestos", precisar el 4x4: paquetes de hasta 8.5 lb y USD 400, con cupo anual de USD 1.600.'},
+ {id:'b_ec_domicilio',kind:'dont',pais:'ec',check:'auto',sev:'warn',text:'Decir que la entrega a domicilio es gratis: cuesta USD 3,50 + IVA por guía (Galápagos USD 15 + IVA). Gratis es el retiro en agencia.'},
+ {id:'b_ec_restringidos',kind:'dont',pais:'ec',check:'auto',sev:'warn',text:'Promocionar productos que no se pueden traer a Ecuador: celulares usados, renovados u open box, ropa o calzado usados, electrónicos refurbished, medicinas sin receta o armas.'},
  {id:'b_ec_celular',kind:'do',pais:'ec',check:'ai',sev:'info',text:'Si la pieza habla de celulares: uno por persona al año, nuevo y sellado, con documentos de control previo.'},
  {id:'b_co_tarifa',kind:'do',pais:'co',check:'ai',sev:'warn',text:'Tarifa de Colombia tal como se publica: USD 5 por libra, cobrada por fracción, con entrega a la puerta incluida.'},
- {id:'b_co_impuestos',kind:'dont',pais:'co',check:'ai',sev:'warn',text:'Decir "sin impuestos" sin condición: aplica a compras de hasta USD 200 (celulares y tablets hasta 22 UVT; portátiles hasta 50 UVT).'},
- {id:'b_co_tiempo',kind:'dont',pais:'co',check:'ai',sev:'warn',text:'Prometer tiempos distintos a los publicados: aduana hasta 3 días hábiles; Bogotá 4 a 7 días hábiles después del vuelo; resto del país 5 a 10.'},
- {id:'b_co_origen',kind:'dont',pais:'co',check:'ai',sev:'warn',text:'Mencionar compras desde España u otros países, o retiro en agencia: en Colombia solo hay bodega en Miami (Doral) y la entrega es a la puerta.'},
- {id:'b_co_restringidos',kind:'dont',pais:'co',check:'ai',sev:'warn',text:'Promocionar productos que no se traen a Colombia o requieren consulta: baterías sueltas, drones, vapes, medicamentos, alimentos, falsificaciones o celulares reacondicionados.'},
+ {id:'b_co_impuestos',kind:'dont',pais:'co',check:'auto',sev:'warn',text:'Decir "sin impuestos" sin condición: aplica a compras de hasta USD 200 (celulares y tablets hasta 22 UVT; portátiles hasta 50 UVT).'},
+ {id:'b_co_tiempo',kind:'dont',pais:'co',check:'auto',sev:'warn',text:'Prometer tiempos distintos a los publicados: aduana hasta 3 días hábiles; Bogotá 4 a 7 días hábiles después del vuelo; resto del país 5 a 10.'},
+ {id:'b_co_origen',kind:'dont',pais:'co',check:'auto',sev:'warn',text:'Mencionar compras desde España u otros países, o retiro en agencia: en Colombia solo hay bodega en Miami (Doral) y la entrega es a la puerta.'},
+ {id:'b_co_restringidos',kind:'dont',pais:'co',check:'auto',sev:'warn',text:'Promocionar productos que no se traen a Colombia o requieren consulta: baterías sueltas, drones, vapes, medicamentos, alimentos, falsificaciones o celulares reacondicionados.'},
  {id:'b_co_celular',kind:'do',pais:'co',check:'ai',sev:'info',text:'Si la pieza habla de celulares: uno por paquete, con factura e IMEI registrado en la app antes de embarcar.'},
 ];
 const KB={data:{},updatedAt:0};
@@ -834,6 +834,8 @@ function allRules(){
 const activeRules=()=>allRules().filter(r=>r.pais==='all'||r.pais===paisActual());
 const words=s=>String(s||'').replace(/\*/g,'').split(/\s+/).filter(Boolean);
 const PIECE_FIELDS=['eyebrow','titular','subtitulo','destacado','nota','cta','codigo','fecha'];
+const copyText=()=>[...PIECE_FIELDS,'legal'].map(f=>S.copy[f]||'').join(' · ').replace(/\*/g,'');
+const daysIn=t=>[...t.matchAll(/(\d+)\s*(?:(?:a|-|y)\s*(\d+)\s*)?d[ií]as/gi)].flatMap(m=>[+m[1],m[2]?+m[2]:null]).filter(n=>n!=null);
 const FORBIDDEN=/\b(te invitamos a|recuerda que puedes|puedes)\b/i;
 function copyHash(){return JSON.stringify([S.copy,S.waMsg,S.propuesta,paisActual(),KB.updatedAt]);}
 /* Evalúa todas las reglas activas sobre una pieza ya dibujada */
@@ -858,6 +860,16 @@ function evaluate(R,tpl){
       if(n>30)return fail(`La pieza tiene ${n} palabras sin contar fecha, código ni legal (máximo 30). Quita lo que no ayuda a decidir.`);if(els>=7)return fail('La pieza combina demasiados elementos a la vez (antetítulo, destacado, código, fecha, CTA, QR y aliados).');return ok(`${n} palabras.`);},
     n_stroke:()=>(R.blocks||0)>0?fail(`La pieza tiene ${R.blocks} bloque(s) redondeado(s) con texto. Pasa el texto a tipografía, sin contenedor.`):ok(),
     n_emoji:()=>/\p{Extended_Pictographic}/u.test(Object.values(d).join(' '))?fail('Hay emojis en la gráfica. Pásalos al mensaje que la acompaña.'):ok(),
+    n_jargon:()=>{const m=copyText().match(/\b(gu[ií]as? a[ée]reas?|consolidad[oa]s?|tracking|manifiestos?|AWB|desaduaniz\w*)\b/i);return m?fail(`Aparece "${m[0]}": es jerga logística. Dilo como lo diría el cliente.`):ok();},
+    b_ec_tarifa:()=>{const t=copyText();return/(libra|\blb\b)/i.test(t)&&/(\$|usd)\s*\d|\d\s*(usd|d[oó]lares)/i.test(t)&&!/iva/i.test(t)?fail('La tarifa por libra va con "+ IVA" (ej. "USD 5 + IVA por libra").'):ok();},
+    b_ec_domicilio:()=>{const t=copyText();return/domicilio|a tu puerta|a tu casa/i.test(t)&&/gratis|sin costo|free|\b0\s*usd/i.test(t)?fail('La entrega a domicilio no es gratis en Ecuador (USD 3,50 + IVA). Gratis es el retiro en agencia.'):ok();},
+    b_ec_4x4:()=>{const t=copyText();return/sin impuestos|libre de impuestos|cero impuestos/i.test(t)&&!/4x4|8[.,]5|400/i.test(t)?fail('Si dice "sin impuestos", precisa el 4x4 (hasta 8.5 lb y USD 400) en el legal.'):ok();},
+    b_co_impuestos:()=>{const t=copyText();return/sin impuestos|libre de impuestos|cero impuestos/i.test(t)&&!/200/.test(t)?fail('"Sin impuestos" aplica a compras de hasta USD 200: agrégalo en el subtítulo o el legal.'):ok();},
+    b_co_origen:()=>{const m=copyText().match(/espa[ñn]a|madrid|europa|agencias?/i);return m?fail(`Aparece "${m[0]}": en Colombia solo hay bodega en Miami y la entrega es a la puerta.`):ok();},
+    b_ec_restringidos:()=>{const m=copyText().match(/\b(usad[oa]s?|renovad[oa]s?|open box|refurbished|reacondicionad[oa]s?|medicinas?|medicamentos?|armas?)\b/i);return m?fail(`Aparece "${m[0]}": no se puede traer a Ecuador.`):ok();},
+    b_co_restringidos:()=>{const m=copyText().match(/\b(bater[ií]as?|drones?|vapes?|vapeadores?|medicamentos?|alimentos?|r[ée]plicas?|falsificad\w*|reacondicionad[oa]s?)\b/i);return m?fail(`Aparece "${m[0]}": no se trae a Colombia o requiere consulta.`):ok();},
+    b_ec_tiempo:()=>{const bad=daysIn(copyText()).filter(n=>![7,10].includes(n));return bad.length?fail(`Tiempo no publicado: ${bad.join(', ')} días. Usa "en 7 días" (claim aprobado) o "de 7 a 10 días hábiles".`):ok();},
+    b_co_tiempo:()=>{const bad=daysIn(copyText()).filter(n=>![3,4,5,7,10].includes(n));return bad.length?fail(`Tiempo no publicado: ${bad.join(', ')} días. Usa los publicados: Bogotá 4 a 7 días hábiles; resto del país 5 a 10.`):ok();},
     n_phrases:()=>{const t=PIECE_FIELDS.map(f=>d[f]).join(' · ')+' · '+S.waMsg;const m=t.match(FORBIDDEN);return m?fail(`Aparece "${m[0]}". Usa un verbo de acción directo.`):ok();},
   };
   const aiFresh=S.aiReview&&S.aiReview.hash===copyHash();
@@ -1095,19 +1107,80 @@ const FIELDS=[['eyebrow','Antetítulo','Ej. Compra desde USA'],['titular','Titul
 const EXTRA_FIELDS=[['nota','Nota del destacado','Ej. +IVA/libra, de regalo'],['fecha','Fecha / vigencia','Ej. Hasta el 30 de nov'],['codigo','Código promocional','Ej. UPPER10'],['legal','Texto legal','Términos y condiciones']];
 const FIELD_LABEL=Object.fromEntries([...FIELDS,...EXTRA_FIELDS].map(([k,l])=>[k,l.replace(/ \(.*\)/,'')]));
 function step3(){const t=curTpl();const filled=new Set(S.msgAI?.campos||[]);
-  return `<h2>Mensaje</h2><p class="lead">Escribe la idea con tus palabras. Claude la valida con el tono de Upper y las reglas de marca, y completa el copy de la pieza para el formato elegido (${esc(curFormat().label)} · ${esc(t.name)}). Todo queda editable.</p>
+  return `<h2>Mensaje</h2><p class="lead">Escribe la idea con tus palabras. La plataforma la valida con el tono, los Do's y Don'ts y el conocimiento de Upper que ya tiene dentro, sin conexión. Para redactar o rehacer el copy, usa la IA que tengas: la plataforma le pasa los lineamientos y tú traes la respuesta (${esc(curFormat().label)} · ${esc(t.name)}).</p>
   <div class="box"><h3>1. Propuesta de mensaje</h3>
     <label class="f">Qué quieres decir<textarea id="prop" rows="3" placeholder="Ej. Te regalamos 10 dólares para tu primer pedido, compra en USA y te lo traemos en 7 días">${esc(S.propuesta)}</textarea></label>
-    <div class="row" style="margin-top:10px"><button class="btn primary" id="val" ${AI.ready()?'':'disabled'}>Validar con Claude</button><button class="btn" id="stop" hidden>Detener</button></div>
-    <div class="status" id="st">${AI.ready()?'':'La IA no está conectada en esta vista: escribe el copy directamente abajo. La revisión de marca funciona igual.'}</div>
+    <div class="row" style="margin-top:10px"><button class="btn primary" id="val">Validar con lineamientos de marca</button><button class="btn" id="rew" aria-expanded="${S.rewOpen?'true':'false'}">Reescribir con IA</button></div>
+    <div class="status" id="st"></div>
+    <div id="verdict">${S.verdict?verdictHtml():''}</div>
+    <div id="rewPanel" ${S.rewOpen?'':'hidden'}>${S.rewOpen?rewHtml():''}</div>
     <div id="aiOut">${aiHtml()}</div>
   </div>
   <div class="box"><h3>2. Copy de la pieza <span class="hint">Fecha, código, legal y mensaje de WhatsApp se agregan en Diseño, si aplican</span></h3>
-  <div class="fields">${FIELDS.map(([k,l,ph])=>`<label class="f ${k==='subtitulo'||k==='titular'?'full':''}${filled.has(k)?' ai-filled':''}">${l}${filled.has(k)?' <span class="aitag">Completado por Claude</span>':''}<input type="text" id="c_${k}" value="${esc(S.copy[k])}" placeholder="${ph}"><span class="counter" id="n_${k}"></span></label>`).join('')}</div></div>
+  <div class="fields">${FIELDS.map(([k,l,ph])=>`<label class="f ${k==='subtitulo'||k==='titular'?'full':''}${filled.has(k)?' ai-filled':''}">${l}${filled.has(k)?' <span class="aitag">Completado con IA</span>':''}<input type="text" id="c_${k}" value="${esc(S.copy[k])}" placeholder="${ph}"><span class="counter" id="n_${k}"></span></label>`).join('')}</div></div>
   ${navHtml('Ver diseño')}`;}
+/* Validación interna: reglas de texto y de negocio del país, sin IA. Lo que pide criterio (tono) queda como "revísalo tú". */
+function localVerdict(){const rv=reviewOf(curTpl(),S.scheme).filter(r=>r.scope==='copy'&&r.enabled);
+  const fails=rv.filter(r=>r.state==='fail'&&r.sev!=='info'),recs=rv.filter(r=>r.state==='fail'&&r.sev==='info'),manual=rv.filter(r=>r.state==='pending');
+  const empty=!S.copy.titular&&!S.copy.destacado;return{ok:!fails.length&&!empty,empty,fails,recs,manual};}
+function verdictHtml(){const v=localVerdict();
+  return `<div class="crit"><div class="row" style="justify-content:space-between"><b style="margin:0">${v.empty?'Falta el copy':v.ok?'Aprobado':'Rehacer'}</b><span class="chip ${v.ok?'c-ok':'c-block'}">${v.empty?'Completa el copy abajo o usa Reescribir con IA':v.ok?'Cumple los lineamientos que se validan solos':`${v.fails.length} regla${v.fails.length>1?'s':''} por corregir`}</span></div>
+  ${v.fails.length?`<b>Por corregir</b><ul class="plain">${v.fails.map(r=>`<li><b>${esc(r.text)}</b>${r.detail?` <span class="hint">${esc(r.detail)}</span>`:''}</li>`).join('')}</ul>`:''}
+  ${v.recs.length?`<b>Recomendaciones</b><ul class="plain">${v.recs.map(r=>`<li>${esc(r.detail||r.text)}</li>`).join('')}</ul>`:''}
+  ${v.manual.length?`<b>Revísalo tú</b><p class="hint" style="margin:2px 0 4px">Estas reglas piden criterio: no se validan solas.</p><ul class="plain">${v.manual.map(r=>`<li>${esc(r.text)}</li>`).join('')}</ul>`:''}
+  ${!v.ok&&!v.empty?'<p class="hint" style="margin:6px 0 0">Corrige a mano o usa Reescribir con IA: el prompt incluye estas correcciones.</p>':''}</div>`;}
+const AI_DESTS=[['Claude','https://claude.ai/new'],['ChatGPT','https://chatgpt.com/'],['Gemini','https://gemini.google.com/app'],['Copilot','https://copilot.microsoft.com/']];
+function rewPrompt(){const t=curTpl(),v=localVerdict(),has=FIELDS.some(([k])=>S.copy[k]);
+  return `${VOICE}
+
+${knowledgeBlock()}
+
+Tarea: eres el UX writer de Upper. ${has?'Revisa y rehaz':'Escribe'} el copy de una pieza gráfica a partir de la propuesta, cumpliendo el tono, el conocimiento y las reglas de abajo. Si ya cumple, mantenlo y solo pule.
+País: ${PAISES[paisActual()].nombre}
+Formato: ${curFormat().label} (${curFormat().canal}), plantilla "${t.name}" ${t.w}×${t.h}px
+Propuesta del ejecutor: «${S.propuesta||'(sin propuesta)'}»
+${has?`Copy actual:\n${FIELDS.map(([k,l])=>`- ${l}: ${S.copy[k]||'(vacío)'}`).join('\n')}\n`:''}${v.fails.length?`La validación interna encontró esto por corregir:\n${v.fails.map(r=>`- ${r.text}${r.detail?' → '+r.detail:''}`).join('\n')}\n`:''}
+Campos y límites ESTRICTOS de caracteres (con espacios, sin contar asteriscos):
+- ANTETÍTULO ≤ ${LIMITS.eyebrow}: corto, en mayúsculas; puede ir vacío.
+- TITULAR ≤ ${LIMITS.titular} y máximo 7 palabras; marca con *asteriscos* una palabra o frase corta a resaltar.
+- SUBTÍTULO ≤ ${LIMITS.subtitulo} y máximo 15 palabras.
+- DESTACADO ≤ ${LIMITS.destacado}: la cifra u oferta (ej. "10 USD"); vacío si no hay oferta.
+- CTA ≤ ${LIMITS.cta}: un solo verbo + acción.
+Sin emojis. No inventes montos, descuentos, fechas ni datos que no estén en la propuesta o en el conocimiento. No escribas fecha, código, legal ni mensaje de WhatsApp.
+Reglas de marca y de negocio:
+${activeRules().filter(r=>r.enabled&&r.check!=='fixed'&&r.scope==='copy').map(r=>`- ${r.kind==='do'?'HACER':'NO HACER'}: ${r.text}`).join('\n')}
+
+Entrega 3 versiones con enfoques distintos (directo a la oferta, urgencia, cómplice). La primera es tu recomendación.
+Responde EXACTAMENTE con este formato de texto, sin nada antes ni después (deja vacío el campo que no aplique):
+VERSIÓN 1
+ENFOQUE:
+ANTETÍTULO:
+TITULAR:
+SUBTÍTULO:
+DESTACADO:
+CTA:
+AJUSTES: qué cambiaste y por qué, en una línea
+VERSIÓN 2
+(mismos campos)
+VERSIÓN 3
+(mismos campos)`;}
+function rewHtml(){return `<div class="crit"><b style="margin-top:0">1. Lleva el prompt a tu IA</b>
+  <p class="hint" style="margin:2px 0 8px">Incluye el tono de Upper, el conocimiento de ${esc(PAISES[paisActual()].nombre)}, los Do's y Don'ts y tu propuesta. Al elegir una IA se copia el prompt y se abre en otra pestaña: pégalo (Ctrl+V o Cmd+V) y envíalo.</p>
+  <div class="row" style="flex-wrap:wrap;gap:6px">${AI_DESTS.map(([n,u])=>`<a class="btn sm" href="${u}" target="_blank" rel="noopener" data-dest>${n}</a>`).join('')}<button class="btn sm" id="cpPrompt">Solo copiar (otra IA)</button></div>
+  <details style="margin-top:8px"><summary class="hint">Ver el prompt</summary><textarea id="promptBox" rows="8" readonly style="width:100%;margin-top:6px">${esc(rewPrompt())}</textarea></details>
+  <b>2. Pega aquí la respuesta</b>
+  <textarea id="aiResp" rows="6" style="width:100%" placeholder="VERSIÓN 1&#10;ENFOQUE: …&#10;TITULAR: …"></textarea>
+  <div class="row" style="margin-top:8px"><button class="btn primary" id="applyResp">Aplicar al copy y validar</button></div></div>`;}
+async function copyPrompt(){const t=rewPrompt();const box=$('#promptBox');if(box)box.value=t;
+  try{await navigator.clipboard.writeText(t);return true;}catch{}
+  try{if(box){box.closest('details').open=true;box.focus();box.select();if(document.execCommand('copy'))return true;}}catch{}return false;}
+function parseAiResp(txt){const blocks=String(txt).replace(/\r/g,'').split(/^[#>*\s]*VERSI[ÓO]N\s*\d+[^\n]*$/im).filter(b=>/TITULAR|DESTACADO/i.test(b));
+  const KEY={'ENFOQUE':'enfoque','ANTETITULO':'eyebrow','TITULAR':'titular','SUBTITULO':'subtitulo','DESTACADO':'destacado','CTA':'cta','AJUSTES':'ajustes'};
+  return blocks.map(b=>{const o={};for(const line of b.split('\n')){const m=line.match(/^[\s>*_-]*([A-Za-zÁÉÍÓÚáéíóú]+)[\s*_]*:[\s*_]*(.*)$/);if(!m)continue;
+    const k=KEY[m[1].toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'')];if(!k)continue;let v=m[2].replace(/\*\*+/g,'').replace(/^["“”']|["“”']$/g,'').trim();if(/^\(?(vac[ií]o|ninguno|n\/a|—|-)\)?$/i.test(v))v='';o[k]=v;}return o;}).filter(o=>o.titular||o.destacado);}
 function aiHtml(){
   if(!S.evalr&&!S.opciones.length)return '';const e=S.evalr||{};const alt=S.opciones.map((o,i)=>[o,i]).filter(([,i])=>i!==S.optSel);
-  return `<div class="crit"><div class="row" style="justify-content:space-between"><b style="margin:0">Evaluación de tu propuesta</b><span class="score">${esc(e.puntaje??'–')}<small style="font-size:14px;color:var(--muted)">/10</small></span></div>
+  return `<div class="crit"><div class="row" style="justify-content:space-between"><b style="margin:0">Respuesta de tu IA</b>${e.puntaje!=null?`<span class="score">${esc(e.puntaje)}<small style="font-size:14px;color:var(--muted)">/10</small></span>`:''}</div>
   ${e.fortalezas?.length?`<b>Funciona</b><ul class="plain">${e.fortalezas.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
   ${e.problemas?.length?`<b>Se ajustó</b><ul class="plain">${e.problemas.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
   ${S.optSel>=0?`<b>Aplicado en el copy</b><p class="hint" style="margin:2px 0 0">Versión “${esc(S.opciones[S.optSel]?.enfoque||'recomendada')}”. Revísala abajo y edítala si hace falta.</p>`:''}
@@ -1116,39 +1189,21 @@ function counters(){[...FIELDS,...EXTRA_FIELDS].forEach(([k])=>{const n=$('#n_'+
 let ctl=null;
 function bind3(){$('#prop').oninput=e=>{S.propuesta=e.target.value;saveDraft();};
   const unmark=k=>{const c=S.msgAI?.campos;if(c&&c.includes(k)){S.msgAI.campos=c.filter(x=>x!==k);const l=$('#c_'+k)?.closest('label');l?.classList.remove('ai-filled');l?.querySelector('.aitag')?.remove();}};
-  FIELDS.forEach(([k])=>$('#c_'+k).oninput=e=>{S.copy[k]=e.target.value;unmark(k);counters();drawLive();saveDraft();});
-  counters();bindOpts();$('#val').onclick=validate;$('#stop').onclick=()=>ctl?.abort();}
+  FIELDS.forEach(([k])=>$('#c_'+k).oninput=e=>{S.copy[k]=e.target.value;unmark(k);counters();drawLive();saveDraft();if(S.verdict)$('#verdict').innerHTML=verdictHtml();});
+  counters();bindOpts();
+  $('#val').onclick=()=>{S.verdict=true;$('#verdict').innerHTML=verdictHtml();};
+  $('#rew').onclick=()=>{S.rewOpen=!S.rewOpen;$('#rewPanel').hidden=!S.rewOpen;$('#rew').setAttribute('aria-expanded',String(S.rewOpen));if(S.rewOpen){$('#rewPanel').innerHTML=rewHtml();bindRew();}};
+  if(S.rewOpen)bindRew();}
+function bindRew(){document.querySelectorAll('[data-dest]').forEach(a=>a.onclick=()=>{copyPrompt().then(ok=>toast(ok?'Prompt copiado: pégalo en tu IA':'Copia el prompt desde "Ver el prompt"'));});
+  $('#cpPrompt').onclick=async()=>toast(await copyPrompt()?'Prompt copiado: pégalo en tu IA':'Selecciona y copia el prompt desde "Ver el prompt"');
+  $('#applyResp').onclick=()=>{const opts=parseAiResp($('#aiResp').value);const st=$('#st');
+    if(!opts.length){st.className='status err';st.textContent='No encontré el copy en la respuesta. Pega la respuesta completa, con VERSIÓN 1 y los campos TITULAR, CTA, etc.';return;}
+    S.opciones=opts.slice(0,3).map(o=>{const c={...o};Object.keys(LIMITS).forEach(k=>{if(typeof c[k]==='string'&&c[k].replace(/\*/g,'').length>LIMITS[k])c[k]=c[k].slice(0,LIMITS[k]).trim();});return c;});
+    S.evalr={puntaje:null,fortalezas:[],problemas:opts[0].ajustes?[opts[0].ajustes]:[]};S.optSel=-1;applyOption(0);S.rewOpen=false;S.verdict=true;drawMain();drawLive();
+    const s2=$('#st');if(s2){s2.className='status';s2.textContent='Copy aplicado desde tu IA y validado con los lineamientos. Revísalo y edítalo si hace falta.';}};}
 function applyOption(i){const o=S.opciones[i];if(!o)return;S.optSel=i;const campos=[];
   ['eyebrow','titular','subtitulo','destacado','cta'].forEach(k=>{S.copy[k]=o[k]!=null?String(o[k]):'';if(S.copy[k])campos.push(k);});S.msgAI={campos};saveDraft();}
-function bindOpts(){document.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{applyOption(+b.dataset.o);drawMain();drawLive();toast('Versión aplicada en el copy');});}
-async function validate(){
-  const st=$('#st');const t=curTpl();
-  const prompt=`${VOICE}
-
-${knowledgeBlock()}
-
-Tarea: evalúa la propuesta de mensaje y escribe 3 versiones de copy para una pieza gráfica de Upper. La primera es tu recomendación: se aplicará directamente en la pieza.
-País: ${PAISES[paisActual()].nombre}
-Formato: ${curFormat().label} (${curFormat().canal}), plantilla "${t.name}" ${t.w}×${t.h}px
-Propuesta del usuario: """${S.propuesta}"""
-
-Campos de la pieza y límites ESTRICTOS de caracteres (cuenta espacios, sin contar asteriscos):
-- eyebrow ≤ ${LIMITS.eyebrow}: antetítulo corto en mayúsculas (ej. "COMPRA DESDE USA"); puede ir vacío.
-- titular ≤ ${LIMITS.titular}: frase contundente; marca con *asteriscos* una palabra o frase corta a resaltar.
-- subtitulo ≤ ${LIMITS.subtitulo}: beneficio o explicación.
-- destacado ≤ ${LIMITS.destacado}: la cifra u oferta (ej. "$5", "10 USD", "1 LIBRA"); vacío si no hay oferta.
-- cta ≤ ${LIMITS.cta}: un solo verbo + acción.
-No escribas fecha, código, nota, legal ni mensaje de WhatsApp: son datos opcionales que decide el ejecutor.
-Las 3 versiones deben tener enfoques distintos (directo a la oferta, urgencia, cómplice/sorpresa). Mantén la oferta y los datos reales; no inventes montos, descuentos ni fechas.\nRespeta además estas reglas de marca del equipo:\n${activeRules().filter(r=>r.enabled&&r.check!=='fixed').map(r=>`- ${r.kind==='do'?'HACER':'NO HACER'}: ${r.text}`).join('\n')}
-
-Responde SOLO con JSON con esta forma:
-{"evaluacion":{"puntaje":0-10,"fortalezas":["lo que funciona de la propuesta"],"problemas":["lo que ajustaste y por qué"]},"opciones":[{"enfoque":"2-3 palabras","eyebrow":"","titular":"","subtitulo":"","destacado":"","cta":""}]}`;
-  $('#val').disabled=true;$('#stop').hidden=false;st.className='status';st.textContent='Claude está revisando tu mensaje…';ctl=new AbortController();
-  try{const r=await AI.json(prompt,{signal:ctl.signal});if(!r||!Array.isArray(r.opciones))throw{code:'invalid_json'};
-    S.evalr=r.evaluacion||null;S.opciones=r.opciones.slice(0,3).map(o=>{const c={...o};Object.keys(LIMITS).forEach(k=>{if(typeof c[k]==='string'&&c[k].replace(/\*/g,'').length>LIMITS[k])c[k]=c[k].slice(0,LIMITS[k]).trim();});return c;});S.optSel=-1;
-    applyOption(0);drawMain();drawLive();const s2=$('#st');if(s2){s2.className='status';s2.textContent='Listo. Claude completó el copy de la pieza; revísalo y edítalo si hace falta.';}}
-  catch(e){st.className='status err';st.textContent=errMsg(e);}
-  finally{if($('#val'))$('#val').disabled=false;if($('#stop'))$('#stop').hidden=true;}}
+function bindOpts(){document.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{applyOption(+b.dataset.o);S.verdict=true;drawMain();drawLive();toast('Versión aplicada en el copy');});}
 function errMsg(e){const m={cancelled:'Revisión detenida.',not_granted:'No se dio permiso para usar Claude en esta página. Puedes escribir el copy a mano.',rate_limited:'Demasiadas consultas seguidas. Espera un minuto y vuelve a intentar.',invalid_json:'Claude respondió en un formato inesperado. Vuelve a intentarlo.',refusal:'Claude no pudo responder a este pedido. Reformúlalo.',network:'No hay conexión con el servidor de IA.',unavailable:'La IA no está disponible aquí.',auth:'El servidor no tiene una API key válida. Revisa ANTHROPIC_API_KEY.'};return m[e?.code]||e?.message||'No se pudo completar la consulta. Vuelve a intentarlo.';}
 
 /* ---------- Paso 4 ---------- */
