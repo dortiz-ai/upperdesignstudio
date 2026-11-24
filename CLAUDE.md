@@ -31,7 +31,7 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
 - Logo: vector oficial embebido (`LOGO_D`), color según el fondo, mínimo 35 px en pantalla / 0,5 cm impreso.
 - Ilustraciones: solo las 6 oficiales de `assets/ilustraciones/`, versión `_claro` u `_oscuro` según el fondo. Colores normalizados a la paleta exacta. Original en `fuentes/NUEVAS_ILUSTRACIONES.ai`.
 - **Sin botones ni bloques redondeados con texto.** El CTA va como texto en Noland, mayúsculas, con el mismo resaltado que las palabras marcadas con `*` (fondo verde de esquinas rectas, texto azul oscuro; `ctaText`). No se agregan elementos que no estén en el copy (nada de flechas). Antetítulo, destacado, fecha y código también van como texto, sin cajas ni contornos. El recuadro del QR es de esquinas rectas.
-- Sin emojis en la gráfica (van en el mensaje que acompaña la pieza), sin gradientes, sombras ni fondos fotográficos completos.
+- Sin emojis en la gráfica (van en el mensaje que acompaña la pieza), sin gradientes, sombras ni fondos fotográficos completos. **Excepción pedida por el equipo:** la composición **Foto de fondo** (`L.foto`, plantillas `foto` 4:5 y `fotostory` 9:16 en Redes sociales), con foto a sangre y texto de marca abajo, centrado: antetítulo en Rethink Sans espaciado, titular en Noland con el resaltado recto de `*`, destacado, subtítulo y CTA. El logo va en una pestaña verde sólida, nunca sobre la foto (regla `n_logo_bg`). Sin sombras ni degradados para legibilidad: `photoLum` avisa si la foto es clara donde va el texto; encuadre arriba/centro/abajo (`fondoY`). No muestra código ni QR. La foto es por lámina en carrusel. Referencias en `docs/referencias/social/foto-*.webp`.
 
 ## Conocimiento de marca por país
 - Panel "Conocimiento de marca" con dos pestañas: Ecuador y Colombia. Base inicial en `KB_DEFAULT` (`index.html`), tomada de upper.com.ec/ayudaecuador y upperlogistics.com/es/ayuda; copia de referencia en `docs/conocimiento/`.
@@ -61,7 +61,7 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
 - El artifact publicado vive en https://claude.ai/artifact/PVXfvYdm6SMJGQyHL5gZqo. Capacidades: `sample`, `downloads`, `db`, `user` (perfil).
 - Vercel (`upperdesignstudio.vercel.app`): `npm run build` (`scripts/build.mjs`) genera `public/` con la página envuelta por `lib/pagina.js`; `server.js` queda como función solo para `/api`; `proxy.js` (Routing Middleware) pide usuario y contraseña con `STUDIO_USERS`. Sin almacenamiento externo, en Vercel los endpoints de reglas y conocimiento responden 404 y la app usa el navegador. No sirvas archivos estáticos desde `server.js` en Vercel: no se incluyen en la función.
 - `server.js`: Node 20+, SDK `@anthropic-ai/sdk`, modelo por defecto `claude-opus-5-5`. Usuarios en `STUDIO_USERS="nombre:clave,…"`. La API key nunca llega al navegador.
-- Plantillas: 3 composiciones adaptables (`L.hero`, `L.tab`, `L.cupon`) × 4 formatos = 12 piezas. Las medidas se calculan en proporción al lienzo.
+- Plantillas: 3 composiciones adaptables (`L.hero`, `L.tab`, `L.cupon`) × 4 formatos = 12 piezas, más Foto de fondo (`L.foto`) en Redes sociales: 14 en total. Las medidas se calculan en proporción al lienzo.
 - Verificación visual: prueba solo la pieza afectada (no renderices las 12 plantillas salvo que se pida): el equipo pidió ahorrar tokens.
 
 ## Pendientes conocidos

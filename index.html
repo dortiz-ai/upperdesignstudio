@@ -326,7 +326,9 @@ const FORMATS={
   social:{label:'Redes sociales',canal:'Instagram / Facebook',templates:[
     {id:'feed',name:'Feed 4:5',w:1080,h:1350,layout:'tab',desc:'Pestaña de logo y producto. El formato del brandbook.'},
     {id:'story',name:'Historia 9:16',w:1080,h:1920,layout:'hero',opt:{safeTop:.11,safeBot:.14},desc:'Con zonas seguras para la interfaz.'},
-    {id:'sq',name:'Cuadrado',w:1080,h:1080,layout:'cupon',desc:'Cupón para anuncios y carrusel.'}]},
+    {id:'sq',name:'Cuadrado',w:1080,h:1080,layout:'cupon',desc:'Cupón para anuncios y carrusel.'},
+    {id:'foto',name:'Foto de fondo 4:5',w:1080,h:1350,layout:'foto',desc:'Foto a sangre con el texto de marca abajo. Para UGC y portadas de carrusel.'},
+    {id:'fotostory',name:'Foto de fondo 9:16',w:1080,h:1920,layout:'foto',opt:{safeTop:.11,safeBot:.14},desc:'Foto a sangre para historias, con zonas seguras.'}]},
   wa:{label:'Imagen WhatsApp',canal:'WhatsApp',templates:[
     {id:'wsq',name:'Post cuadrado',w:1080,h:1080,layout:'tab',desc:'Se entiende en miniatura dentro del chat.'},
     {id:'estado',name:'Estado 9:16',w:1080,h:1920,layout:'hero',opt:{safeTop:.11,safeBot:.14},desc:'Textos fuera de las zonas que tapa la app.'},
@@ -350,7 +352,7 @@ const DEFAULTS={
 const S={step:2,formato:'inapp',tpl:'hero',scheme:'oscuro',car:{on:false,n:3,idx:0,slides:[]},
   req:{...DEFAULTS.req},propuesta:DEFAULTS.propuesta,copy:{...DEFAULTS.copy},waMsg:DEFAULTS.waMsg,
   evalr:null,opciones:[],optSel:-1,casilla:'',extrasAI:null,
-  extras:{aliados:[],producto:null,productos:[],visual:DEFAULTS.visual,qr:DEFAULTS.qr},
+  extras:{aliados:[],producto:null,productos:[],fondo:null,fondoY:.5,visual:DEFAULTS.visual,qr:DEFAULTS.qr},
   fonts:{display:false,text:false},manual:{},aiReview:null,msgAI:null};
 const curFormat=()=>FORMATS[S.formato];
 const curTpl=()=>curFormat().templates.find(t=>t.id===S.tpl)||curFormat().templates[0];
@@ -360,14 +362,14 @@ const store={get(k){try{return JSON.parse(localStorage.getItem('upper_'+k))}catc
 const CAR_MAX=10,CAR_MIN=2;
 const emptyCopy=()=>Object.fromEntries(Object.keys(S.copy).map(k=>[k,'']));
 const isCar=()=>S.car.on&&S.formato==='social';
-function syncSlide(){if(!S.car.on)return;S.car.slides[S.car.idx]={copy:S.copy,visual:S.extras.visual,productos:S.extras.productos,producto:S.extras.producto};}
+function syncSlide(){if(!S.car.on)return;S.car.slides[S.car.idx]={copy:S.copy,visual:S.extras.visual,productos:S.extras.productos,producto:S.extras.producto,fondo:S.extras.fondo,fondoY:S.extras.fondoY};}
 function selectSlide(i){if(!S.car.on)return;syncSlide();i=Math.max(0,Math.min(S.car.slides.length-1,i));const sl=S.car.slides[i];
-  S.car.idx=i;S.copy=sl.copy;S.extras.visual=sl.visual;S.extras.productos=sl.productos;S.extras.producto=sl.producto;}
+  S.car.idx=i;S.copy=sl.copy;S.extras.visual=sl.visual;S.extras.productos=sl.productos;S.extras.producto=sl.producto;S.extras.fondo=sl.fondo??null;S.extras.fondoY=sl.fondoY??.5;}
 function withSlide(i,fn){if(!S.car.on||i===S.car.idx)return fn();const prev=S.car.idx;selectSlide(i);try{return fn();}finally{selectSlide(prev);}}
-function newSlide(){return{copy:emptyCopy(),visual:S.extras.visual,productos:[],producto:null};}
+function newSlide(){return{copy:emptyCopy(),visual:S.extras.visual,productos:[],producto:null,fondo:null,fondoY:.5};}
 function setCarousel(on){if(on===S.car.on)return;
-  if(on){S.car.on=true;S.car.idx=0;S.car.slides=[{copy:S.copy,visual:S.extras.visual,productos:S.extras.productos,producto:S.extras.producto}];while(S.car.slides.length<S.car.n)S.car.slides.push(newSlide());
-    if(S.tpl==='story')S.tpl='feed';}
+  if(on){S.car.on=true;S.car.idx=0;S.car.slides=[{copy:S.copy,visual:S.extras.visual,productos:S.extras.productos,producto:S.extras.producto,fondo:S.extras.fondo,fondoY:S.extras.fondoY}];while(S.car.slides.length<S.car.n)S.car.slides.push(newSlide());
+    if(S.tpl==='story')S.tpl='feed';if(S.tpl==='fotostory')S.tpl='foto';}
   else{selectSlide(0);S.car.on=false;S.car.slides=[];S.car.idx=0;}}
 function setSlides(n){n=Math.max(CAR_MIN,Math.min(CAR_MAX,n));S.car.n=n;if(!S.car.on)return;syncSlide();
   while(S.car.slides.length<n)S.car.slides.push(newSlide());if(S.car.slides.length>n){if(S.car.idx>=n)selectSlide(n-1);S.car.slides.length=n;}}
@@ -653,6 +655,31 @@ L.cupon=(ctx,W,H,d,sc,R,o)=>{
     if(qrOn){const s=card.w*.24;qr(ctx,R,card.x+card.w-p-s,card.y+card.h-p-s*1.18,s,curFormatFor(R).print);}
     else if(d.cta)ctaText(ctx,R,d.cta,card.x+card.w-p,by,card.w*.09,fg,bg,{align:'right',maxW:card.w*.45});}
   text(ctx,R,'Legal',d.legal,{x:card.x,y:card.y+card.h+(wide?H*.03:A*.025),w:card.w,h:legalH},{font:'t',max:wide?H*.03:W*.021,min:wide?H*.02:W*.015,color:outerFg,bg:sc.cuponBg,lh:1.25,maxLines:3,align:'center'});
+};
+/* FOTO DE FONDO: foto a sangre + texto de marca abajo (referencias UGC de redes). El logo va en una pestaña sólida: nunca sobre la foto. */
+const isFoto=()=>curTpl().layout==='foto';
+function coverImg(ctx,img,W,H,fy){const k=Math.max(W/img.width,H/img.height);const w=img.width*k,h=img.height*k;ctx.drawImage(img,(W-w)/2,(H-h)*fy,w,h);}
+let lumCache={k:null,y:null,v:0};
+function photoLum(img,fy){if(lumCache.k===img&&lumCache.y===fy)return lumCache.v;const c=document.createElement('canvas');c.width=40;c.height=50;const x=c.getContext('2d');coverImg(x,img,40,50,fy);
+  let v=0;try{const d=x.getImageData(0,25,40,25).data;for(let i=0;i<d.length;i+=4)v+=(.2126*d[i]+.7152*d[i+1]+.0722*d[i+2])/255;v/=d.length/4;}catch{v=0;}lumCache={k:img,y:fy,v};return v;}
+L.foto=(ctx,W,H,d,sc,R,o)=>{
+  const top=H*(o.safeTop||0),bot=H*(o.safeBot||0);const ph=S.extras.fondo;
+  if(ph){coverImg(ctx,ph,W,H,S.extras.fondoY??.5);R.visual=true;if(photoLum(ph,S.extras.fondoY??.5)>.55)R.checks.push({lvl:'warn',msg:'La foto es clara donde va el texto: elige una más oscura abajo o mueve el encuadre.'});}
+  else{ctx.fillStyle=C.navy;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(240,255,232,.12)';ctx.fillRect(W*.08,top+H*.1,W*.84,H*.42);ctx.fillStyle=C.cream;ctx.font=fd(W*.07);ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('TU FOTO AQUÍ',W/2,top+H*.31);
+    R.checks.push({lvl:'warn',msg:'Foto de fondo: lo que ves es un marcador. Sube la foto en Visual de la pieza.'});}
+  const tabH=Math.max(W*.1,minLogo(R)/.42),tabW=tabH*2.6,tx=(W-tabW)/2;
+  rr(ctx,tx,top-tabH*.5,tabW,tabH*1.5,tabH*.32);ctx.fillStyle=C.green;ctx.fill();
+  const lgh=Math.max(tabH*.42,minLogo(R));drawLogo(ctx,tx+(tabW-lgh*LB.w/LB.h)/2,top+(tabH-lgh)/2,lgh,C.navy);R.logo=true;R.logoH=lgh;R.pairs.push({fg:C.navy,bg:C.green,large:true,label:'Logo'});
+  const p=W*.08,iw=W-p*2,gap=H*.015;let yb=H-bot-p;const T={...sc,hi:C.cream,bg:C.navy};
+  if(d.legal){const r=text(ctx,R,'Legal',d.legal,{x:p,y:yb-H*.05,w:iw,h:H*.05},{font:'t',max:W*.022,min:W*.016,color:C.cream,bg:C.navy,lh:1.25,maxLines:2,align:'center',valign:'bottom'});yb-=r.h+gap;}
+  if(d.cta){const h=W*.075;ctaText(ctx,R,d.cta,W/2,yb-h,h,C.navy,C.green,{align:'center',maxW:iw});yb-=h+gap*1.5;}
+  if(d.subtitulo){const r=text(ctx,R,'Subtítulo',d.subtitulo,{x:p,y:yb-H*.1,w:iw,h:H*.1},{font:'t',weight:500,max:W*.042,min:W*.026,color:C.cream,bg:C.navy,lh:1.25,maxLines:3,align:'center',valign:'bottom'});yb-=r.h+gap;}
+  if(d.fecha){const r=text(ctx,R,'Fecha',d.fecha,{x:p,y:yb-H*.05,w:iw,h:H*.05},{font:'t',max:W*.05,min:W*.03,color:C.cream,bg:C.navy,lh:1.1,maxLines:1,align:'center',valign:'bottom'});yb-=r.h+gap;}
+  if(d.destacado){const r=text(ctx,R,'Destacado',[d.destacado,d.nota].filter(Boolean).join(' '),{x:p,y:yb-H*.1,w:iw,h:H*.1},{font:'d',upper:true,max:W*.12,min:W*.06,color:C.green,bg:C.navy,lh:1,maxLines:1,align:'center',valign:'bottom'});yb-=r.h+gap;}
+  if(d.titular){const r=text(ctx,R,'Titular',d.titular,{x:p,y:yb-H*.3,w:iw,h:H*.3},{font:'d',upper:true,max:W*.085,min:W*.05,color:C.cream,bg:C.navy,lh:1.12,maxLines:3,align:'center',valign:'bottom',hi:C.navy,hiMode:'marker'});yb-=r.h+gap;}
+  if(d.eyebrow){const h=W*.075;eyebrow(ctx,R,d.eyebrow,W/2,yb-h,h,T,{align:'center',maxW:iw});}
+  if(d.codigo)R.checks.push({lvl:'warn',msg:'Foto de fondo no muestra el código: ponlo en el subtítulo o usa otra composición.'});
+  if(S.extras.qr)R.checks.push({lvl:'warn',msg:'Foto de fondo no lleva QR: usa otra composición si lo necesitas.'});
 };
 const curFormatFor=R=>FORMATS[R.fmt];
 const minLogo=R=>curFormatFor(R).print?64:40;
@@ -1010,7 +1037,7 @@ function step2(){const f=curFormat();
   <div class="fmts" role="group" aria-label="Vista" style="margin:0"><button class="fmt ${v==='mockup'?'sel':''}" data-view="mockup" aria-pressed="${v==='mockup'}">Mockup</button><button class="fmt ${v==='esquema'?'sel':''}" data-view="esquema" aria-pressed="${v==='esquema'}">Esquema</button></div></div>
   ${S.formato==='social'?`<div class="row" style="margin:0 0 12px;gap:10px"><b style="font-size:13px">Tipo</b><div class="fmts" role="group" aria-label="Post o carrusel" style="margin:0"><button class="fmt ${!S.car.on?'sel':''}" data-car="0" aria-pressed="${!S.car.on}">Post</button><button class="fmt ${S.car.on?'sel':''}" data-car="1" aria-pressed="${S.car.on}">Carrusel</button></div>
     ${S.car.on?`<span class="row" style="gap:6px"><span class="hint">Láminas</span><button class="btn sm" data-n="-1" aria-label="Quitar lámina" ${S.car.n<=CAR_MIN?'disabled':''}>−</button><b>${S.car.n}</b><button class="btn sm" data-n="1" aria-label="Agregar lámina" ${S.car.n>=CAR_MAX?'disabled':''}>+</button><span class="hint">máx. ${CAR_MAX}. Todas comparten formato, plantilla y colores.</span></span>`:'<span class="hint">Carrusel: hasta 10 láminas coherentes entre sí.</span>'}</div>`:''}
-  <div class="tpls">${f.templates.map(t=>`<button class="tpl ${t.id===S.tpl?'sel':''}" data-t="${t.id}" aria-pressed="${t.id===S.tpl}" ${S.car.on&&S.formato==='social'&&t.id==='story'?'disabled title="Las historias no van en carrusel"':''}><div class="thumb ${v==="mockup"?"mock":""}"><canvas data-th="${t.id}" aria-label="${v==="mockup"?"Mockup de ejemplo":"Esquema"} de ${esc(t.name)}"></canvas></div>${v==="mockup"?'<span class="mock-tag">Ejemplo con mensaje de muestra</span>':''}<b>${esc(t.name)}</b><span class="dim">${t.w}×${t.h} px</span><p>${esc(t.desc)}</p></button>`).join('')}</div>
+  <div class="tpls">${f.templates.map(t=>`<button class="tpl ${t.id===S.tpl?'sel':''}" data-t="${t.id}" aria-pressed="${t.id===S.tpl}" ${S.car.on&&S.formato==='social'&&t.h/t.w>1.5?'disabled title="Las historias no van en carrusel"':''}><div class="thumb ${v==="mockup"?"mock":""}"><canvas data-th="${t.id}" aria-label="${v==="mockup"?"Mockup de ejemplo":"Esquema"} de ${esc(t.name)}"></canvas></div>${v==="mockup"?'<span class="mock-tag">Ejemplo con mensaje de muestra</span>':''}<b>${esc(t.name)}</b><span class="dim">${t.w}×${t.h} px</span><p>${esc(t.desc)}</p></button>`).join('')}</div>
   ${navHtml('Escribir mensaje')}`;}
 function bind2(){document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{if(b.dataset.f!=='social')setCarousel(false);S.formato=b.dataset.f;S.tpl=FORMATS[S.formato].templates[0].id;drawMain();drawLive();saveDraft();});
   document.querySelectorAll('[data-car]').forEach(b=>b.onclick=()=>{setCarousel(b.dataset.car==='1');saveDraft();drawMain();drawLive();});
@@ -1022,10 +1049,10 @@ function bind2(){document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>
 
 /* Mockup de ejemplo: la composición con un mensaje de muestra, puesta en su contexto real (app, feed, chat, mostrador) */
 const SAMPLE={copy:{eyebrow:'Compra desde USA',titular:'Tus compras, *sin fronteras*',subtitulo:'Compra en tus tiendas favoritas y tráelo con Upper.',destacado:'10 USD',cta:'Compra ya',nota:'de regalo',codigo:'',fecha:'',legal:''},visual:'celular-bolsa'};
-const MOCK_KIND={inapp:{hero:'app',tab:'app',cupon:'app'},social:{feed:'feed',story:'story',sq:'feed'},wa:{wsq:'chat',estado:'story',wv:'chat'},hablador:{a5:'stand',a6:'stand',colg:'hang'}};
-function renderSample(t,k){const keep={copy:S.copy,visual:S.extras.visual,qr:S.extras.qr,aliados:S.extras.aliados,producto:S.extras.producto};
+const MOCK_KIND={inapp:{hero:'app',tab:'app',cupon:'app'},social:{feed:'feed',story:'story',sq:'feed',foto:'feed',fotostory:'story'},wa:{wsq:'chat',estado:'story',wv:'chat'},hablador:{a5:'stand',a6:'stand',colg:'hang'}};
+function renderSample(t,k){const keep={copy:S.copy,visual:S.extras.visual,qr:S.extras.qr,aliados:S.extras.aliados,producto:S.extras.producto,fondo:S.extras.fondo};S.extras.fondo=null;
   S.copy={...SAMPLE.copy};S.extras.visual=SAMPLE.visual;S.extras.qr='';S.extras.aliados=[];S.extras.producto=null;
-  const c=document.createElement('canvas');try{render(c,t,S.scheme,k);}finally{S.copy=keep.copy;S.extras.visual=keep.visual;S.extras.qr=keep.qr;S.extras.aliados=keep.aliados;S.extras.producto=keep.producto;}return c;}
+  const c=document.createElement('canvas');try{render(c,t,S.scheme,k);}finally{S.copy=keep.copy;S.extras.visual=keep.visual;S.extras.qr=keep.qr;S.extras.aliados=keep.aliados;S.extras.producto=keep.producto;S.extras.fondo=keep.fondo;}return c;}
 function mkPhone(x,cx,cy,h){const w=h*.49,px=cx-w/2,py=cy-h/2;x.save();x.shadowColor='rgba(0,0,0,.28)';x.shadowBlur=h*.05;x.shadowOffsetY=h*.02;rr(x,px,py,w,h,w*.14);x.fillStyle='#16181D';x.fill();x.restore();
   const b=w*.04;const s={x:px+b,y:py+b,w:w-2*b,h:h-2*b,r:w*.11};return s;}
 function phoneNotch(x,s){rr(x,s.x+s.w*.35,s.y+s.h*.012,s.w*.3,s.h*.028,s.h*.014);x.fillStyle='#16181D';x.fill();}
@@ -1136,6 +1163,7 @@ function drawWire(c,t){const k=Math.min(.4,340/Math.max(t.w,t.h));const W=t.w,H=
     else{const p=W*.08;box(p,top+p,W*.28,W*.06,ln);bars(p,top+A*.14,W*.8,2,A*.05,A*.02);bars(p,top+A*.3,W*.75,2,A*.015,A*.012);box(p,top+A*.38,W-p*2,A*.4);box(p,top+A*.84,W*.3,A*.06,ac,A*.03);}}
   else if(t.layout==='tab'){if(wide){box(W*.06,-H*.05,H*.36,H*.19,ln);bars(W*.06,H*.28,W*.42,2,H*.1,H*.04);bars(W*.06,H*.56,W*.4,2,H*.035,H*.025);box(W*.06,H*.76,W*.13,H*.11,ac,H*.055);box(W*.56,H*.14,W*.4,H*.76);}
     else{const p=W*.08;box(W/2-W*.13,top-W*.05,W*.26,W*.15,ln);bars(W*.18,top+A*.12,W*.64,2,A*.05,A*.02);bars(W*.22,top+A*.27,W*.56,1,A*.015,A*.01);box(p,top+A*.33,W-p*2,A*.45);box(W/2-W*.16,top+A*.83,W*.32,A*.06,ac,A*.03);}}
+  else if(t.layout==='foto'){x.fillStyle=dark?'#3A4A6B':'#C9D6BE';x.fillRect(0,0,W,H);const p=W*.08;box(W/2-W*.13,top-W*.05,W*.26,W*.15,ac);bars(W*.3,top+A*.62,W*.4,1,A*.02,0);box(p,top+A*.67,W-p*2,A*.05,ac,0);bars(W*.18,top+A*.74,W*.64,1,A*.05,0);bars(W*.25,top+A*.82,W*.5,2,A*.015,A*.012);box(W/2-W*.14,top+A*.89,W*.28,A*.05,ac,0);}
   else{const cw=wide?W*.86:W*.84,ch=wide?H*.72:A*.7,cx=(W-cw)/2,cy=wide?H*.1:top+A*.1;box(cx,cy,cw,ch,dark?'#1B2740':'#F7FBF3');const p=Math.min(cw,ch)*.09;
     box(cx+p,cy+p,cw*.22,ch*.08,ln);bars(cx+p,cy+ch*.3,cw*.4,1,ch*.07,0);bars(cx+p,cy+ch*.42,cw*.45,1,ch*.18,0);bars(cx+p,cy+ch*.68,cw*.5,2,ch*.03,ch*.02);box(cx+cw-p-cw*.22,cy+ch-p-ch*.12,cw*.22,ch*.12,ac,ch*.06);}
 }
@@ -1277,9 +1305,11 @@ function step4(){const x=S.extras,a=S.extrasAI,t=curTpl();const filled=new Set(a
     <div class="meta"><span><span class="pill">${esc(curFormat().label)}</span> ${esc(t.name)}${isCar()?` · <b>Lámina ${S.car.idx+1} de ${S.car.slides.length}</b>`:''}</span><span>${t.w}×${t.h} px</span></div>
   </section>
   <div class="box"><h3>1. Visual de la pieza</h3>
+    ${isFoto()?fotoEditor():`
     <div class="visuals">${VISUALS.map(([k,l])=>`<button class="vis ${x.visual===k?'sel':''}" data-v="${k}" aria-pressed="${x.visual===k}"><canvas width="240" height="160" data-vis="${k}"></canvas>${l}</button>`).join('')}</div>
     <label class="f" style="margin-top:12px">Foto de producto<input type="file" id="prod" accept="image/png,image/webp,image/jpeg"><span class="hint">PNG recortado sin fondo. Va sobre la tarjeta, nunca como fondo completo.</span><div class="files">${x.producto?`<span class="fileitem"><img src="${x.producto.src}" alt=""> producto <button id="rmProd" aria-label="Quitar foto">×</button></span>`:''}</div></label>
     ${x.visual==='recortes'||x.visual==='cards'?prodEditor():''}
+    `}
   </div>
   <div class="box"><h3>2. ¿Qué más necesita la pieza?</h3>
     <p class="hint" style="margin:0 0 10px">Completa los datos que apliquen y pide lo que la plantilla base no trae. Llévalo a tu IA con los lineamientos de Upper: lo que encaja se ubica en zonas reservadas y lo que rompe la marca se rechaza con una alternativa. Pega la respuesta y lo aceptado aparece completado en Elementos permitidos, donde puedes editarlo o borrarlo.</p>
@@ -1297,6 +1327,9 @@ function step4(){const x=S.extras,a=S.extrasAI,t=curTpl();const filled=new Set(a
   </div></div>
   <div class="box review-box"><div id="d_review"></div></div>
   ${navHtml('Ir a descarga')}`;}
+function fotoEditor(){const x=S.extras,y=x.fondoY??.5;
+  return `<label class="f">Foto de fondo<input type="file" id="fondo" accept="image/png,image/webp,image/jpeg"><span class="hint">Va a sangre en toda la pieza. Elige una foto con la parte de abajo más oscura o despejada: ahí va el texto.</span><div class="files">${x.fondo?`<span class="fileitem"><img src="${x.fondo.src}" alt=""> foto <button id="rmFondo" aria-label="Quitar foto">×</button></span>`:''}</div></label>
+  <div class="row" style="margin-top:10px;gap:10px"><b style="font-size:13px">Encuadre</b><div class="fmts" role="group" aria-label="Encuadre de la foto" style="margin:0">${[['Arriba',0],['Centro',.5],['Abajo',1]].map(([l,v])=>`<button class="fmt ${y===v?'sel':''}" data-fy="${v}" aria-pressed="${y===v}">${l}</button>`).join('')}</div></div>`;}
 function prodEditor(){const x=S.extras,cards=x.visual==='cards',filled=new Set(S.extrasAI?.campos||[]);
   return `<div class="f full${filled.has('productos')?' ai-filled':''}" style="margin-top:12px"><b>${cards?`Cards de producto (máx. ${CARDS_MAX})`:`Productos recortados (máx. ${PROD_MAX})`}</b>${filled.has('productos')?' <span class="aitag">Completado con IA</span>':''}
     <input type="file" id="prods" accept="image/png,image/webp" multiple ${x.productos.length>=PROD_MAX?'disabled':''}>
@@ -1323,7 +1356,10 @@ function bind4(){
   document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{S.extras.visual=b.dataset.v;saveDraft();drawMain();drawLive();});
   $('#e_qr').oninput=e=>{S.extras.qr=e.target.value.trim();S.extrasAI?.campos&&(S.extrasAI.campos=S.extrasAI.campos.filter(x=>x!=='qr'));saveDraft();drawLive();};
   $('#ali').onchange=async e=>{for(const f of [...e.target.files]){if(S.extras.aliados.length>=3){toast('Máximo 3 aliados por pieza.');break;}try{S.extras.aliados.push({img:await readImg(f),name:f.name.replace(/\.\w+$/,''),white:true});}catch{toast('No se pudo leer '+f.name);}}drawMain();drawLive();};
-  $('#prod').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{S.extras.producto=await readImg(f);S.extras.visual='producto';}catch{toast('No se pudo leer la imagen.');}drawMain();drawLive();};
+  $('#fondo')&&($('#fondo').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{S.extras.fondo=await readImg(f);}catch{toast('No se pudo leer la imagen.');}drawMain();drawLive();});
+  $('#rmFondo')&&($('#rmFondo').onclick=()=>{S.extras.fondo=null;drawMain();drawLive();});
+  document.querySelectorAll('[data-fy]').forEach(b=>b.onclick=()=>{S.extras.fondoY=+b.dataset.fy;drawMain();drawLive();});
+  $('#prod')&&($('#prod').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{S.extras.producto=await readImg(f);S.extras.visual='producto';}catch{toast('No se pudo leer la imagen.');}drawMain();drawLive();});
   $('#prods')&&($('#prods').onchange=async e=>{for(const f of [...e.target.files]){if(S.extras.productos.length>=PROD_MAX){toast(`Máximo ${PROD_MAX} productos.`);break;}try{S.extras.productos.push({img:await readImg(f),name:f.name.replace(/\.\w+$/,''),nombre:'',precio:'',antes:''});}catch{toast('No se pudo leer '+f.name);}}drawMain();drawLive();});
   document.querySelectorAll('[data-pf]').forEach(el=>el.oninput=()=>{S.extras.productos[+el.dataset.pi][el.dataset.pf]=el.value;drawLive();});
   document.querySelectorAll('[data-prm]').forEach(b=>b.onclick=()=>{S.extras.productos.splice(+b.dataset.prm,1);drawMain();drawLive();});
@@ -1401,7 +1437,7 @@ function step5(){const t=curTpl();if(isCar())return step5Car();
   <div class="final">${Object.entries(SCHEMES).map(([k,v])=>`<div class="card"><h3>${esc(v.name)} ${k===S.scheme?'<span class="pill">Elegida</span>':`<button class="btn sm" data-pick="${k}">Elegir</button>`}</h3><div class="stage"><canvas id="f_${k}"></canvas></div><div class="review rv-card" id="fc_${k}"></div><div class="row"><button class="btn primary" data-ex="${k}">Descargar PNG ${t.w}×${t.h}</button><button class="btn" data-svg="${k}">SVG editable</button></div><div class="status" id="fs_${k}"></div></div>`).join('')}</div>
   ${S.waMsg?`<div class="box"><h3>Mensaje para enviar con la imagen <button class="btn sm" id="cpwa">Copiar</button></h3><div class="wa" id="watext">${esc(S.waMsg)}</div></div>`:''}
   <div class="box"><h3>Adaptaciones multiformato <span style="display:flex;gap:8px;align-items:center"><span class="hint">${esc(SCHEMES[S.scheme].name)}</span><button class="btn primary sm" id="zip">Descargar kit .zip</button></span></h3>
-  <p class="hint" style="margin:0">Las 12 plantillas con el mismo mensaje, en PNG y en SVG editable. Al descargar, la plataforma te avisa de las reglas que no se cumplen y el kit incluye <code>revision.txt</code>.</p>
+  <p class="hint" style="margin:0">Las ${Object.values(FORMATS).flatMap(f=>f.templates).length} plantillas con el mismo mensaje, en PNG y en SVG editable. Al descargar, la plataforma te avisa de las reglas que no se cumplen y el kit incluye <code>revision.txt</code>.</p>
   <div class="status" id="zst"></div>
   <div class="adapt" id="adapt"></div></div>
   ${navHtml()}`;}
@@ -1459,7 +1495,7 @@ async function exportPng(t,k,st){const g=await gate([t],k);if(!g.go){st.classNam
 async function exportZip(){const st=$('#zst');if(typeof JSZip==='undefined'){st.className='status err';st.textContent='No cargó el compresor. Recarga la página.';return;}
   const all=Object.values(FORMATS).flatMap(f=>f.templates);const g=await gate(all,S.scheme);
   if(!g.go){st.className='status';st.textContent='Descarga detenida. Corrige las piezas con alertas y vuelve a intentar.';return;}
-  st.className='status';st.textContent='Generando 12 piezas…';$('#zip').disabled=true;
+  st.className='status';st.textContent=`Generando ${all.length} piezas…`;$('#zip').disabled=true;
   try{await logIfNeeded(g,all,S.scheme);const zip=new JSZip();for(const t of all){const c=document.createElement('canvas');render(c,t,S.scheme,1);zip.file(`${t.fmt}/`+fileName(t,S.scheme),await toBlob(c));zip.file(`${t.fmt}/`+fileName(t,S.scheme,'svg'),renderSvg(t,S.scheme));}
     if(S.waMsg)zip.file('mensaje.txt',S.waMsg);zip.file('revision.txt',await revisionTxt(all,S.scheme,g));
     const blob=await zip.generateAsync({type:'blob'});await deliver(blob,`upper_${paisActual()}_${pieceSlug()}_kit_${S.scheme}.zip`,st);}
