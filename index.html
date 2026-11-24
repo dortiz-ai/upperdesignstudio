@@ -349,8 +349,8 @@ const S={step:2,formato:'inapp',tpl:'hero',scheme:'oscuro',
 const curFormat=()=>FORMATS[S.formato];
 const curTpl=()=>curFormat().templates.find(t=>t.id===S.tpl)||curFormat().templates[0];
 const store={get(k){try{return JSON.parse(localStorage.getItem('upper_'+k))}catch{return null}},set(k,v){try{localStorage.setItem('upper_'+k,JSON.stringify(v))}catch{}}};
-function saveDraft(){store.set('draft',{v:2,req:S.req,propuesta:S.propuesta,copy:S.copy,waMsg:S.waMsg,formato:S.formato,tpl:S.tpl,scheme:S.scheme,visual:S.extras.visual,qr:S.extras.qr});}
-function loadDraft(){const d=store.get('draft');if(!d)return;if(!d.v){if(d.copy)['nota','codigo','fecha','legal'].forEach(k=>d.copy[k]='');d.waMsg='';}Object.assign(S.req,d.req||{});Object.assign(S.copy,d.copy||{});['propuesta','waMsg','formato','tpl','scheme'].forEach(k=>{if(d[k]!=null)S[k]=d[k]});if(d.visual)S.extras.visual=d.visual;if(!VISUALS.some(v=>v[0]===S.extras.visual))S.extras.visual=DEFAULTS.visual;if(d.qr!=null)S.extras.qr=d.qr;if(!FORMATS[S.formato]){S.formato='inapp';S.tpl='hero';}if(!SCHEMES[S.scheme])S.scheme='oscuro';}
+function saveDraft(){store.set('draft',{v:3,req:S.req,copy:S.copy,waMsg:S.waMsg,formato:S.formato,tpl:S.tpl,scheme:S.scheme,visual:S.extras.visual,qr:S.extras.qr});}
+function loadDraft(){const d=store.get('draft');if(!d)return;if(!d.v){if(d.copy)['nota','codigo','fecha','legal'].forEach(k=>d.copy[k]='');d.waMsg='';}Object.assign(S.req,d.req||{});Object.assign(S.copy,d.copy||{});['waMsg','formato','tpl','scheme'].forEach(k=>{if(d[k]!=null)S[k]=d[k]});if(d.visual)S.extras.visual=d.visual;if(!VISUALS.some(v=>v[0]===S.extras.visual))S.extras.visual=DEFAULTS.visual;if(d.qr!=null)S.extras.qr=d.qr;if(!FORMATS[S.formato]){S.formato='inapp';S.tpl='hero';}if(!SCHEMES[S.scheme])S.scheme='oscuro';}
 
 /* ===================== DIBUJO ===================== */
 function rr(ctx,x,y,w,h,r){r=Math.max(0,Math.min(r,w/2,h/2));ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
@@ -1223,22 +1223,23 @@ function step4(){const x=S.extras,a=S.extrasAI,t=curTpl();const filled=new Set(a
     ${x.visual==='recortes'||x.visual==='cards'?prodEditor():''}
   </div>
   <div class="box"><h3>2. ¿Qué más necesita la pieza?</h3>
-    <p class="hint" style="margin:0 0 10px">Completa los datos que apliquen y pide lo que la plantilla base no trae. Claude lo interpreta con el criterio del brandbook: lo que encaja se ubica en zonas reservadas y lo que rompe la marca se rechaza con una alternativa. Lo que acepta aparece completado en Elementos permitidos, donde puedes editarlo o borrarlo.</p>
+    <p class="hint" style="margin:0 0 10px">Completa los datos que apliquen y pide lo que la plantilla base no trae. Llévalo a tu IA con los lineamientos de Upper: lo que encaja se ubica en zonas reservadas y lo que rompe la marca se rechaza con una alternativa. Pega la respuesta y lo aceptado aparece completado en Elementos permitidos, donde puedes editarlo o borrarlo.</p>
     <label class="f">Tu pedido<textarea id="cas" rows="3" placeholder="Ej. Válido hasta el domingo, con el código BLACK20 y un QR a upper.com.ec/blackfriday. Agrega el logo de Banco Pichincha.">${esc(S.casilla)}</textarea></label>
-    <div class="row" style="margin-top:10px"><button class="btn primary" id="interp" ${AI.ready()?'':'disabled'}>Interpretar con Claude</button></div>
-    <div class="status" id="st4">${AI.ready()?'':'La IA no está conectada en esta vista: completa los elementos directamente abajo.'}</div>
+    <div class="row" style="margin-top:10px"><button class="btn primary" id="interp" aria-expanded="${S.intOpen?'true':'false'}">Interpretar con IA</button></div>
+    <div class="status" id="st4"></div>
+    <div id="intPanel" ${S.intOpen?'':'hidden'}>${S.intOpen?intHtml():''}</div>
     ${a?`<div class="crit">${a.aceptados?.length?`<b>Se aplicó</b><ul class="plain">${a.aceptados.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}${a.rechazados?.length?`<b>No se aplicó</b><ul class="plain">${a.rechazados.map(r=>`<li><b>${esc(r.pedido)}</b>: ${esc(r.motivo)}${r.alternativa?` <span class="hint">→ ${esc(r.alternativa)}</span>`:''}</li>`).join('')}</ul>`:''}${a.faltan?.length?`<b>Falta que subas</b><ul class="plain">${a.faltan.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}</div>`:''}
   </div>
   <div class="box"><h3>3. Elementos permitidos <span class="hint">Todos son opcionales. Vacíos, la pieza no los muestra.</span></h3>
-  <div class="fields">${EXTRA_FIELDS.map(([k,l,ph])=>`<label class="f ${k==='legal'?'full':''}${mark(k)}">${l}${filled.has(k)?' <span class="aitag">Completado por Claude</span>':''}<input type="text" id="c_${k}" value="${esc(S.copy[k])}" placeholder="${ph}"><span class="counter" id="n_${k}"></span></label>`).join('')}
-    <label class="f${mark('qr')}">QR (enlace)${filled.has('qr')?' <span class="aitag">Completado por Claude</span>':''}<input type="url" id="e_qr" value="${esc(x.qr)}" placeholder="https://upper.com.ec/..."><span class="hint">Cuenta como CTA: con QR, quita el botón. Impreso, mínimo 2,5 cm.</span></label>
+  <div class="fields">${EXTRA_FIELDS.map(([k,l,ph])=>`<label class="f ${k==='legal'?'full':''}${mark(k)}">${l}${filled.has(k)?' <span class="aitag">Completado con IA</span>':''}<input type="text" id="c_${k}" value="${esc(S.copy[k])}" placeholder="${ph}"><span class="counter" id="n_${k}"></span></label>`).join('')}
+    <label class="f${mark('qr')}">QR (enlace)${filled.has('qr')?' <span class="aitag">Completado con IA</span>':''}<input type="url" id="e_qr" value="${esc(x.qr)}" placeholder="https://upper.com.ec/..."><span class="hint">Cuenta como CTA: con QR, quita el botón. Impreso, mínimo 2,5 cm.</span></label>
     <label class="f">Logos de aliados (máx. 3)<input type="file" id="ali" accept="image/png,image/svg+xml,image/webp,image/jpeg" multiple><span class="hint">Van junto al logo de Upper, separados por línea. PNG o SVG transparente.</span><div class="files">${x.aliados.map((al,i)=>`<span class="fileitem"><img src="${al.img.src}" alt=""> ${esc(al.name.slice(0,18))} <label style="display:flex;gap:3px;align-items:center"><input type="checkbox" data-w="${i}" ${al.white?'checked':''}>monocromo</label><button data-rm="${i}" aria-label="Quitar">×</button></span>`).join('')}</div></label>
-    <label class="f full${mark('mensaje')}">Mensaje que acompaña la pieza (WhatsApp o push)${filled.has('mensaje')?' <span class="aitag">Completado por Claude</span>':''}<textarea id="c_wa" rows="3" placeholder="Aquí sí van emojis y el CTA dentro del texto: Mira aquí…">${esc(S.waMsg)}</textarea></label>
+    <label class="f full${mark('mensaje')}">Mensaje que acompaña la pieza (WhatsApp o push)${filled.has('mensaje')?' <span class="aitag">Completado con IA</span>':''}<textarea id="c_wa" rows="3" placeholder="Aquí sí van emojis y el CTA dentro del texto: Mira aquí…">${esc(S.waMsg)}</textarea></label>
   </div></div>
   <div class="box review-box"><div id="d_review"></div></div>
   ${navHtml('Ir a descarga')}`;}
 function prodEditor(){const x=S.extras,cards=x.visual==='cards',filled=new Set(S.extrasAI?.campos||[]);
-  return `<div class="f full${filled.has('productos')?' ai-filled':''}" style="margin-top:12px"><b>${cards?`Cards de producto (máx. ${CARDS_MAX})`:`Productos recortados (máx. ${PROD_MAX})`}</b>${filled.has('productos')?' <span class="aitag">Completado por Claude</span>':''}
+  return `<div class="f full${filled.has('productos')?' ai-filled':''}" style="margin-top:12px"><b>${cards?`Cards de producto (máx. ${CARDS_MAX})`:`Productos recortados (máx. ${PROD_MAX})`}</b>${filled.has('productos')?' <span class="aitag">Completado con IA</span>':''}
     <input type="file" id="prods" accept="image/png,image/webp" multiple ${x.productos.length>=PROD_MAX?'disabled':''}>
     <span class="hint">${cards?'Cada card lleva foto, precio, precio anterior y nombre: todo opcional; lo vacío no se muestra. Se usan las 3 primeras.':'PNG o WebP sin fondo. Se ubican grandes y algo girados; con 3, el último va al centro.'}</span>
     ${x.productos.map((p,i)=>`<div class="prod-row">${p.img?`<img src="${p.img.src}" alt="">`:'<span class="hint">Sin foto</span>'}
@@ -1249,7 +1250,10 @@ function bind4(){
   const unmark=k=>{const c=S.extrasAI?.campos;if(c&&c.includes(k)){S.extrasAI.campos=c.filter(x=>x!==k);const l=document.getElementById(k==='mensaje'?'c_wa':k==='qr'?'e_qr':'c_'+k)?.closest('label');l?.classList.remove('ai-filled');l?.querySelector('.aitag')?.remove();}};
   EXTRA_FIELDS.forEach(([k])=>$('#c_'+k).oninput=e=>{S.copy[k]=e.target.value;unmark(k);counters();drawLive();saveDraft();});counters();
   $('#c_wa').oninput=e=>{S.waMsg=e.target.value;unmark('mensaje');drawLive();saveDraft();};
-  $('#cas').oninput=e=>S.casilla=e.target.value;$('#interp').onclick=interpret;
+  $('#cas').oninput=e=>{S.casilla=e.target.value;const b=$('#intBox');if(b)b.value=interpPrompt();};
+  $('#interp').onclick=()=>{if(!S.casilla.trim()){const st=$('#st4');st.className='status err';st.textContent='Escribe primero qué quieres agregar.';return;}
+    S.intOpen=!S.intOpen;$('#intPanel').hidden=!S.intOpen;$('#interp').setAttribute('aria-expanded',String(S.intOpen));if(S.intOpen){$('#intPanel').innerHTML=intHtml();bindInt();}};
+  if(S.intOpen)bindInt();
   document.querySelectorAll('canvas[data-vis]').forEach(c=>{const ctx=c.getContext('2d');const sc=SCHEMES.oscuro;ctx.fillStyle=sc.bg;ctx.fillRect(0,0,240,160);const v=c.dataset.vis;
     if(isIllus(v)){const im=ILUS_IMG[v]?.oscuro;if(im)contain(ctx,im,30,8,180,144);}
     else if(v==='recortes'){drawRecortes(ctx,{checks:[],pairs:[]},{x:20,y:8,w:200,h:144});}
@@ -1266,43 +1270,70 @@ function bind4(){
   $('#rmProd')&&($('#rmProd').onclick=()=>{S.extras.producto=null;if(S.extras.visual==='producto')S.extras.visual=DEFAULTS.visual;drawMain();drawLive();});
   document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{S.extras.aliados.splice(+b.dataset.rm,1);drawMain();drawLive();});
   document.querySelectorAll('[data-w]').forEach(c=>c.onchange=()=>{S.extras.aliados[+c.dataset.w].white=c.checked;drawLive();});}
-async function interpret(){
-  const st=$('#st4');if(!S.casilla.trim()){st.className='status err';st.textContent='Escribe primero qué quieres agregar.';return;}
-  const t=curTpl();
-  const prompt=`Eres el director de arte de Upper (courier, ${PAISES[paisActual()].nombre}). Interpreta un pedido de elementos extra para una pieza ya diseñada con plantilla fija.
+/* "¿Qué más necesita la pieza?": prompt corto para la IA del ejecutor; la respuesta pegada se aplica con las mismas reglas */
+function interpPrompt(){const t=curTpl();
+  return `Eres el director de arte de Upper (courier, ${PAISES[paisActual()].nombre}). Interpreta un pedido de elementos extra para una pieza con plantilla fija y responde solo en el formato indicado.
 
 ${knowledgeBlock()}
-Si el pedido pide un dato de negocio (tarifa, tiempo, condición) que contradice ese conocimiento, recházalo y propone el dato correcto.
+Si el pedido trae un dato de negocio que contradice ese conocimiento, recházalo y propone el dato correcto.
 
-Plantilla: ${curFormat().label} — "${t.name}" (${t.w}×${t.h}px). Copy actual: titular "${S.copy.titular}", destacado "${S.copy.destacado}".
-Archivos ya subidos: aliados [${S.extras.aliados.map(a=>a.name).join(', ')||'ninguno'}], foto de producto: ${S.extras.producto?'sí':'no'}, productos para recortes o cards: ${S.extras.productos.length?S.extras.productos.map((p,i)=>`${i+1}) ${p.img?'con PNG':'sin foto'}${p.nombre?' '+p.nombre:''}${p.precio?' '+p.precio:''}`).join('; '):'ninguno'}.
+Pieza: ${curFormat().label}, "${t.name}" (${t.w}×${t.h}px). Titular: "${S.copy.titular||''}". Destacado: "${S.copy.destacado||''}".
+Archivos subidos: aliados ${S.extras.aliados.length}, foto de producto ${S.extras.producto?'sí':'no'}, productos (recortes o cards) ${S.extras.productos.length}.
 
-Sistema de diseño del Brandbook 2025 (NO negociable): solo tres colores (Upper Dark Blue #141D30, Green #CDF5A3, Cream Green #F0FFE8); titulares en Noland mayúsculas y cuerpo en Rethink Sans; el CTA es texto en Noland con resaltado verde recto (como las palabras con *), sin flecha ni otros elementos, nunca un botón ni bloque redondeado; logo oficial sin distorsionar, girar, sombrear, recolorear ni poner sobre fondos sobrecargados; ilustraciones oficiales de línea con bloques verdes (no se dibujan otras); cinta gruesa verde como elemento gráfico; sin emojis en la gráfica; sin fondos fotográficos completos; máximo 3 logos de aliados.
-Elementos que la plataforma SÍ puede agregar:
-- qr: una URL
-- fecha: ≤ ${LIMITS.fecha} caracteres
-- codigo: ≤ ${LIMITS.codigo} caracteres
-- legal: ≤ ${LIMITS.legal}
-- nota: complemento del destacado ≤ ${LIMITS.nota} (ej. "+IVA/libra", "de regalo")
-- mensaje: 1-2 líneas para enviar con la imagen por WhatsApp o push, con emojis y el CTA "Mira aquí"/"Descubre aquí"
-- visual: ${ILUS.map(i=>`"${i[0]}" (${i[1]})`).join(', ')}, "producto" (solo si hay foto subida), "recortes" (1 a 4 productos en PNG sin fondo, grandes y algo girados sobre la cinta verde), "cards" (hasta 3 cards de producto tipo tienda: foto, precio, precio anterior tachado y nombre, esquinas rectas) o "none"
-- productos: datos de las cards [{"nombre":"","precio":"","antes":""}] en el orden de los productos subidos, máx. 3. SOLO con los nombres y precios que el pedido da explícitamente: nunca inventes precios ni descuentos.
-- logos de aliados, foto de producto y PNG de productos: solo si se suben como archivo (si los pide y no están, ponlos en "faltan").
-Todo lo demás (otros colores, otras fuentes, mover o girar el logo, fondos con foto, sombras, gradientes, más de 3 logos, animaciones) se rechaza con motivo breve y una alternativa dentro del sistema.
+Marca (no negociable): solo azul oscuro #141D30, verde #CDF5A3 y crema #F0FFE8; Noland en mayúsculas y Rethink Sans; CTA como texto resaltado, nunca botón ni bloque redondeado; logo oficial sin cambios; solo ilustraciones oficiales; sin emojis, sombras, degradados ni fondos de foto completos; máximo 3 aliados.
+La plataforma puede agregar:
+- QR (una URL) · FECHA ≤ ${LIMITS.fecha} caracteres · CODIGO ≤ ${LIMITS.codigo} · NOTA ≤ ${LIMITS.nota} (complemento del destacado, ej. "de regalo") · LEGAL ≤ ${LIMITS.legal}
+- MENSAJE: 1-2 líneas para WhatsApp o push, con emojis y un CTA tipo "Mira aquí"
+- VISUAL: ${ILUS.map(i=>i[0]).join(', ')}, producto, recortes (productos en PNG sin fondo), cards (cards de producto con precio) o none
+- PRODUCTO: datos de cards (nombre | precio | precio anterior), solo con los datos que da el pedido; nunca inventes precios
+- Logos de aliados y fotos solo si se suben como archivo: si faltan, ponlos en FALTA.
+Todo lo demás se rechaza con motivo breve y una alternativa dentro de la marca.
 
-Pedido: """${S.casilla}"""
+Pedido: «${S.casilla}»
 
-Responde SOLO JSON: {"qr":"" o null,"fecha":"" o null,"codigo":"" o null,"nota":"" o null,"legal":"" o null,"mensaje":"" o null,"visual":"" o null,"productos":[] o null,"aceptados":["frase corta de lo aplicado"],"rechazados":[{"pedido":"","motivo":"","alternativa":""}],"faltan":["archivo que debe subir"]}`;
-  $('#interp').disabled=true;st.className='status';st.textContent='Claude está revisando el pedido con el criterio de marca…';
-  try{const r=await AI.json(prompt);
-    const campos=[];
-    if(r.qr&&/^https?:\/\//.test(r.qr)){S.extras.qr=String(r.qr);campos.push('qr');}
-    ['fecha','codigo','nota','legal'].forEach(k=>{if(r[k]){S.copy[k]=String(r[k]).slice(0,LIMITS[k]);campos.push(k);}});
-    if(r.mensaje){S.waMsg=String(r.mensaje).slice(0,400);campos.push('mensaje');}
-    if(r.visual&&VISUALS.some(v=>v[0]===r.visual)&&(r.visual!=='producto'||S.extras.producto))S.extras.visual=r.visual;
-    if(Array.isArray(r.productos)&&r.productos.length){r.productos.slice(0,CARDS_MAX).forEach((q,i)=>{const p=S.extras.productos[i]||(S.extras.productos[i]={img:null,name:'',nombre:'',precio:'',antes:''});['nombre','precio','antes'].forEach(k=>{if(q&&q[k])p[k]=String(q[k]).slice(0,k==='nombre'?60:14);});});campos.push('productos');}
-    S.extrasAI={aceptados:r.aceptados||[],rechazados:r.rechazados||[],faltan:r.faltan||[],campos};saveDraft();drawMain();drawLive();}
-  catch(e){st.className='status err';st.textContent=errMsg(e);$('#interp').disabled=false;}}
+Responde EXACTAMENTE así, una cosa por línea, sin nada más. Omite las líneas que no apliquen; ACEPTADO, RECHAZADO, PRODUCTO y FALTA pueden repetirse:
+QR:
+FECHA:
+CODIGO:
+NOTA:
+LEGAL:
+MENSAJE:
+VISUAL:
+PRODUCTO: nombre | precio | precio anterior
+ACEPTADO: frase corta de lo aplicado
+RECHAZADO: lo pedido | motivo | alternativa
+FALTA: archivo que debe subir`;}
+function intHtml(){return `<div class="crit"><b style="margin-top:0">1. Lleva el pedido a tu IA</b>
+  <p class="hint" style="margin:2px 0 8px">Al elegir una IA se copia el prompt (tu pedido + lineamientos de Upper) y se abre en otra pestaña: pégalo y envíalo.</p>
+  <div class="row" style="flex-wrap:wrap;gap:6px">${AI_DESTS.map(([n,u])=>`<a class="btn sm" href="${u}" target="_blank" rel="noopener" data-idest>${n}</a>`).join('')}<button class="btn sm" id="cpInt">Solo copiar (otra IA)</button></div>
+  <details style="margin-top:8px"><summary class="hint">Ver el prompt</summary><textarea id="intBox" rows="8" readonly style="width:100%;margin-top:6px">${esc(interpPrompt())}</textarea></details>
+  <b>2. Pega aquí la respuesta</b>
+  <textarea id="intResp" rows="5" style="width:100%" placeholder="FECHA: …&#10;CODIGO: …&#10;ACEPTADO: …"></textarea>
+  <div class="row" style="margin-top:8px"><button class="btn primary" id="applyInt">Aplicar a la pieza</button></div></div>`;}
+async function copyText2(t,box){if(box)box.value=t;try{await navigator.clipboard.writeText(t);return true;}catch{}
+  try{if(box){box.closest('details').open=true;box.focus();box.select();if(document.execCommand('copy'))return true;}}catch{}return false;}
+function bindInt(){const cp=()=>copyText2(interpPrompt(),$('#intBox')).then(ok=>toast(ok?'Prompt copiado: pégalo en tu IA':'Copia el prompt desde "Ver el prompt"'));
+  document.querySelectorAll('[data-idest]').forEach(a=>a.onclick=cp);$('#cpInt').onclick=cp;
+  $('#applyInt').onclick=()=>{const r=parseInterp($('#intResp').value);const st=$('#st4');
+    if(!r){st.className='status err';st.textContent='No encontré elementos en la respuesta. Pega la respuesta completa (líneas FECHA:, CODIGO:, ACEPTADO:…).';return;}
+    S.intOpen=false;applyInterp(r);};}
+function parseInterp(txt){const r={aceptados:[],rechazados:[],faltan:[],productos:[]};let n=0;
+  const KEY={QR:'qr',FECHA:'fecha',CODIGO:'codigo',NOTA:'nota',LEGAL:'legal',MENSAJE:'mensaje',VISUAL:'visual',PRODUCTO:'producto',ACEPTADO:'aceptado',RECHAZADO:'rechazado',FALTA:'falta'};
+  for(const line of String(txt).replace(/\r/g,'').split('\n')){const m=line.match(/^[\s>*_-]*([A-Za-zÁÉÍÓÚáéíóú]+)[\s*_]*:[\s*_]*(.*)$/);if(!m)continue;
+    const k=KEY[m[1].toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'')];if(!k)continue;
+    const v=m[2].replace(/\*\*+/g,'').replace(/^["“”']|["“”']$/g,'').trim();if(!v||/^\(?(vac[ií]o|ninguno|no aplica|n\/a|—|-)\)?$/i.test(v))continue;n++;
+    if(k==='aceptado')r.aceptados.push(v);else if(k==='falta')r.faltan.push(v);
+    else if(k==='rechazado'){const [pedido,motivo,alternativa]=v.split('|').map(x=>x.trim());r.rechazados.push({pedido,motivo:motivo||'',alternativa:alternativa||''});}
+    else if(k==='producto'){const [nombre,precio,antes]=v.split('|').map(x=>(x||'').trim());r.productos.push({nombre,precio,antes});}
+    else r[k]=k==='visual'?v.toLowerCase().replace(/[^a-z-]/g,''):v;}
+  return n?r:null;}
+function applyInterp(r){const campos=[];
+  if(r.qr&&/^https?:\/\//.test(r.qr)){S.extras.qr=String(r.qr);campos.push('qr');}
+  ['fecha','codigo','nota','legal'].forEach(k=>{if(r[k]){S.copy[k]=String(r[k]).slice(0,LIMITS[k]);campos.push(k);}});
+  if(r.mensaje){S.waMsg=String(r.mensaje).slice(0,400);campos.push('mensaje');}
+  if(r.visual&&VISUALS.some(v=>v[0]===r.visual)&&(r.visual!=='producto'||S.extras.producto))S.extras.visual=r.visual;
+  if(r.productos?.length){r.productos.slice(0,CARDS_MAX).forEach((q,i)=>{const p=S.extras.productos[i]||(S.extras.productos[i]={img:null,name:'',nombre:'',precio:'',antes:''});['nombre','precio','antes'].forEach(k=>{if(q[k])p[k]=String(q[k]).slice(0,k==='nombre'?60:14);});});campos.push('productos');}
+  S.extrasAI={aceptados:r.aceptados||[],rechazados:r.rechazados||[],faltan:r.faltan||[],campos};saveDraft();drawMain();drawLive();}
 
 /* ---------- Paso 5 ---------- */
 function step5(){const t=curTpl();
