@@ -151,6 +151,7 @@ img.out{max-width:100%;border-radius:4px;margin-top:8px}
 .kb-sec summary b{font-weight:700}
 .kb-edit{padding:0 12px 12px;display:grid;gap:10px}
 .kb-edit textarea{font-size:13px;line-height:1.5}
+.prod-row{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}.prod-row img{width:40px;height:40px;object-fit:contain;background:var(--chip)}.prod-row input{flex:1;min-width:90px}
 .pill.pais{background:var(--info-bg);color:var(--fg)}
 .design{margin:4px 0 4px}
 .design .stage canvas{max-height:70vh}
@@ -349,7 +350,7 @@ const DEFAULTS={
 const S={step:2,formato:'inapp',tpl:'hero',scheme:'oscuro',
   req:{...DEFAULTS.req},propuesta:DEFAULTS.propuesta,copy:{...DEFAULTS.copy},waMsg:DEFAULTS.waMsg,
   evalr:null,opciones:[],optSel:-1,casilla:'',extrasAI:null,
-  extras:{aliados:[],producto:null,visual:DEFAULTS.visual,qr:DEFAULTS.qr},
+  extras:{aliados:[],producto:null,productos:[],visual:DEFAULTS.visual,qr:DEFAULTS.qr},
   fonts:{display:false,text:false},manual:{},aiReview:null,msgAI:null};
 const curFormat=()=>FORMATS[S.formato];
 const curTpl=()=>curFormat().templates.find(t=>t.id===S.tpl)||curFormat().templates[0];
@@ -452,8 +453,31 @@ function drawIllus(ctx,R,k,b,bg){const v=lum(bg)<.3?'oscuro':'claro';const im=IL
   if(!im){R.checks.push({lvl:'warn',msg:'No cargó la ilustración: revisa la carpeta assets/ilustraciones.'});return;}
   contain(ctx,im,b.x,b.y,b.w,b.h);R.visual=true;}
 function contain(ctx,img,x,y,w,h){const k=Math.min(w/img.width,h/img.height);const iw=img.width*k,ih=img.height*k;ctx.drawImage(img,x+(w-iw)/2,y+(h-ih)/2,iw,ih);}
+/* Productos recortados (PNG sin fondo): 1 a 4, grandes y algo girados, como las referencias de redes */
+const RECORTE_SLOTS={1:[[.5,.5,1,0]],2:[[.3,.52,.64,-8],[.7,.48,.64,8]],3:[[.18,.6,.44,-12],[.82,.6,.44,12],[.5,.48,.62,0]],4:[[.28,.3,.5,-10],[.72,.3,.5,10],[.28,.72,.5,8],[.72,.72,.5,-8]]};
+function drawRecortes(ctx,R,b,items){const ps=(items||S.extras.productos).filter(p=>p.img).slice(0,4);
+  if(!ps.length){R.checks.push({lvl:'warn',msg:'Elegiste productos recortados pero no hay PNG cargados.'});return false;}
+  RECORTE_SLOTS[ps.length].forEach(([cx,cy,k,deg],i)=>{const w=b.w*k,h=b.h*k;ctx.save();ctx.translate(b.x+b.w*cx,b.y+b.h*cy);ctx.rotate(deg*Math.PI/180);contain(ctx,ps[i].img,-w/2,-h/2,w,h);ctx.restore();});
+  R.visual=true;return true;}
+/* Cards de producto tipo captura de tienda: foto, precio en Noland, precio anterior tachado y nombre. Esquinas rectas (sin bloques redondeados). */
+function fitLines(ctx,t,w,max){const out=[];let line='';for(const word of String(t).split(/\s+/).filter(Boolean)){const tr=line?line+' '+word:word;if(ctx.measureText(tr).width<=w||!line)line=tr;else{out.push(line);line=word;}}if(line)out.push(line);
+  if(out.length>max){out.length=max;let l=out[max-1];while(l.length>1&&ctx.measureText(l+'…').width>w)l=l.slice(0,-1);out[max-1]=l+'…';}return out;}
+function drawCards(ctx,R,b,bg,items){const ps=(items||S.extras.productos).filter(p=>p.img||p.nombre||p.precio).slice(0,3);
+  if(!ps.length){R.checks.push({lvl:'warn',msg:'Elegiste cards de producto pero no hay productos cargados.'});return false;}
+  const n=ps.length,gap=b.w*.04;const cw=Math.min((b.w-gap*(n-1))/n,b.h*.74),ch=Math.min(b.h,cw*1.36);
+  let x=b.x+(b.w-(cw*n+gap*(n-1)))/2;const y=b.y+(b.h-ch)/2;const fill=bg===C.cream?C.green:C.cream,fg=C.navy,pad=cw*.08;
+  for(const p of ps){ctx.fillStyle=fill;ctx.fillRect(x,y,cw,ch);
+    const ih=ch*.5;if(p.img)contain(ctx,p.img,x+pad,y+pad,cw-pad*2,ih-pad);
+    let ty=y+ih+ch*.03;ctx.textAlign='left';ctx.textBaseline='top';ctx.fillStyle=fg;
+    if(p.precio){const fs=cw*.15;ctx.font=fd(fs);let w=ctx.measureText(p.precio.toLocaleUpperCase('es')).width;const f2=w>cw-pad*2?fs*(cw-pad*2)/w:fs;ctx.font=fd(f2);ctx.fillText(p.precio.toLocaleUpperCase('es'),x+pad,ty);ty+=f2*1.05;}
+    if(p.antes){const fs=cw*.065;ctx.font=ft(500,fs);const t='Antes '+p.antes;const w=Math.min(ctx.measureText(t).width,cw-pad*2);ctx.fillText(t,x+pad,ty);ctx.fillRect(x+pad+ctx.measureText('Antes ').width,ty+fs*.55,Math.max(0,w-ctx.measureText('Antes ').width),Math.max(1,fs*.08));ty+=fs*1.4;}
+    if(p.nombre){const fs=cw*.072;ctx.font=ft(600,fs);fitLines(ctx,p.nombre,cw-pad*2,2).forEach(l=>{if(ty+fs<y+ch-pad*.5)ctx.fillText(l,x+pad,ty);ty+=fs*1.2;});}
+    x+=cw+gap;}
+  R.pairs.push({fg,bg:fill,large:false,label:'Cards de producto'});R.visual=true;return true;}
 function visual(ctx,R,b,sc,o={}){
   if(b.w<20||b.h<20)return;const v=S.extras.visual;
+  if(v==='recortes'){drawRecortes(ctx,R,b);return;}
+  if(v==='cards'){drawCards(ctx,R,b,sc.bg);return;}
   if(v==='producto'&&S.extras.producto){const cb={x:b.x+b.w*.06,y:b.y+b.h*.22,w:b.w*.88,h:b.h*.74};rr(ctx,cb.x,cb.y,cb.w,cb.h,Math.min(cb.w,cb.h)*.12);ctx.fillStyle=sc.card;ctx.fill();contain(ctx,S.extras.producto,b.x+b.w*.12,b.y,b.w*.76,b.h*.96);R.visual=true;return;}
   if(v==='producto'){R.checks.push({lvl:'warn',msg:'Elegiste foto de producto pero no hay imagen cargada (paso Extras).'});return;}
   if(isIllus(v))drawIllus(ctx,R,v,b,sc.bg);
@@ -529,7 +553,7 @@ L.tab=(ctx,W,H,d,sc,R,o)=>{
     let x=p;const rowH=H*.115;
     if(d.destacado)x+=offer(ctx,R,d,x,yb,rowH,cw*.6,sc)+W*.015;
     if(d.cta)ctaText(ctx,R,d.cta,x,yb+rowH*.12,rowH*.76,sc.hi,sc.bg,{maxW:Math.max(60,cw-(x-p))});
-    const card={x:W*.56,y:H*.14,w:W*.4,h:H*.76};const cf=cardFill(sc),cp=cardPills(cf);rr(ctx,card.x,card.y,card.w,card.h,card.h*.12);ctx.fillStyle=cf;ctx.fill();
+    const card={x:W*.56,y:H*.14,w:W*.4,h:H*.76};const cf=cardFill(sc),cp=cardPills(cf);tabCard(ctx,card,sc,cf,card.h*.12);
     drawCardVisual(ctx,R,card,sc);
     if(d.fecha)tag(ctx,R,d.fecha,card.x+card.w*.06,card.y+card.h-card.h*.05-H*.075,H*.075,cp.t,{maxW:card.w*.6,label:'Fecha',bg:cf});
     if(d.codigo)tag(ctx,R,'Código: '+d.codigo,card.x+card.w*.94,card.y+card.h*.04,H*.075,cp.t,{align:'right',maxW:card.w*.6,label:'Código',bg:cf});
@@ -542,7 +566,7 @@ L.tab=(ctx,W,H,d,sc,R,o)=>{
     r=text(ctx,R,'Subtítulo',d.subtitulo,{x:p+iw*.05,y,w:iw*.9,h:A*.1},{font:'t',max:W*.036,min:W*.025,color:sc.fg,bg:sc.bg,lh:1.3,align:'center',maxLines:3});y+=r.h+A*.03;
     const legalH=d.legal?A*.055:0;const rowH=W*.11;const yb=top+A-W*.05-legalH-rowH-A*.02;
     const ch=yb-y-A*.035;
-    if(ch>A*.14){const card={x:p,y,w:iw,h:ch};const cf=cardFill(sc),cp=cardPills(cf);rr(ctx,card.x,card.y,card.w,card.h,Math.min(card.w,card.h)*.1);ctx.fillStyle=cf;ctx.fill();drawCardVisual(ctx,R,card,sc);
+    if(ch>A*.14){const card={x:p,y,w:iw,h:ch};const cf=cardFill(sc),cp=cardPills(cf);tabCard(ctx,card,sc,cf,Math.min(card.w,card.h)*.1);drawCardVisual(ctx,R,card,sc);
       if(d.fecha)tag(ctx,R,d.fecha,card.x+card.w*.05,card.y+card.w*.03,W*.06,cp.t,{maxW:card.w*.5,label:'Fecha',bg:cf});
       if(d.codigo)tag(ctx,R,'Código: '+d.codigo,card.x+card.w*.95,card.y+card.w*.03,W*.06,cp.t,{align:'right',maxW:card.w*.45,label:'Código',bg:cf});
       if(S.extras.qr)qr(ctx,R,card.x+card.w-card.w*.3-card.w*.04,card.y+card.h-card.w*.3*1.18-card.w*.04,card.w*.3,curFormatFor(R).print);}
@@ -556,10 +580,16 @@ L.tab=(ctx,W,H,d,sc,R,o)=>{
 function offerWidth(ctx,d,h){ctx.font=fd(h*.82);let w=ctx.measureText(d.destacado.toLocaleUpperCase('es')).width;if(d.nota){ctx.font=ft(700,h*.2);const ws=d.nota.split(/\s+/);const half=Math.ceil(ws.length/2);w+=h*.12+Math.max(ctx.measureText(ws.slice(0,half).join(' ')).width,ctx.measureText(ws.slice(half).join(' ')).width);}return w;}
 function logoRowAliados(ctx,R,rightX,y,h,color){let x=rightX;[...S.extras.aliados].slice(0,3).reverse().forEach(a=>{const im=a.img;const w=h*im.width/im.height;x-=w;ctx.drawImage(a.white?tinted(im,color):im,x,y,w,h);x-=h*.6;});}
 /* Tarjeta de la composición pestaña: verde para producto o cinta; con ilustración, contraste inverso al fondo */
+/* Recortes y cards van sueltos sobre el fondo, con la cinta verde como base (referencias de redes); el resto, sobre la tarjeta */
+const freeVisual=()=>{const v=S.extras.visual,ps=S.extras.productos;return(v==='recortes'&&ps.some(p=>p.img))||(v==='cards'&&ps.some(p=>p.img||p.nombre||p.precio));};
+function tabCard(ctx,card,sc,cf,r){if(freeVisual()){const t=Math.min(card.w,card.h)*.12;ribbon(ctx,[[card.x+card.w*.06,card.y+card.h*1.02],[card.x+card.w*.06,card.y+card.h*.5],[card.x+card.w*2,card.y+card.h*.5]],t,Math.min(card.w*.35,card.h*.45),C.green);return;}
+  rr(ctx,card.x,card.y,card.w,card.h,r);ctx.fillStyle=cf;ctx.fill();}
 function cardFill(sc){return isIllus(S.extras.visual)?(sc.bg===C.navy?C.cream:C.navy):C.green;}
 function cardPills(fill){return{t:fill===C.navy?C.cream:C.navy};}
 function drawCardVisual(ctx,R,card,sc){
   const v=S.extras.visual;
+  if(v==='recortes'){if(drawRecortes(ctx,R,{x:card.x-card.w*.04,y:card.y-card.h*.04,w:card.w*1.08,h:card.h*1.04}))return;}
+  if(v==='cards'){if(drawCards(ctx,R,{x:card.x,y:card.y,w:card.w,h:card.h},freeVisual()?sc.bg:cardFill(sc)))return;}
   if(v==='producto'&&S.extras.producto){contain(ctx,S.extras.producto,card.x+card.w*.06,card.y-card.h*.04,card.w*.88,card.h*.98);R.visual=true;return;}
   if(v==='producto')R.checks.push({lvl:'warn',msg:'Elegiste foto de producto pero no hay imagen cargada (paso Extras).'});
   if(isIllus(v)){drawIllus(ctx,R,v,{x:card.x+card.w*.05,y:card.y+card.h*.06,w:card.w*.9,h:card.h*.9},cardFill(sc));return;}
@@ -1124,7 +1154,8 @@ Responde SOLO con JSON con esta forma:
 function errMsg(e){const m={cancelled:'Revisión detenida.',not_granted:'No se dio permiso para usar Claude en esta página. Puedes escribir el copy a mano.',rate_limited:'Demasiadas consultas seguidas. Espera un minuto y vuelve a intentar.',invalid_json:'Claude respondió en un formato inesperado. Vuelve a intentarlo.',refusal:'Claude no pudo responder a este pedido. Reformúlalo.',network:'No hay conexión con el servidor de IA.',unavailable:'La IA no está disponible aquí.',auth:'El servidor no tiene una API key válida. Revisa ANTHROPIC_API_KEY.'};return m[e?.code]||e?.message||'No se pudo completar la consulta. Vuelve a intentarlo.';}
 
 /* ---------- Paso 4 ---------- */
-const VISUALS=[...ILUS,['producto','Foto de producto'],['none','Solo cinta Upper']];
+const VISUALS=[...ILUS,['producto','Foto de producto'],['recortes','Productos recortados'],['cards','Cards de producto'],['none','Solo cinta Upper']];
+const PROD_MAX=4,CARDS_MAX=3;
 function step4(){const x=S.extras,a=S.extrasAI,t=curTpl();const filled=new Set(a?.campos||[]);
   const mark=k=>filled.has(k)?' ai-filled':'';
   return `<h2>Diseño</h2><p class="lead">Esta es la propuesta inicial con tu formato y tu mensaje. Ajústala con los visuales y los elementos de abajo; la pieza se actualiza al instante.</p>
@@ -1136,6 +1167,7 @@ function step4(){const x=S.extras,a=S.extrasAI,t=curTpl();const filled=new Set(a
   <div class="box"><h3>1. Visual de la pieza</h3>
     <div class="visuals">${VISUALS.map(([k,l])=>`<button class="vis ${x.visual===k?'sel':''}" data-v="${k}" aria-pressed="${x.visual===k}"><canvas width="240" height="160" data-vis="${k}"></canvas>${l}</button>`).join('')}</div>
     <label class="f" style="margin-top:12px">Foto de producto<input type="file" id="prod" accept="image/png,image/webp,image/jpeg"><span class="hint">PNG recortado sin fondo. Va sobre la tarjeta, nunca como fondo completo.</span><div class="files">${x.producto?`<span class="fileitem"><img src="${x.producto.src}" alt=""> producto <button id="rmProd" aria-label="Quitar foto">×</button></span>`:''}</div></label>
+    ${x.visual==='recortes'||x.visual==='cards'?prodEditor():''}
   </div>
   <div class="box"><h3>2. ¿Qué más necesita la pieza?</h3>
     <p class="hint" style="margin:0 0 10px">Completa los datos que apliquen y pide lo que la plantilla base no trae. Claude lo interpreta con el criterio del brandbook: lo que encaja se ubica en zonas reservadas y lo que rompe la marca se rechaza con una alternativa. Lo que acepta aparece completado en Elementos permitidos, donde puedes editarlo o borrarlo.</p>
@@ -1152,6 +1184,13 @@ function step4(){const x=S.extras,a=S.extrasAI,t=curTpl();const filled=new Set(a
   </div></div>
   <div class="box review-box"><div id="d_review"></div></div>
   ${navHtml('Ir a descarga')}`;}
+function prodEditor(){const x=S.extras,cards=x.visual==='cards',filled=new Set(S.extrasAI?.campos||[]);
+  return `<div class="f full${filled.has('productos')?' ai-filled':''}" style="margin-top:12px"><b>${cards?`Cards de producto (máx. ${CARDS_MAX})`:`Productos recortados (máx. ${PROD_MAX})`}</b>${filled.has('productos')?' <span class="aitag">Completado por Claude</span>':''}
+    <input type="file" id="prods" accept="image/png,image/webp" multiple ${x.productos.length>=PROD_MAX?'disabled':''}>
+    <span class="hint">${cards?'Cada card lleva foto, precio, precio anterior y nombre: todo opcional; lo vacío no se muestra. Se usan las 3 primeras.':'PNG o WebP sin fondo. Se ubican grandes y algo girados; con 3, el último va al centro.'}</span>
+    ${x.productos.map((p,i)=>`<div class="prod-row">${p.img?`<img src="${p.img.src}" alt="">`:'<span class="hint">Sin foto</span>'}
+      ${cards?`<input type="text" data-pf="precio" data-pi="${i}" value="${esc(p.precio||'')}" placeholder="Precio (USD 34,99)" maxlength="14"><input type="text" data-pf="antes" data-pi="${i}" value="${esc(p.antes||'')}" placeholder="Antes (USD 69,99)" maxlength="14"><input type="text" data-pf="nombre" data-pi="${i}" value="${esc(p.nombre||'')}" placeholder="Nombre del producto" maxlength="60">`:`<span>${esc(p.name||'producto')}</span>`}
+      <button class="btn sm" data-prm="${i}" aria-label="Quitar producto">×</button></div>`).join('')}</div>`;}
 function readImg(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=fr.result;};fr.onerror=rej;fr.readAsDataURL(file);});}
 function bind4(){
   const unmark=k=>{const c=S.extrasAI?.campos;if(c&&c.includes(k)){S.extrasAI.campos=c.filter(x=>x!==k);const l=document.getElementById(k==='mensaje'?'c_wa':k==='qr'?'e_qr':'c_'+k)?.closest('label');l?.classList.remove('ai-filled');l?.querySelector('.aitag')?.remove();}};
@@ -1160,12 +1199,17 @@ function bind4(){
   $('#cas').oninput=e=>S.casilla=e.target.value;$('#interp').onclick=interpret;
   document.querySelectorAll('canvas[data-vis]').forEach(c=>{const ctx=c.getContext('2d');const sc=SCHEMES.oscuro;ctx.fillStyle=sc.bg;ctx.fillRect(0,0,240,160);const v=c.dataset.vis;
     if(isIllus(v)){const im=ILUS_IMG[v]?.oscuro;if(im)contain(ctx,im,30,8,180,144);}
+    else if(v==='recortes'){const R0={checks:[],pairs:[]};if(!S.extras.productos.some(p=>p.img)){ribbon(ctx,[[70,0],[70,120],[170,120],[170,0]],22,40,C.green);ctx.fillStyle=C.cream;ctx.font=ft(700,14);ctx.textAlign='center';ctx.fillText('Sube tus PNG',120,150);}else drawRecortes(ctx,R0,{x:20,y:8,w:200,h:144});}
+    else if(v==='cards'){const R0={checks:[],pairs:[]};const sample=[{nombre:'Producto',precio:'USD 35',antes:'USD 70'},{nombre:'Producto',precio:'USD 70',antes:'USD 99'}];drawCards(ctx,R0,{x:16,y:10,w:208,h:140},sc.bg,S.extras.productos.length?null:sample);}
     else if(v==='producto'){if(S.extras.producto){rr(ctx,50,40,140,110,16);ctx.fillStyle=C.green;ctx.fill();contain(ctx,S.extras.producto,60,10,120,140);}else{rr(ctx,50,40,140,110,16);ctx.fillStyle=C.green;ctx.fill();ctx.fillStyle=C.navy;ctx.font=ft(700,14);ctx.textAlign='center';ctx.fillText('Sube tu PNG',120,100);}}
     else ribbon(ctx,[[70,0],[70,120],[170,120],[170,0]],22,40,C.green);});
   document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{S.extras.visual=b.dataset.v;saveDraft();drawMain();drawLive();});
   $('#e_qr').oninput=e=>{S.extras.qr=e.target.value.trim();S.extrasAI?.campos&&(S.extrasAI.campos=S.extrasAI.campos.filter(x=>x!=='qr'));saveDraft();drawLive();};
   $('#ali').onchange=async e=>{for(const f of [...e.target.files]){if(S.extras.aliados.length>=3){toast('Máximo 3 aliados por pieza.');break;}try{S.extras.aliados.push({img:await readImg(f),name:f.name.replace(/\.\w+$/,''),white:true});}catch{toast('No se pudo leer '+f.name);}}drawMain();drawLive();};
   $('#prod').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{S.extras.producto=await readImg(f);S.extras.visual='producto';}catch{toast('No se pudo leer la imagen.');}drawMain();drawLive();};
+  $('#prods')&&($('#prods').onchange=async e=>{for(const f of [...e.target.files]){if(S.extras.productos.length>=PROD_MAX){toast(`Máximo ${PROD_MAX} productos.`);break;}try{S.extras.productos.push({img:await readImg(f),name:f.name.replace(/\.\w+$/,''),nombre:'',precio:'',antes:''});}catch{toast('No se pudo leer '+f.name);}}drawMain();drawLive();});
+  document.querySelectorAll('[data-pf]').forEach(el=>el.oninput=()=>{S.extras.productos[+el.dataset.pi][el.dataset.pf]=el.value;drawLive();});
+  document.querySelectorAll('[data-prm]').forEach(b=>b.onclick=()=>{S.extras.productos.splice(+b.dataset.prm,1);drawMain();drawLive();});
   $('#rmProd')&&($('#rmProd').onclick=()=>{S.extras.producto=null;if(S.extras.visual==='producto')S.extras.visual=DEFAULTS.visual;drawMain();drawLive();});
   document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{S.extras.aliados.splice(+b.dataset.rm,1);drawMain();drawLive();});
   document.querySelectorAll('[data-w]').forEach(c=>c.onchange=()=>{S.extras.aliados[+c.dataset.w].white=c.checked;drawLive();});}
@@ -1178,7 +1222,7 @@ ${knowledgeBlock()}
 Si el pedido pide un dato de negocio (tarifa, tiempo, condición) que contradice ese conocimiento, recházalo y propone el dato correcto.
 
 Plantilla: ${curFormat().label} — "${t.name}" (${t.w}×${t.h}px). Copy actual: titular "${S.copy.titular}", destacado "${S.copy.destacado}".
-Archivos ya subidos: aliados [${S.extras.aliados.map(a=>a.name).join(', ')||'ninguno'}], foto de producto: ${S.extras.producto?'sí':'no'}.
+Archivos ya subidos: aliados [${S.extras.aliados.map(a=>a.name).join(', ')||'ninguno'}], foto de producto: ${S.extras.producto?'sí':'no'}, productos para recortes o cards: ${S.extras.productos.length?S.extras.productos.map((p,i)=>`${i+1}) ${p.img?'con PNG':'sin foto'}${p.nombre?' '+p.nombre:''}${p.precio?' '+p.precio:''}`).join('; '):'ninguno'}.
 
 Sistema de diseño del Brandbook 2025 (NO negociable): solo tres colores (Upper Dark Blue #141D30, Green #CDF5A3, Cream Green #F0FFE8); titulares en Noland mayúsculas y cuerpo en Rethink Sans; el CTA es texto en Noland con resaltado verde recto (como las palabras con *), sin flecha ni otros elementos, nunca un botón ni bloque redondeado; logo oficial sin distorsionar, girar, sombrear, recolorear ni poner sobre fondos sobrecargados; ilustraciones oficiales de línea con bloques verdes (no se dibujan otras); cinta gruesa verde como elemento gráfico; sin emojis en la gráfica; sin fondos fotográficos completos; máximo 3 logos de aliados.
 Elementos que la plataforma SÍ puede agregar:
@@ -1188,13 +1232,14 @@ Elementos que la plataforma SÍ puede agregar:
 - legal: ≤ ${LIMITS.legal}
 - nota: complemento del destacado ≤ ${LIMITS.nota} (ej. "+IVA/libra", "de regalo")
 - mensaje: 1-2 líneas para enviar con la imagen por WhatsApp o push, con emojis y el CTA "Mira aquí"/"Descubre aquí"
-- visual: ${ILUS.map(i=>`"${i[0]}" (${i[1]})`).join(', ')}, "producto" (solo si hay foto subida) o "none"
-- logos de aliados y foto de producto: solo si se suben como archivo (si los pide y no están, ponlos en "faltan").
+- visual: ${ILUS.map(i=>`"${i[0]}" (${i[1]})`).join(', ')}, "producto" (solo si hay foto subida), "recortes" (1 a 4 productos en PNG sin fondo, grandes y algo girados sobre la cinta verde), "cards" (hasta 3 cards de producto tipo tienda: foto, precio, precio anterior tachado y nombre, esquinas rectas) o "none"
+- productos: datos de las cards [{"nombre":"","precio":"","antes":""}] en el orden de los productos subidos, máx. 3. SOLO con los nombres y precios que el pedido da explícitamente: nunca inventes precios ni descuentos.
+- logos de aliados, foto de producto y PNG de productos: solo si se suben como archivo (si los pide y no están, ponlos en "faltan").
 Todo lo demás (otros colores, otras fuentes, mover o girar el logo, fondos con foto, sombras, gradientes, más de 3 logos, animaciones) se rechaza con motivo breve y una alternativa dentro del sistema.
 
 Pedido: """${S.casilla}"""
 
-Responde SOLO JSON: {"qr":"" o null,"fecha":"" o null,"codigo":"" o null,"nota":"" o null,"legal":"" o null,"mensaje":"" o null,"visual":"" o null,"aceptados":["frase corta de lo aplicado"],"rechazados":[{"pedido":"","motivo":"","alternativa":""}],"faltan":["archivo que debe subir"]}`;
+Responde SOLO JSON: {"qr":"" o null,"fecha":"" o null,"codigo":"" o null,"nota":"" o null,"legal":"" o null,"mensaje":"" o null,"visual":"" o null,"productos":[] o null,"aceptados":["frase corta de lo aplicado"],"rechazados":[{"pedido":"","motivo":"","alternativa":""}],"faltan":["archivo que debe subir"]}`;
   $('#interp').disabled=true;st.className='status';st.textContent='Claude está revisando el pedido con el criterio de marca…';
   try{const r=await AI.json(prompt);
     const campos=[];
@@ -1202,6 +1247,7 @@ Responde SOLO JSON: {"qr":"" o null,"fecha":"" o null,"codigo":"" o null,"nota":
     ['fecha','codigo','nota','legal'].forEach(k=>{if(r[k]){S.copy[k]=String(r[k]).slice(0,LIMITS[k]);campos.push(k);}});
     if(r.mensaje){S.waMsg=String(r.mensaje).slice(0,400);campos.push('mensaje');}
     if(r.visual&&VISUALS.some(v=>v[0]===r.visual)&&(r.visual!=='producto'||S.extras.producto))S.extras.visual=r.visual;
+    if(Array.isArray(r.productos)&&r.productos.length){r.productos.slice(0,CARDS_MAX).forEach((q,i)=>{const p=S.extras.productos[i]||(S.extras.productos[i]={img:null,name:'',nombre:'',precio:'',antes:''});['nombre','precio','antes'].forEach(k=>{if(q&&q[k])p[k]=String(q[k]).slice(0,k==='nombre'?60:14);});});campos.push('productos');}
     S.extrasAI={aceptados:r.aceptados||[],rechazados:r.rechazados||[],faltan:r.faltan||[],campos};saveDraft();drawMain();drawLive();}
   catch(e){st.className='status err';st.textContent=errMsg(e);$('#interp').disabled=false;}}
 
