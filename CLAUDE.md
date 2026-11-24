@@ -12,6 +12,13 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
    - Visuales: 6 ilustraciones, foto de producto, **Productos recortados** (1 a 4 PNG sin fondo, grandes y algo girados; `drawRecortes`), **Cards de producto** (hasta 3, tipo tienda: foto, precio en Noland, precio anterior tachado y nombre; esquinas rectas; `drawCards`) y solo cinta. Recortes y cards van sueltos sobre la cinta verde en arco (`tabCard`), no sobre la tarjeta. El pedido libre puede elegir estos visuales y completar nombre y precios de las cards solo con datos que el ejecutor dé (campo `productos`).
 4. **Descarga:** las dos combinaciones de color, PNG y **SVG editable** por pieza, y kit .zip de 12 formatos (PNG + SVG) con `revision.txt`.
 
+## Carrusel (solo Redes sociales)
+- En Formato, "Tipo: Post | Carrusel" y número de láminas (2 a 10, `CAR_MIN`/`CAR_MAX`). Todas comparten formato, plantilla (no historias) y combinación de color.
+- Estado en `S.car` (`on`, `n`, `idx`, `slides`). La lámina activa vive en `S.copy` y `S.extras` (visual, productos, foto), así render y reglas no cambian; `selectSlide`, `withSlide(i, fn)` y `slideTpl(i)` (con `__slide`, que entienden `reviewOf` y `pieceName`) manejan las demás.
+- Mensaje: chips de lámina con estado (cumple / por corregir). "Reescribir con IA" pide el carrusel completo (LÁMINA 1…n: portada con gancho, una idea por lámina, CTA solo en la última) y `parseSlides` lo reparte. Las láminas intermedias pueden ir solo con subtítulo.
+- Diseño: tira swipe de miniaturas livianas (`drawSwipe`, ~200 px; solo se redibuja la activa al editar) sobre la vista previa grande.
+- Descarga: tira swipe por combinación y "Descargar carrusel .zip" (`exportCarousel`): carpetas `png/` y `svg/` numeradas 01…n, `revision.txt` y `mensaje.txt`. No hay kit multiformato en carrusel.
+
 ## Copy
 - Campos del Mensaje: antetítulo, titular, subtítulo, destacado y llamado a la acción. **Empiezan vacíos.** La propuesta escrita no se guarda en el borrador del navegador.
 - Elementos permitidos (paso 4), todos **opcionales y vacíos por defecto**: nota del destacado, fecha, código, legal, QR, logos de aliados (máx. 3) y mensaje de WhatsApp/push. Nunca se llenan solos; solo el ejecutor o Claude a pedido explícito, marcando "Completado con IA".

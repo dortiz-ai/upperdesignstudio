@@ -115,6 +115,12 @@ ul.plain li{margin:2px 0}
 .card .stage{padding:10px;min-height:0}
 .card canvas{max-height:520px}
 img.out{max-width:100%;border-radius:4px;margin-top:8px}
+.slidebar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 10px}.slidebar .fmt{min-width:36px;padding:5px 10px;position:relative}
+.slidebar .sl-ok::after,.slidebar .sl-bad::after{content:"";position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:var(--ok)}.slidebar .sl-bad::after{background:var(--bad)}
+.swipe{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px 2px;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.sw-item{flex:0 0 auto;scroll-snap-align:center;border:2px solid transparent;border-radius:8px;background:none;padding:2px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--muted)}
+.sw-item canvas{width:120px;height:auto;display:block;border-radius:4px}.swipe.big .sw-item canvas{width:min(78vw,260px)}
+.sw-item.sel{border-color:var(--sel)}.sw-item.bad{border-color:var(--bad)}.sw-item.warn{border-color:var(--warn)}
 .adapt{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:12px}
 .ad{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--panel);display:flex;flex-direction:column;gap:6px;min-width:0}
 .ad .thumb{height:150px}
@@ -341,7 +347,7 @@ const DEFAULTS={
   waMsg:'',
   visual:'giftcard',qr:''
 };
-const S={step:2,formato:'inapp',tpl:'hero',scheme:'oscuro',
+const S={step:2,formato:'inapp',tpl:'hero',scheme:'oscuro',car:{on:false,n:3,idx:0,slides:[]},
   req:{...DEFAULTS.req},propuesta:DEFAULTS.propuesta,copy:{...DEFAULTS.copy},waMsg:DEFAULTS.waMsg,
   evalr:null,opciones:[],optSel:-1,casilla:'',extrasAI:null,
   extras:{aliados:[],producto:null,productos:[],visual:DEFAULTS.visual,qr:DEFAULTS.qr},
@@ -349,8 +355,32 @@ const S={step:2,formato:'inapp',tpl:'hero',scheme:'oscuro',
 const curFormat=()=>FORMATS[S.formato];
 const curTpl=()=>curFormat().templates.find(t=>t.id===S.tpl)||curFormat().templates[0];
 const store={get(k){try{return JSON.parse(localStorage.getItem('upper_'+k))}catch{return null}},set(k,v){try{localStorage.setItem('upper_'+k,JSON.stringify(v))}catch{}}};
-function saveDraft(){store.set('draft',{v:3,req:S.req,copy:S.copy,waMsg:S.waMsg,formato:S.formato,tpl:S.tpl,scheme:S.scheme,visual:S.extras.visual,qr:S.extras.qr});}
-function loadDraft(){const d=store.get('draft');if(!d)return;if(!d.v){if(d.copy)['nota','codigo','fecha','legal'].forEach(k=>d.copy[k]='');d.waMsg='';}Object.assign(S.req,d.req||{});Object.assign(S.copy,d.copy||{});['waMsg','formato','tpl','scheme'].forEach(k=>{if(d[k]!=null)S[k]=d[k]});if(d.visual)S.extras.visual=d.visual;if(!VISUALS.some(v=>v[0]===S.extras.visual))S.extras.visual=DEFAULTS.visual;if(d.qr!=null)S.extras.qr=d.qr;if(!FORMATS[S.formato]){S.formato='inapp';S.tpl='hero';}if(!SCHEMES[S.scheme])S.scheme='oscuro';}
+/* ===== Carrusel (solo Redes sociales): hasta 10 láminas con el mismo formato, plantilla y combinación.
+   La lámina activa vive en S.copy / S.extras (así todo el render y las reglas funcionan igual); las demás, en S.car.slides. */
+const CAR_MAX=10,CAR_MIN=2;
+const emptyCopy=()=>Object.fromEntries(Object.keys(S.copy).map(k=>[k,'']));
+const isCar=()=>S.car.on&&S.formato==='social';
+function syncSlide(){if(!S.car.on)return;S.car.slides[S.car.idx]={copy:S.copy,visual:S.extras.visual,productos:S.extras.productos,producto:S.extras.producto};}
+function selectSlide(i){if(!S.car.on)return;syncSlide();i=Math.max(0,Math.min(S.car.slides.length-1,i));const sl=S.car.slides[i];
+  S.car.idx=i;S.copy=sl.copy;S.extras.visual=sl.visual;S.extras.productos=sl.productos;S.extras.producto=sl.producto;}
+function withSlide(i,fn){if(!S.car.on||i===S.car.idx)return fn();const prev=S.car.idx;selectSlide(i);try{return fn();}finally{selectSlide(prev);}}
+function newSlide(){return{copy:emptyCopy(),visual:S.extras.visual,productos:[],producto:null};}
+function setCarousel(on){if(on===S.car.on)return;
+  if(on){S.car.on=true;S.car.idx=0;S.car.slides=[{copy:S.copy,visual:S.extras.visual,productos:S.extras.productos,producto:S.extras.producto}];while(S.car.slides.length<S.car.n)S.car.slides.push(newSlide());
+    if(S.tpl==='story')S.tpl='feed';}
+  else{selectSlide(0);S.car.on=false;S.car.slides=[];S.car.idx=0;}}
+function setSlides(n){n=Math.max(CAR_MIN,Math.min(CAR_MAX,n));S.car.n=n;if(!S.car.on)return;syncSlide();
+  while(S.car.slides.length<n)S.car.slides.push(newSlide());if(S.car.slides.length>n){if(S.car.idx>=n)selectSlide(n-1);S.car.slides.length=n;}}
+const slideTpl=i=>({...curTpl(),__slide:i});
+function slideChips(){if(!isCar())return'';
+  return `<div class="slidebar" role="group" aria-label="Láminas del carrusel"><span class="hint">Lámina</span>${S.car.slides.map((_,i)=>{const v=withSlide(i,localVerdict);const st=v.empty?'empty':v.ok?'ok':'bad';
+    return `<button class="fmt sl-${st} ${i===S.car.idx?'sel':''}" data-slide="${i}" aria-pressed="${i===S.car.idx}" title="${v.empty?'Sin copy':v.ok?'Cumple':'Por corregir'}">${i+1}</button>`;}).join('')}</div>`;}
+function bindSlideChips(){document.querySelectorAll('[data-slide]').forEach(b=>b.onclick=()=>{selectSlide(+b.dataset.slide);saveDraft();drawMain();drawLive();});}
+function saveDraft(){syncSlide();store.set('draft',{v:3,req:S.req,car:S.car.on?{on:true,n:S.car.n,idx:S.car.idx,slides:S.car.slides.map(x=>({copy:x.copy,visual:x.visual}))}:null,copy:S.copy,waMsg:S.waMsg,formato:S.formato,tpl:S.tpl,scheme:S.scheme,visual:S.extras.visual,qr:S.extras.qr});}
+function loadDraft(){const d=store.get('draft');if(!d)return;if(!d.v){if(d.copy)['nota','codigo','fecha','legal'].forEach(k=>d.copy[k]='');d.waMsg='';}Object.assign(S.req,d.req||{});Object.assign(S.copy,d.copy||{});['waMsg','formato','tpl','scheme'].forEach(k=>{if(d[k]!=null)S[k]=d[k]});if(d.visual)S.extras.visual=d.visual;if(!VISUALS.some(v=>v[0]===S.extras.visual))S.extras.visual=DEFAULTS.visual;if(d.qr!=null)S.extras.qr=d.qr;if(!FORMATS[S.formato]){S.formato='inapp';S.tpl='hero';}if(!SCHEMES[S.scheme])S.scheme='oscuro';
+  if(d.car?.on&&Array.isArray(d.car.slides)&&d.car.slides.length>=CAR_MIN&&S.formato==='social'){const keys=Object.keys(S.copy);
+    S.car={on:true,n:Math.min(CAR_MAX,d.car.slides.length),idx:0,slides:d.car.slides.slice(0,CAR_MAX).map(x=>({copy:Object.fromEntries(keys.map(k=>[k,x.copy?.[k]||''])),visual:VISUALS.some(v=>v[0]===x.visual)?x.visual:DEFAULTS.visual,productos:[],producto:null}))};
+    const i=Math.min(d.car.idx||0,S.car.slides.length-1);const sl=S.car.slides[i];S.car.idx=i;S.copy=sl.copy;S.extras.visual=sl.visual;S.extras.productos=sl.productos;}}
 
 /* ===================== DIBUJO ===================== */
 function rr(ctx,x,y,w,h,r){r=Math.max(0,Math.min(r,w/2,h/2));ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
@@ -639,7 +669,7 @@ function render(canvas,tpl,schemeKey,k){
   return evaluate(R,tpl);
 }
 /* Revisa una pieza sin mostrarla (exportación y kit) */
-function reviewOf(tpl,schemeKey){return render(document.createElement('canvas'),tpl,schemeKey,.05);}
+function reviewOf(tpl,schemeKey){const f=()=>render(document.createElement('canvas'),tpl,schemeKey,.05);return tpl.__slide!=null?withSlide(tpl.__slide,f):f();}
 
 /* ===================== REVISIÓN DE MARCA: reglas ===================== */
 /* check: auto = la plataforma la mide · ai = Claude la revisa · manual = el ejecutor la confirma · fixed = la plataforma la garantiza
@@ -844,7 +874,7 @@ function evaluate(R,tpl){
   const ok=(detail='')=>({state:'ok',detail}),fail=detail=>({state:'fail',detail});
   const AUTO={
     d_logo_min:()=>{if(!R.logo)return fail('Falta el logo.');const min=fmt.print?59:35;return R.logoH>=min?ok(`${Math.round(R.logoH)} px de alto.`):fail(`El logo mide ${Math.round(R.logoH)} px; el mínimo es ${fmt.print?'0,5 cm (59 px a 300 dpi)':'35 px'}. Quita un aliado o cambia de plantilla.`);},
-    d_fit:()=>{const f=R.checks.filter(c=>c.fit);if(!d.titular&&!d.destacado)return fail('La pieza no tiene mensaje principal.');return f.length?fail(f.map(c=>c.msg).join(' ')):ok();},
+    d_fit:()=>{const f=R.checks.filter(c=>c.fit);if(!d.titular&&!d.destacado&&!(isCar()&&(d.subtitulo||d.eyebrow)))return fail('La pieza no tiene mensaje principal.');return f.length?fail(f.map(c=>c.msg).join(' ')):ok();},
     d_contrast:()=>{const bad=R.pairs.filter(p=>{const r=ratio(p.fg,p.bg);return r!=null&&r<(p.large?3:4.5)});return bad.length?fail('Contraste bajo en: '+[...new Set(bad.map(b=>b.label))].join(', ')+'.'):ok();},
     d_highlight:()=>{const runs=(d.titular||'').match(/\*[^*]+\*/g)||[];if(!runs.length)return ok('Sin resaltado.');const hw=runs.reduce((a,r)=>a+words(r).length,0);
       if(runs.length>1)return fail(`Hay ${runs.length} partes resaltadas; deja una.`);if(hw>words(d.titular).length*.6)return fail('Resaltaste casi todo el titular; si todo resalta, nada resalta.');return ok();},
@@ -953,7 +983,11 @@ function schemeBtns(id){return Object.entries(SCHEMES).map(([k,v])=>`<button cla
 function drawDesign(){const cv=$('#d_live');if(!cv)return;
   $('#d_schemes').innerHTML=schemeBtns();$('#d_schemes').querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>{S.scheme=b.dataset.sc;drawDesign();saveDraft();});
   const t=curTpl();const rv=render(cv,t,S.scheme,Math.min(1,1100/Math.max(t.w,t.h)));
-  $('#d_review').innerHTML=reviewHtml(rv);bindReview($('#d_review'));}
+  $('#d_review').innerHTML=reviewHtml(rv);bindReview($('#d_review'));
+  if(isCar())drawSwipe(document.querySelector(`canvas[data-swc="${S.car.idx}"]`)?[S.car.idx]:null);}
+/* Miniaturas livianas (≈200 px) para deslizar: todas al entrar al paso, solo la activa mientras se edita */
+function drawSwipe(only,scheme=S.scheme,root=document){const t=curTpl();const k=Math.min(.2,200/t.w);
+  (only||S.car.slides.map((_,i)=>i)).forEach(i=>{const c=root.querySelector(`canvas[data-swc="${i}"]`);if(c)withSlide(i,()=>render(c,t,scheme,k));});}
 function drawLive(){
   if(S.step===4){drawDesign();}
   const hide=S.step!==3;$('#aside').hidden=hide;$('#grid').classList.toggle('full',hide);if(hide)return;
@@ -974,13 +1008,17 @@ function step2(){const f=curFormat();
   <div class="fmts">${Object.entries(FORMATS).map(([k,v])=>`<button class="fmt ${k===S.formato?'sel':''}" data-f="${k}" aria-pressed="${k===S.formato}">${v.label}</button>`).join('')}</div>
   <div class="row" style="justify-content:space-between;margin:0 0 12px"><p class="hint" style="margin:0">${f.print?'Salida para imprenta: PNG a 300 dpi con 3 mm de sangrado.':'Salida digital en PNG a tamaño real.'}</p>
   <div class="fmts" role="group" aria-label="Vista" style="margin:0"><button class="fmt ${v==='mockup'?'sel':''}" data-view="mockup" aria-pressed="${v==='mockup'}">Mockup</button><button class="fmt ${v==='esquema'?'sel':''}" data-view="esquema" aria-pressed="${v==='esquema'}">Esquema</button></div></div>
-  <div class="tpls">${f.templates.map(t=>`<button class="tpl ${t.id===S.tpl?'sel':''}" data-t="${t.id}" aria-pressed="${t.id===S.tpl}"><div class="thumb ${v==="mockup"?"mock":""}"><canvas data-th="${t.id}" aria-label="${v==="mockup"?"Mockup de ejemplo":"Esquema"} de ${esc(t.name)}"></canvas></div>${v==="mockup"?'<span class="mock-tag">Ejemplo con mensaje de muestra</span>':''}<b>${esc(t.name)}</b><span class="dim">${t.w}×${t.h} px</span><p>${esc(t.desc)}</p></button>`).join('')}</div>
+  ${S.formato==='social'?`<div class="row" style="margin:0 0 12px;gap:10px"><b style="font-size:13px">Tipo</b><div class="fmts" role="group" aria-label="Post o carrusel" style="margin:0"><button class="fmt ${!S.car.on?'sel':''}" data-car="0" aria-pressed="${!S.car.on}">Post</button><button class="fmt ${S.car.on?'sel':''}" data-car="1" aria-pressed="${S.car.on}">Carrusel</button></div>
+    ${S.car.on?`<span class="row" style="gap:6px"><span class="hint">Láminas</span><button class="btn sm" data-n="-1" aria-label="Quitar lámina" ${S.car.n<=CAR_MIN?'disabled':''}>−</button><b>${S.car.n}</b><button class="btn sm" data-n="1" aria-label="Agregar lámina" ${S.car.n>=CAR_MAX?'disabled':''}>+</button><span class="hint">máx. ${CAR_MAX}. Todas comparten formato, plantilla y colores.</span></span>`:'<span class="hint">Carrusel: hasta 10 láminas coherentes entre sí.</span>'}</div>`:''}
+  <div class="tpls">${f.templates.map(t=>`<button class="tpl ${t.id===S.tpl?'sel':''}" data-t="${t.id}" aria-pressed="${t.id===S.tpl}" ${S.car.on&&S.formato==='social'&&t.id==='story'?'disabled title="Las historias no van en carrusel"':''}><div class="thumb ${v==="mockup"?"mock":""}"><canvas data-th="${t.id}" aria-label="${v==="mockup"?"Mockup de ejemplo":"Esquema"} de ${esc(t.name)}"></canvas></div>${v==="mockup"?'<span class="mock-tag">Ejemplo con mensaje de muestra</span>':''}<b>${esc(t.name)}</b><span class="dim">${t.w}×${t.h} px</span><p>${esc(t.desc)}</p></button>`).join('')}</div>
   ${navHtml('Escribir mensaje')}`;}
-function bind2(){document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{S.formato=b.dataset.f;S.tpl=FORMATS[S.formato].templates[0].id;drawMain();drawLive();saveDraft();});
+function bind2(){document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{if(b.dataset.f!=='social')setCarousel(false);S.formato=b.dataset.f;S.tpl=FORMATS[S.formato].templates[0].id;drawMain();drawLive();saveDraft();});
+  document.querySelectorAll('[data-car]').forEach(b=>b.onclick=()=>{setCarousel(b.dataset.car==='1');saveDraft();drawMain();drawLive();});
+  document.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{setSlides(S.car.n+(+b.dataset.n));saveDraft();drawMain();});
   curFormat().templates.forEach(t=>{const c=document.querySelector(`canvas[data-th="${t.id}"]`);S.fmtView==='esquema'?drawWire(c,t):drawMockup(c,t);});
   document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{S.fmtView=b.dataset.view;drawMain();});
   document.querySelectorAll('[data-pais]').forEach(b=>b.onclick=()=>{S.req.pais=b.dataset.pais;S.aiReview=null;saveDraft();drawMain();});
-  document.querySelectorAll('.tpl').forEach(b=>b.onclick=()=>{S.tpl=b.dataset.t;drawMain();drawLive();saveDraft();});}
+  document.querySelectorAll('.tpl').forEach(b=>b.onclick=()=>{if(b.disabled)return;S.tpl=b.dataset.t;drawMain();drawLive();saveDraft();});}
 
 /* Mockup de ejemplo: la composición con un mensaje de muestra, puesta en su contexto real (app, feed, chat, mostrador) */
 const SAMPLE={copy:{eyebrow:'Compra desde USA',titular:'Tus compras, *sin fronteras*',subtitulo:'Compra en tus tiendas favoritas y tráelo con Upper.',destacado:'10 USD',cta:'Compra ya',nota:'de regalo',codigo:'',fecha:'',legal:''},visual:'celular-bolsa'};
@@ -1116,13 +1154,13 @@ function step3(){const t=curTpl();const filled=new Set(S.msgAI?.campos||[]);
     <div id="rewPanel" ${S.rewOpen?'':'hidden'}>${S.rewOpen?rewHtml():''}</div>
     <div id="aiOut">${aiHtml()}</div>
   </div>
-  <div class="box"><h3>2. Copy de la pieza <span class="hint">Fecha, código, legal y mensaje de WhatsApp se agregan en Diseño, si aplican</span></h3>
-  <div class="fields">${FIELDS.map(([k,l,ph])=>`<label class="f ${k==='subtitulo'||k==='titular'?'full':''}${filled.has(k)?' ai-filled':''}">${l}${filled.has(k)?' <span class="aitag">Completado con IA</span>':''}<input type="text" id="c_${k}" value="${esc(S.copy[k])}" placeholder="${ph}"><span class="counter" id="n_${k}"></span></label>`).join('')}</div></div>
+  <div class="box"><h3>2. Copy de la ${isCar()?`lámina ${S.car.idx+1} de ${S.car.slides.length}`:'pieza'} <span class="hint">Fecha, código, legal y mensaje de WhatsApp se agregan en Diseño, si aplican</span></h3>
+  ${slideChips()}<div class="fields">${FIELDS.map(([k,l,ph])=>`<label class="f ${k==='subtitulo'||k==='titular'?'full':''}${filled.has(k)?' ai-filled':''}">${l}${filled.has(k)?' <span class="aitag">Completado con IA</span>':''}<input type="text" id="c_${k}" value="${esc(S.copy[k])}" placeholder="${ph}"><span class="counter" id="n_${k}"></span></label>`).join('')}</div></div>
   ${navHtml('Ver diseño')}`;}
 /* Validación interna: reglas de texto y de negocio del país, sin IA. Lo que pide criterio (tono) queda como "revísalo tú". */
 function localVerdict(){const rv=reviewOf(curTpl(),S.scheme).filter(r=>r.scope==='copy'&&r.enabled);
   const fails=rv.filter(r=>r.state==='fail'&&r.sev!=='info'),recs=rv.filter(r=>r.state==='fail'&&r.sev==='info'),manual=rv.filter(r=>r.state==='pending');
-  const empty=!S.copy.titular&&!S.copy.destacado;return{ok:!fails.length&&!empty,empty,fails,recs,manual};}
+  const empty=!S.copy.titular&&!S.copy.destacado&&!(isCar()&&(S.copy.subtitulo||S.copy.eyebrow));return{ok:!fails.length&&!empty,empty,fails,recs,manual};}
 function verdictHtml(){const v=localVerdict();
   return `<div class="crit"><div class="row" style="justify-content:space-between"><b style="margin:0">${v.empty?'Falta el copy':v.ok?'Aprobado':'Rehacer'}</b><span class="chip ${v.ok?'c-ok':'c-block'}">${v.empty?'Completa el copy abajo o usa Reescribir con IA':v.ok?'Cumple los lineamientos que se validan solos':`${v.fails.length} regla${v.fails.length>1?'s':''} por corregir`}</span></div>
   ${v.fails.length?`<b>Por corregir</b><ul class="plain">${v.fails.map(r=>`<li><b>${esc(r.text)}</b>${r.detail?` <span class="hint">${esc(r.detail)}</span>`:''}</li>`).join('')}</ul>`:''}
@@ -1150,7 +1188,7 @@ Sin emojis. No inventes montos, descuentos, fechas ni datos que no estén en la 
 Reglas de marca y de negocio:
 ${activeRules().filter(r=>r.enabled&&r.check!=='fixed'&&r.scope==='copy').map(r=>`- ${r.kind==='do'?'HACER':'NO HACER'}: ${r.text}`).join('\n')}
 
-Entrega 3 versiones con enfoques distintos (directo a la oferta, urgencia, cómplice). La primera es tu recomendación.
+${isCar()?carPromptTail():`Entrega 3 versiones con enfoques distintos (directo a la oferta, urgencia, cómplice). La primera es tu recomendación.
 Responde EXACTAMENTE con este formato de texto, sin nada antes ni después (deja vacío el campo que no aplique):
 VERSIÓN 1
 ENFOQUE:
@@ -1163,7 +1201,20 @@ AJUSTES: qué cambiaste y por qué, en una línea
 VERSIÓN 2
 (mismos campos)
 VERSIÓN 3
-(mismos campos)`;}
+(mismos campos)`}`;}
+function carPromptTail(){const n=S.car.slides.length;const cur=S.car.slides.map((_,i)=>withSlide(i,()=>FIELDS.some(([k])=>S.copy[k])?`Lámina ${i+1}: ${FIELDS.map(([k,l])=>`${l}: ${S.copy[k]||'(vacío)'}`).join(' · ')}`:'')).filter(Boolean);
+  return `Es un CARRUSEL de ${n} láminas para redes: deben leerse como una sola historia coherente, con el mismo tono. Lámina 1: portada con gancho (titular fuerte, sin CTA). Láminas intermedias: una idea por lámina, en orden. Lámina ${n}: cierre con el CTA. Solo la última lleva CTA; en las demás deja CTA vacío. Cada lámina respeta los límites de arriba.
+${cur.length?`Copy actual del carrusel:
+${cur.join('\n')}
+`:''}
+Responde EXACTAMENTE con este formato de texto, sin nada antes ni después (deja vacío el campo que no aplique):
+${Array.from({length:n},(_,i)=>`LÁMINA ${i+1}
+ANTETÍTULO:
+TITULAR:
+SUBTÍTULO:
+DESTACADO:
+CTA:`).join('\n')}
+AJUSTES: qué decidiste y por qué, en una línea`;}
 function rewHtml(){return `<div class="crit"><b style="margin-top:0">1. Lleva el prompt a tu IA</b>
   <p class="hint" style="margin:2px 0 8px">Incluye el tono de Upper, el conocimiento de ${esc(PAISES[paisActual()].nombre)}, los Do's y Don'ts y tu propuesta. Al elegir una IA se copia el prompt y se abre en otra pestaña: pégalo (Ctrl+V o Cmd+V) y envíalo.</p>
   <div class="row" style="flex-wrap:wrap;gap:6px">${AI_DESTS.map(([n,u])=>`<a class="btn sm" href="${u}" target="_blank" rel="noopener" data-dest>${n}</a>`).join('')}<button class="btn sm" id="cpPrompt">Solo copiar (otra IA)</button></div>
@@ -1174,10 +1225,12 @@ function rewHtml(){return `<div class="crit"><b style="margin-top:0">1. Lleva el
 async function copyPrompt(){const t=rewPrompt();const box=$('#promptBox');if(box)box.value=t;
   try{await navigator.clipboard.writeText(t);return true;}catch{}
   try{if(box){box.closest('details').open=true;box.focus();box.select();if(document.execCommand('copy'))return true;}}catch{}return false;}
-function parseAiResp(txt){const blocks=String(txt).replace(/\r/g,'').split(/^[#>*\s]*VERSI[ÓO]N\s*\d+[^\n]*$/im).filter(b=>/TITULAR|DESTACADO/i.test(b));
+function parseSlides(txt){const t=String(txt).replace(/\r/g,'');const aj=(t.match(/^[\s>*_-]*AJUSTES[\s*_]*:[\s*_]*(.*)$/im)||[])[1];
+  const out=parseAiResp(true,t.replace(/^[#>*\s]*L[ÁA]MINA\s*(\d+)[^\n]*$/gim,'VERSIÓN $1'));out.ajustes=aj?aj.replace(/\*\*+/g,'').trim():'';return out;}
+function parseAiResp(txt,all){if(txt===true){[txt,all]=[all,true];}const blocks=String(txt).replace(/\r/g,'').split(/^[#>*\s]*VERSI[ÓO]N\s*\d+[^\n]*$/im);const blocks2=all?blocks.slice(1):blocks.filter(b=>/TITULAR|DESTACADO/i.test(b));
   const KEY={'ENFOQUE':'enfoque','ANTETITULO':'eyebrow','TITULAR':'titular','SUBTITULO':'subtitulo','DESTACADO':'destacado','CTA':'cta','AJUSTES':'ajustes'};
-  return blocks.map(b=>{const o={};for(const line of b.split('\n')){const m=line.match(/^[\s>*_-]*([A-Za-zÁÉÍÓÚáéíóú]+)[\s*_]*:[\s*_]*(.*)$/);if(!m)continue;
-    const k=KEY[m[1].toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'')];if(!k)continue;let v=m[2].replace(/\*\*+/g,'').replace(/^["“”']|["“”']$/g,'').trim();if(/^\(?(vac[ií]o|ninguno|n\/a|—|-)\)?$/i.test(v))v='';o[k]=v;}return o;}).filter(o=>o.titular||o.destacado);}
+  return blocks2.map(b=>{const o={};for(const line of b.split('\n')){const m=line.match(/^[\s>*_-]*([A-Za-zÁÉÍÓÚáéíóú]+)[\s*_]*:[\s*_]*(.*)$/);if(!m)continue;
+    const k=KEY[m[1].toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'')];if(!k)continue;let v=m[2].replace(/\*\*+/g,'').replace(/^["“”']|["“”']$/g,'').trim();if(/^\(?(vac[ií]o|ninguno|n\/a|—|-)\)?$/i.test(v))v='';o[k]=v;}return o;}).filter(o=>all||o.titular||o.destacado);}
 function aiHtml(){
   if(!S.evalr&&!S.opciones.length)return '';const e=S.evalr||{};const alt=S.opciones.map((o,i)=>[o,i]).filter(([,i])=>i!==S.optSel);
   return `<div class="crit"><div class="row" style="justify-content:space-between"><b style="margin:0">Respuesta de tu IA</b>${e.puntaje!=null?`<span class="score">${esc(e.puntaje)}<small style="font-size:14px;color:var(--muted)">/10</small></span>`:''}</div>
@@ -1189,14 +1242,19 @@ function counters(){[...FIELDS,...EXTRA_FIELDS].forEach(([k])=>{const n=$('#n_'+
 let ctl=null;
 function bind3(){$('#prop').oninput=e=>{S.propuesta=e.target.value;saveDraft();};
   const unmark=k=>{const c=S.msgAI?.campos;if(c&&c.includes(k)){S.msgAI.campos=c.filter(x=>x!==k);const l=$('#c_'+k)?.closest('label');l?.classList.remove('ai-filled');l?.querySelector('.aitag')?.remove();}};
-  FIELDS.forEach(([k])=>$('#c_'+k).oninput=e=>{S.copy[k]=e.target.value;unmark(k);counters();drawLive();saveDraft();if(S.verdict)$('#verdict').innerHTML=verdictHtml();});
-  counters();bindOpts();
+  FIELDS.forEach(([k])=>$('#c_'+k).oninput=e=>{S.copy[k]=e.target.value;unmark(k);counters();drawLive();saveDraft();if(S.verdict)$('#verdict').innerHTML=verdictHtml();const ch=document.querySelector(`[data-slide="${S.car.idx}"]`);if(ch&&isCar()){const v=localVerdict();ch.className=`fmt sl-${v.empty?'empty':v.ok?'ok':'bad'} sel`;}});
+  counters();bindOpts();bindSlideChips();
   $('#val').onclick=()=>{S.verdict=true;$('#verdict').innerHTML=verdictHtml();};
   $('#rew').onclick=()=>{S.rewOpen=!S.rewOpen;$('#rewPanel').hidden=!S.rewOpen;$('#rew').setAttribute('aria-expanded',String(S.rewOpen));if(S.rewOpen){$('#rewPanel').innerHTML=rewHtml();bindRew();}};
   if(S.rewOpen)bindRew();}
 function bindRew(){document.querySelectorAll('[data-dest]').forEach(a=>a.onclick=()=>{copyPrompt().then(ok=>toast(ok?'Prompt copiado: pégalo en tu IA':'Copia el prompt desde "Ver el prompt"'));});
   $('#cpPrompt').onclick=async()=>toast(await copyPrompt()?'Prompt copiado: pégalo en tu IA':'Selecciona y copia el prompt desde "Ver el prompt"');
-  $('#applyResp').onclick=()=>{const opts=parseAiResp($('#aiResp').value);const st=$('#st');
+  $('#applyResp').onclick=()=>{const st=$('#st');
+    if(isCar()){const sl=parseSlides($('#aiResp').value);if(!sl.length){st.className='status err';st.textContent='No encontré las láminas. Pega la respuesta completa, con LÁMINA 1, LÁMINA 2… y sus campos.';return;}
+      sl.slice(0,S.car.slides.length).forEach((o,i)=>withSlide(i,()=>{FIELDS.forEach(([k])=>{let v=o[k]!=null?String(o[k]):'';if(v.replace(/\*/g,'').length>LIMITS[k])v=v.slice(0,LIMITS[k]).trim();S.copy[k]=v;});}));
+      S.msgAI={campos:FIELDS.map(([k])=>k).filter(k=>S.copy[k])};S.opciones=[];S.evalr=sl.ajustes?{puntaje:null,fortalezas:[],problemas:[sl.ajustes]}:null;S.rewOpen=false;S.verdict=true;saveDraft();drawMain();drawLive();
+      const s2=$('#st');if(s2){s2.className='status';s2.textContent=`Copy de ${Math.min(sl.length,S.car.slides.length)} láminas aplicado desde tu IA. Revisa cada lámina con los números de arriba del copy.`;}return;}
+    const opts=parseAiResp($('#aiResp').value);
     if(!opts.length){st.className='status err';st.textContent='No encontré el copy en la respuesta. Pega la respuesta completa, con VERSIÓN 1 y los campos TITULAR, CTA, etc.';return;}
     S.opciones=opts.slice(0,3).map(o=>{const c={...o};Object.keys(LIMITS).forEach(k=>{if(typeof c[k]==='string'&&c[k].replace(/\*/g,'').length>LIMITS[k])c[k]=c[k].slice(0,LIMITS[k]).trim();});return c;});
     S.evalr={puntaje:null,fortalezas:[],problemas:opts[0].ajustes?[opts[0].ajustes]:[]};S.optSel=-1;applyOption(0);S.rewOpen=false;S.verdict=true;drawMain();drawLive();
@@ -1214,8 +1272,9 @@ function step4(){const x=S.extras,a=S.extrasAI,t=curTpl();const filled=new Set(a
   return `<h2>Diseño</h2><p class="lead">Esta es la propuesta inicial con tu formato y tu mensaje. Ajústala con los visuales y los elementos de abajo; la pieza se actualiza al instante.</p>
   <section class="design">
     <div class="schemes" id="d_schemes"></div>
+    ${isCar()?`<div class="swipe" id="d_swipe" aria-label="Láminas del carrusel: desliza y elige una para editarla">${S.car.slides.map((_,i)=>`<button class="sw-item ${i===S.car.idx?'sel':''}" data-sw="${i}" aria-pressed="${i===S.car.idx}"><canvas data-swc="${i}"></canvas><span>${i+1}</span></button>`).join('')}</div>`:''}
     <div class="stage"><canvas id="d_live"></canvas></div>
-    <div class="meta"><span><span class="pill">${esc(curFormat().label)}</span> ${esc(t.name)}</span><span>${t.w}×${t.h} px</span></div>
+    <div class="meta"><span><span class="pill">${esc(curFormat().label)}</span> ${esc(t.name)}${isCar()?` · <b>Lámina ${S.car.idx+1} de ${S.car.slides.length}</b>`:''}</span><span>${t.w}×${t.h} px</span></div>
   </section>
   <div class="box"><h3>1. Visual de la pieza</h3>
     <div class="visuals">${VISUALS.map(([k,l])=>`<button class="vis ${x.visual===k?'sel':''}" data-v="${k}" aria-pressed="${x.visual===k}"><canvas width="240" height="160" data-vis="${k}"></canvas>${l}</button>`).join('')}</div>
@@ -1247,6 +1306,7 @@ function prodEditor(){const x=S.extras,cards=x.visual==='cards',filled=new Set(S
       <button class="btn sm" data-prm="${i}" aria-label="Quitar producto">×</button></div>`).join('')}</div>`;}
 function readImg(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=fr.result;};fr.onerror=rej;fr.readAsDataURL(file);});}
 function bind4(){
+  if(isCar()){drawSwipe(null);document.querySelectorAll('[data-sw]').forEach(b=>b.onclick=()=>{selectSlide(+b.dataset.sw);saveDraft();drawMain();drawLive();});document.querySelector('.sw-item.sel')?.scrollIntoView({block:'nearest',inline:'center'});}
   const unmark=k=>{const c=S.extrasAI?.campos;if(c&&c.includes(k)){S.extrasAI.campos=c.filter(x=>x!==k);const l=document.getElementById(k==='mensaje'?'c_wa':k==='qr'?'e_qr':'c_'+k)?.closest('label');l?.classList.remove('ai-filled');l?.querySelector('.aitag')?.remove();}};
   EXTRA_FIELDS.forEach(([k])=>$('#c_'+k).oninput=e=>{S.copy[k]=e.target.value;unmark(k);counters();drawLive();saveDraft();});counters();
   $('#c_wa').oninput=e=>{S.waMsg=e.target.value;unmark('mensaje');drawLive();saveDraft();};
@@ -1336,7 +1396,7 @@ function applyInterp(r){const campos=[];
   S.extrasAI={aceptados:r.aceptados||[],rechazados:r.rechazados||[],faltan:r.faltan||[],campos};saveDraft();drawMain();drawLive();}
 
 /* ---------- Paso 5 ---------- */
-function step5(){const t=curTpl();
+function step5(){const t=curTpl();if(isCar())return step5Car();
   return `<h2>Descarga</h2><p class="lead">La pieza en las dos combinaciones aprobadas. Elige una y descárgala, o baja el kit completo adaptado a todos los formatos.</p>
   <div class="final">${Object.entries(SCHEMES).map(([k,v])=>`<div class="card"><h3>${esc(v.name)} ${k===S.scheme?'<span class="pill">Elegida</span>':`<button class="btn sm" data-pick="${k}">Elegir</button>`}</h3><div class="stage"><canvas id="f_${k}"></canvas></div><div class="review rv-card" id="fc_${k}"></div><div class="row"><button class="btn primary" data-ex="${k}">Descargar PNG ${t.w}×${t.h}</button><button class="btn" data-svg="${k}">SVG editable</button></div><div class="status" id="fs_${k}"></div></div>`).join('')}</div>
   ${S.waMsg?`<div class="box"><h3>Mensaje para enviar con la imagen <button class="btn sm" id="cpwa">Copiar</button></h3><div class="wa" id="watext">${esc(S.waMsg)}</div></div>`:''}
@@ -1345,7 +1405,32 @@ function step5(){const t=curTpl();
   <div class="status" id="zst"></div>
   <div class="adapt" id="adapt"></div></div>
   ${navHtml()}`;}
-function bind5(){const t=curTpl();
+function step5Car(){const t=curTpl(),n=S.car.slides.length;
+  return `<h2>Descarga del carrusel</h2><p class="lead">${n} láminas de ${esc(t.name)} (${t.w}×${t.h} px). Desliza para revisarlas y descarga el carrusel completo: un .zip con una carpeta <code>png</code> y otra <code>svg</code>, numeradas en orden.</p>
+  <div class="final">${Object.entries(SCHEMES).map(([k,v])=>`<div class="card"><h3>${esc(v.name)} ${k===S.scheme?'<span class="pill">Elegida</span>':`<button class="btn sm" data-pick="${k}">Elegir</button>`}</h3>
+    <div class="swipe big" data-swroot="${k}">${S.car.slides.map((_,i)=>`<div class="sw-item"><canvas data-swc="${i}"></canvas><span>${i+1}</span></div>`).join('')}</div>
+    <div class="review rv-card" id="fc_${k}"></div><div class="row"><button class="btn primary" data-carzip="${k}">Descargar carrusel .zip</button></div><div class="status" id="fs_${k}"></div></div>`).join('')}</div>
+  ${S.waMsg?`<div class="box"><h3>Mensaje para enviar con el carrusel <button class="btn sm" id="cpwa">Copiar</button></h3><div class="wa" id="watext">${esc(S.waMsg)}</div></div>`:''}
+  ${navHtml()}`;}
+function bind5Car(){const n=S.car.slides.length;
+  Object.keys(SCHEMES).forEach(k=>{const root=document.querySelector(`[data-swroot="${k}"]`);const t=curTpl();const kk=Math.min(.3,320/t.w);
+    let b=0,w=0;S.car.slides.forEach((_,i)=>{const c=root.querySelector(`canvas[data-swc="${i}"]`);const rv=withSlide(i,()=>render(c,t,k,kk));const sm=reviewSummary(rv);b+=sm.b;w+=sm.w;if(sm.b||sm.w)c.parentElement.classList.add(sm.b?'bad':'warn');});
+    $('#fc_'+k).innerHTML=`<p class="hint" style="margin:6px 0">${b||w?`${b?b+' bloqueante(s) ':''}${w?w+' alerta(s) ':''}en ${n} láminas. Las láminas marcadas tienen incumplimientos.`:`Las ${n} láminas cumplen las reglas.`}</p>`;});
+  document.querySelectorAll('[data-carzip]').forEach(b=>b.onclick=()=>exportCarousel(b.dataset.carzip,$('#fs_'+b.dataset.carzip),b));
+  document.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{S.scheme=b.dataset.pick;saveDraft();drawMain();});
+  $('#cpwa')&&($('#cpwa').onclick=async()=>{try{await navigator.clipboard.writeText(S.waMsg);toast('Mensaje copiado');}catch{toast('Selecciona el texto y cópialo');}});}
+async function exportCarousel(k,st,btn){if(typeof JSZip==='undefined'){st.className='status err';st.textContent='No cargó el compresor. Recarga la página.';return;}
+  const n=S.car.slides.length,t=curTpl(),items=S.car.slides.map((_,i)=>slideTpl(i));const g=await gate(items,k);
+  if(!g.go){st.className='status';st.textContent='Descarga detenida. Corrige las láminas con alertas y vuelve a intentar.';return;}
+  btn.disabled=true;st.className='status';st.textContent=`Generando ${n} láminas…`;
+  try{await logIfNeeded(g,items,k);const zip=new JSZip(),base=`upper_${paisActual()}_${withSlide(0,pieceSlug)}_carrusel`;
+    for(let i=0;i<n;i++){const num=String(i+1).padStart(2,'0');const c=document.createElement('canvas');withSlide(i,()=>render(c,t,k,1));
+      zip.file(`png/${num}_${base}_${k}.png`,await toBlob(c));zip.file(`svg/${num}_${base}_${k}.svg`,withSlide(i,()=>renderSvg(t,k)));}
+    if(S.waMsg)zip.file('mensaje.txt',S.waMsg);zip.file('revision.txt',await revisionTxt(items,k,g));
+    await deliver(await zip.generateAsync({type:'blob'}),`${base}_${k}.zip`,st);}
+  catch{st.className='status err';st.textContent='No se pudo generar el carrusel. Vuelve a intentarlo.';}
+  finally{btn.disabled=false;}}
+function bind5(){if(isCar())return bind5Car();const t=curTpl();
   Object.keys(SCHEMES).forEach(k=>{const rv=render($('#f_'+k),t,k,Math.min(1,1100/Math.max(t.w,t.h)));$('#fc_'+k).innerHTML=reviewHtml(rv,{compact:true});});
   document.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>exportPng(t,b.dataset.ex,$('#fs_'+b.dataset.ex)));
   document.querySelectorAll('[data-svg]').forEach(b=>b.onclick=()=>exportSvg(t,b.dataset.svg,$('#fs_'+b.dataset.svg)));
@@ -1522,7 +1607,7 @@ async function loadLog(kind,box){
 }
 
 /* ===================== Aviso antes de descargar ===================== */
-function pieceName(t){return `${FORMATS[t.fmt].label} · ${t.name}`;}
+function pieceName(t){return t.__slide!=null?`Carrusel · lámina ${t.__slide+1}`:`${FORMATS[t.fmt].label} · ${t.name}`;}
 /* Devuelve {go, reglas, comentario}. Si no hay incumplimientos, sigue sin preguntar. */
 function gate(tpls,schemeKey){
   if(!fontsOk()){toast('Noland o Rethink Sans no cargaron: la descarga está bloqueada para no salir con otra tipografía. Recarga la página.');return Promise.resolve({go:false});}
