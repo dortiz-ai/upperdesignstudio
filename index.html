@@ -393,20 +393,16 @@ function text(ctx,R,label,str,b,o){
   if(o.hi&&o.bg&&hiCount&&o.hiMode!=='marker')R.pairs.push({fg:o.hi,bg:o.bg,large:size>=24,label:label+' (resaltado)'});
   return{h:th,w:mw,size,y:y0};
 }
-/* CTA: texto en Noland, mayúsculas, con flecha. Sin botón, contenedor ni bordes redondeados (decisión de marca). */
+/* CTA: texto en Noland, mayúsculas, con el mismo resaltado que las palabras marcadas con * (fondo verde recto, texto azul). Sin botón, sin bordes redondeados y sin elementos que no estén en el copy. */
 function ctaText(ctx,R,str,x,y,h,color,bg,o={}){
   if(!str)return 0;const s=str.toLocaleUpperCase('es');let fs=h*.6;ctx.font=fd(fs);
-  const parts=f=>{const tw=ctx.measureText(s).width;return{tw,gap:f*.4,aw:f*.85};};
-  let m=parts(fs),w=m.tw+m.gap+m.aw;
-  if(o.maxW&&w>o.maxW){fs=fs*o.maxW/w;ctx.font=fd(fs);m=parts(fs);w=m.tw+m.gap+m.aw;if(fs<h*.3)R.checks.push({lvl:'warn',msg:'“CTA” queda pequeño: acórtalo.'});}
+  let w=ctx.measureText(s).width+fs*.16;
+  if(o.maxW&&w>o.maxW){fs=fs*o.maxW/w;ctx.font=fd(fs);w=ctx.measureText(s).width+fs*.16;if(fs<h*.3)R.checks.push({lvl:'warn',msg:'“CTA” queda pequeño: acórtalo.'});}
   const px=o.align==='center'?x-w/2:o.align==='right'?x-w:x,cy=y+h/2;
-  ctx.fillStyle=color;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(s,px,cy+fs*.04);
-  const ax=px+m.tw+m.gap,lw=Math.max(1.5,fs*.12),hd=fs*.3;
-  ctx.strokeStyle=color;ctx.lineWidth=lw;ctx.lineCap='butt';ctx.lineJoin='miter';
-  ctx.beginPath();ctx.moveTo(ax,cy);ctx.lineTo(ax+m.aw-lw*.5,cy);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(ax+m.aw-hd-lw*.3,cy-hd);ctx.lineTo(ax+m.aw-lw*.3,cy);ctx.lineTo(ax+m.aw-hd-lw*.3,cy+hd);ctx.stroke();
-  R.ctas=(R.ctas||0)+1;R.pairs.push({fg:color,bg,large:true,label:'CTA'});return w;}
-function ctaWidth(ctx,t,h){const fs=h*.6;ctx.font=fd(fs);return ctx.measureText(t.toLocaleUpperCase('es')).width+fs*1.25;}
+  ctx.fillStyle=C.green;ctx.fillRect(px,cy-fs*.5,w,fs);
+  ctx.fillStyle=C.navy;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(s,px+fs*.08,cy+fs*.04);
+  R.ctas=(R.ctas||0)+1;R.pairs.push({fg:C.navy,bg:C.green,large:true,label:'CTA'});return w;}
+function ctaWidth(ctx,t,h){const fs=h*.6;ctx.font=fd(fs);return ctx.measureText(t.toLocaleUpperCase('es')).width+fs*.16;}
 function pill(ctx,R,str,x,y,h,bg,fg,o={}){
   if(!str)return 0;const s=o.upper?str.toLocaleUpperCase('es'):str;let fs=h*(o.fs||.42);ctx.font=ft(o.weight||700,fs);
   if('letterSpacing' in ctx)ctx.letterSpacing=o.upper?`${fs*.06}px`:'0px';
@@ -646,7 +642,7 @@ const BRAND_RULES=[
   {id:'n_title7',kind:'dont',check:'auto',sev:'warn',text:'Titulares de más de 7 palabras.'},
   {id:'n_sub15',kind:'dont',check:'auto',sev:'warn',text:'Subtítulos de más de 15 palabras.'},
   {id:'n_cta1',kind:'dont',check:'auto',sev:'warn',text:'Más de un CTA por pieza.'},
-  {id:'n_stroke',kind:'dont',check:'auto',sev:'warn',scope:'design',text:'Botones o bloques redondeados con texto. El CTA va como texto en Noland con flecha, sin contenedor. Sin textos con contorno.'},
+  {id:'n_stroke',kind:'dont',check:'auto',sev:'warn',scope:'design',text:'Botones o bloques redondeados con texto. El CTA va como texto en Noland con resaltado recto, como las palabras con *. Sin textos con contorno.'},
   {id:'n_overinfo',kind:'dont',check:'auto',sev:'warn',text:'Sobreinformar: más de 30 palabras de mensaje (sin contar fecha, código ni legal) o demasiados elementos a la vez.'},
   {id:'n_emoji',kind:'dont',check:'auto',sev:'block',text:'Emojis en la gráfica (van en el mensaje que la acompaña).'},
   {id:'n_phrases',kind:'dont',check:'auto',sev:'warn',text:'Frases prohibidas: "Te invitamos a", "Puedes", "Recuerda que puedes".'},
@@ -1163,7 +1159,7 @@ Si el pedido pide un dato de negocio (tarifa, tiempo, condición) que contradice
 Plantilla: ${curFormat().label} — "${t.name}" (${t.w}×${t.h}px). Copy actual: titular "${S.copy.titular}", destacado "${S.copy.destacado}".
 Archivos ya subidos: aliados [${S.extras.aliados.map(a=>a.name).join(', ')||'ninguno'}], foto de producto: ${S.extras.producto?'sí':'no'}.
 
-Sistema de diseño del Brandbook 2025 (NO negociable): solo tres colores (Upper Dark Blue #141D30, Green #CDF5A3, Cream Green #F0FFE8); titulares en Noland mayúsculas y cuerpo en Rethink Sans; el CTA es texto en Noland con flecha, nunca un botón ni bloque redondeado; logo oficial sin distorsionar, girar, sombrear, recolorear ni poner sobre fondos sobrecargados; ilustraciones oficiales de línea con bloques verdes (no se dibujan otras); cinta gruesa verde como elemento gráfico; sin emojis en la gráfica; sin fondos fotográficos completos; máximo 3 logos de aliados.
+Sistema de diseño del Brandbook 2025 (NO negociable): solo tres colores (Upper Dark Blue #141D30, Green #CDF5A3, Cream Green #F0FFE8); titulares en Noland mayúsculas y cuerpo en Rethink Sans; el CTA es texto en Noland con resaltado verde recto (como las palabras con *), sin flecha ni otros elementos, nunca un botón ni bloque redondeado; logo oficial sin distorsionar, girar, sombrear, recolorear ni poner sobre fondos sobrecargados; ilustraciones oficiales de línea con bloques verdes (no se dibujan otras); cinta gruesa verde como elemento gráfico; sin emojis en la gráfica; sin fondos fotográficos completos; máximo 3 logos de aliados.
 Elementos que la plataforma SÍ puede agregar:
 - qr: una URL
 - fecha: ≤ ${LIMITS.fecha} caracteres

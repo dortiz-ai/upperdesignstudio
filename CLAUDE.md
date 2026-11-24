@@ -22,7 +22,7 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
 - Tipografías: Noland Bold (titulares, siempre en mayúsculas) y **Rethink Sans** (cuerpo, decisión del equipo en lugar de Tropiline Sans). Están en `fonts/`; Noland es licenciada: el repositorio debe seguir privado.
 - Logo: vector oficial embebido (`LOGO_D`), color según el fondo, mínimo 35 px en pantalla / 0,5 cm impreso.
 - Ilustraciones: solo las 6 oficiales de `assets/ilustraciones/`, versión `_claro` u `_oscuro` según el fondo. Colores normalizados a la paleta exacta. Original en `fuentes/NUEVAS_ILUSTRACIONES.ai`.
-- **Sin botones ni bloques redondeados con texto.** El CTA va como texto en Noland, mayúsculas, con flecha (`ctaText`), sin contenedor. Antetítulo, destacado, fecha y código también van como texto, sin cajas ni contornos. El recuadro del QR es de esquinas rectas.
+- **Sin botones ni bloques redondeados con texto.** El CTA va como texto en Noland, mayúsculas, con el mismo resaltado que las palabras marcadas con `*` (fondo verde de esquinas rectas, texto azul oscuro; `ctaText`). No se agregan elementos que no estén en el copy (nada de flechas). Antetítulo, destacado, fecha y código también van como texto, sin cajas ni contornos. El recuadro del QR es de esquinas rectas.
 - Sin emojis en la gráfica (van en el mensaje que acompaña la pieza), sin gradientes, sombras ni fondos fotográficos completos.
 
 ## Conocimiento de marca por país
@@ -52,7 +52,7 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
 - Vercel (`upperdesignstudio.vercel.app`): `npm run build` (`scripts/build.mjs`) genera `public/` con la página envuelta por `lib/pagina.js`; `server.js` queda como función solo para `/api`; `proxy.js` (Routing Middleware) pide usuario y contraseña con `STUDIO_USERS`. Sin almacenamiento externo, en Vercel los endpoints de reglas y conocimiento responden 404 y la app usa el navegador. No sirvas archivos estáticos desde `server.js` en Vercel: no se incluyen en la función.
 - `server.js`: Node 20+, SDK `@anthropic-ai/sdk`, modelo por defecto `claude-opus-5-5`. Usuarios en `STUDIO_USERS="nombre:clave,…"`. La API key nunca llega al navegador.
 - Plantillas: 3 composiciones adaptables (`L.hero`, `L.tab`, `L.cupon`) × 4 formatos = 12 piezas. Las medidas se calculan en proporción al lienzo.
-- Para verificar cambios visuales, renderiza las 12 plantillas en ambas combinaciones con Playwright y revisa que pasen la revisión de marca.
+- Verificación visual: prueba solo la pieza afectada (no renderices las 12 plantillas salvo que se pida): el equipo pidió ahorrar tokens.
 
 ## Pendientes conocidos
 - ¿Suavizar una regla del brandbook debe requerir aprobación de un rol de marca?
