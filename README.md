@@ -13,7 +13,7 @@ Workflow web para producir piezas de Upper fieles al Brandbook 2025: requerimien
 | Composiciones | Cupón, split, tira, stack | Hero con cinta en U, pestaña de logo (piezas sociales), cupón tipo gift card |
 | Elementos gráficos | Caja amarilla dibujada, sello amarillo | Cinta Upper, las 6 ilustraciones oficiales (versión clara y oscura), resaltado verde en titulares (`*así*`) |
 | Formatos | 9 plantillas | 12 plantillas: in-app, redes, WhatsApp, hablador impreso |
-| Salida | 1 PNG | PNG por pieza + kit .zip con las 12 adaptaciones y el mensaje |
+| Salida | 1 PNG | PNG y SVG editable por pieza + kit .zip con las 12 adaptaciones, el mensaje y la revisión |
 | IA | Solo dentro de claude.ai | claude.ai **o** servidor propio (`server.js`), con la API key fuera del navegador |
 
 ## Ejecutar en local

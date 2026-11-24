@@ -4,12 +4,12 @@ Workflow web para que el equipo de Upper (courier internacional, Ecuador) produz
 
 Antes de cambiar algo, lee esta guía completa. Las decisiones de abajo las tomó el equipo de marca: no las reviertas sin que lo pidan.
 
-## Flujo (orden fijo)
-1. **Requerimiento:** país (Ecuador o Colombia), campaña, objetivo, canal, vigencia y descripción.
-2. **Formato:** formato y una de sus 3 composiciones. Cada una muestra un **mockup de ejemplo** (mensaje de muestra `SAMPLE`, en su contexto: app, feed, chat, historia, mostrador o vitrina) y, opcionalmente, su **esquema neutro**. El mockup de Banner in-app recrea la pantalla de inicio real de la app (`drawAppHome`, referencia en `docs/referencias/app-inicio-ecuador.png`) y cambia textos y casilleros según el país. El diseño con el copy del ejecutor solo se ve en el paso 4.
-3. **Mensaje:** el ejecutor escribe su propuesta → "Validar con Claude" evalúa y **completa los 5 campos del copy** (marcados "Completado por Claude"; la marca desaparece al editarlos) y ofrece 2 versiones alternativas. Al costado, solo la revisión de reglas de texto.
-4. **Diseño**, en este orden: propuesta inicial (vista previa grande) → Visual de la pieza → "¿Qué más necesita la pieza?" (pedido abierto que Claude interpreta) → Elementos permitidos → Revisión de marca.
-5. **Descarga:** las dos combinaciones de color, PNG por pieza y kit .zip de 12 formatos con `revision.txt`.
+## Flujo (orden fijo, 4 pasos)
+No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la ejecución y no hay base de datos de requerimientos. Internamente los pasos conservan los ids 2 a 5 (`VIEWS`), pero se muestran como 1 a 4.
+1. **Formato:** selector de **país** (Ecuador o Colombia; define conocimiento de marca, Do's y Don'ts y textos de los mockups), formato y una de sus 3 composiciones. Cada una muestra un **mockup de ejemplo** (mensaje de muestra `SAMPLE`, en su contexto: app, feed, chat, historia, mostrador o vitrina) y, opcionalmente, su **esquema neutro**. El mockup de Banner in-app recrea la pantalla de inicio real de la app (`drawAppHome`, referencia en `docs/referencias/app-inicio-ecuador.png`) y cambia textos y casilleros según el país. El diseño con el copy del ejecutor solo se ve en el paso 4.
+2. **Mensaje:** el ejecutor escribe su propuesta → "Validar con Claude" evalúa y **completa los 5 campos del copy** (marcados "Completado por Claude"; la marca desaparece al editarlos) y ofrece 2 versiones alternativas. Al costado, solo la revisión de reglas de texto.
+3. **Diseño**, en este orden: propuesta inicial (vista previa grande) → Visual de la pieza → "¿Qué más necesita la pieza?" (pedido abierto que Claude interpreta) → Elementos permitidos → Revisión de marca.
+4. **Descarga:** las dos combinaciones de color, PNG y **SVG editable** por pieza, y kit .zip de 12 formatos (PNG + SVG) con `revision.txt`.
 
 ## Copy
 - Campos del Mensaje: antetítulo, titular, subtítulo, destacado y llamado a la acción. **Empiezan vacíos.**
@@ -27,7 +27,7 @@ Antes de cambiar algo, lee esta guía completa. Las decisiones de abajo las tom�
 
 ## Conocimiento de marca por país
 - Panel "Conocimiento de marca" con dos pestañas: Ecuador y Colombia. Base inicial en `KB_DEFAULT` (`index.html`), tomada de upper.com.ec/ayudaecuador y upperlogistics.com/es/ayuda; copia de referencia en `docs/conocimiento/`.
-- El país del Requerimiento decide qué conocimiento y qué reglas aplica Claude: `knowledgeBlock()` se agrega a los prompts de validar mensaje, revisar tono e interpretar pedidos. Claude no debe afirmar datos que no estén ahí.
+- El país elegido en Formato decide qué conocimiento y qué reglas aplica Claude: `knowledgeBlock()` se agrega a los prompts de validar mensaje, revisar tono e interpretar pedidos. Claude no debe afirmar datos que no estén ahí.
 - Diferencias clave: Ecuador tiene bodegas en Miami y Madrid, tarifas con "+ IVA", tasa de USD 20 por orden (la cobra el gobierno), 4x4 y retiro en 4 agencias (domicilio cuesta USD 3,50 + IVA). Colombia solo tiene bodega en Miami (Doral), USD 5 por libra con entrega a la puerta incluida e impuestos desde USD 200.
 - Tiempos de Ecuador: el dato operativo es de 7 a 10 días hábiles desde Miami (confirmado por el equipo). "En 7 días" se mantiene como claim de marketing aprobado para Ecuador; en Colombia solo se usan los tiempos publicados.
 - Lo editado se guarda compartido: `config/conocimiento` en el artifact y `conocimiento.json` en `DATA_DIR`. Los cambios quedan en el historial.
@@ -39,6 +39,12 @@ Antes de cambiar algo, lee esta guía completa. Las decisiones de abajo las tom�
 - Edición (opción B): las reglas del brandbook no se borran; se pueden suavizar o desactivar **con motivo obligatorio**. Las del equipo se agregan, editan y borran libremente. Todo queda en el historial.
 - Al descargar con incumplimientos aparece un aviso: Alerta deja continuar; Bloqueante exige un motivo. Cada excepción se registra con usuario, fecha y motivo.
 - Almacenamiento compartido: en claude.ai, la base `db` del artifact (`config/reglas`, `cambios`, `excepciones`); en hosting propio, `DATA_DIR` (`reglas.json`, `cambios.jsonl`, `excepciones.jsonl`).
+
+## Exportación SVG editable
+- `SvgCtx` imita el contexto 2D del canvas y escribe SVG; `renderSvg()` corre las mismas composiciones (`L.*`) que el PNG, así ambos salen idénticos.
+- Textos editables: una línea = un `<text>`, palabras resaltadas como `<tspan>`; fuentes "Noland" (700) y "Rethink Sans". Logo como `<path>` (`LOGO_D`), ilustraciones como SVG anidado (texto guardado en `img.__svg` al cargarlas), fotos y QR como imagen incrustada.
+- No se genera .AI (formato propietario): el SVG se abre en Illustrator y se guarda como .AI.
+- Si una plantilla nueva usa otra función del canvas, agrégala a `SvgCtx` y compara PNG vs SVG de las 12 piezas.
 
 ## Técnica
 - `index.html`: app completa y autocontenida, escrita como fragmento (sin `<html>`/`<head>`), formato que exige el artifact de claude.ai. `server.js` le agrega el esqueleto al servirla.
