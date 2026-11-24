@@ -259,7 +259,7 @@ dialog#gate::backdrop{background:rgba(20,29,48,.55)}
         <ul class="rules">
           <li>Solo 3 colores: Upper Dark Blue, Green y Cream Green.</li>
           <li>Titulares en Noland, siempre en mayúsculas.</li>
-          <li>Cuerpo, botones y etiquetas en Rethink Sans.</li>
+          <li>Cuerpo y etiquetas en Rethink Sans; titulares, destacado y CTA en Noland.</li>
           <li>Ilustraciones: solo las oficiales, en su versión para fondo claro u oscuro.</li>
           <li>Logo con tamaño mínimo: 35 px en pantalla, 0,5 cm impreso.</li>
           <li>Sin fondos fotográficos sobrecargados, sombras ni gradientes.</li>
@@ -393,6 +393,20 @@ function text(ctx,R,label,str,b,o){
   if(o.hi&&o.bg&&hiCount&&o.hiMode!=='marker')R.pairs.push({fg:o.hi,bg:o.bg,large:size>=24,label:label+' (resaltado)'});
   return{h:th,w:mw,size,y:y0};
 }
+/* CTA: texto en Noland, mayúsculas, con flecha. Sin botón, contenedor ni bordes redondeados (decisión de marca). */
+function ctaText(ctx,R,str,x,y,h,color,bg,o={}){
+  if(!str)return 0;const s=str.toLocaleUpperCase('es');let fs=h*.6;ctx.font=fd(fs);
+  const parts=f=>{const tw=ctx.measureText(s).width;return{tw,gap:f*.4,aw:f*.85};};
+  let m=parts(fs),w=m.tw+m.gap+m.aw;
+  if(o.maxW&&w>o.maxW){fs=fs*o.maxW/w;ctx.font=fd(fs);m=parts(fs);w=m.tw+m.gap+m.aw;if(fs<h*.3)R.checks.push({lvl:'warn',msg:'“CTA” queda pequeño: acórtalo.'});}
+  const px=o.align==='center'?x-w/2:o.align==='right'?x-w:x,cy=y+h/2;
+  ctx.fillStyle=color;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(s,px,cy+fs*.04);
+  const ax=px+m.tw+m.gap,lw=Math.max(1.5,fs*.12),hd=fs*.3;
+  ctx.strokeStyle=color;ctx.lineWidth=lw;ctx.lineCap='butt';ctx.lineJoin='miter';
+  ctx.beginPath();ctx.moveTo(ax,cy);ctx.lineTo(ax+m.aw-lw*.5,cy);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ax+m.aw-hd-lw*.3,cy-hd);ctx.lineTo(ax+m.aw-lw*.3,cy);ctx.lineTo(ax+m.aw-hd-lw*.3,cy+hd);ctx.stroke();
+  R.ctas=(R.ctas||0)+1;R.pairs.push({fg:color,bg,large:true,label:'CTA'});return w;}
+function ctaWidth(ctx,t,h){const fs=h*.6;ctx.font=fd(fs);return ctx.measureText(t.toLocaleUpperCase('es')).width+fs*1.25;}
 function pill(ctx,R,str,x,y,h,bg,fg,o={}){
   if(!str)return 0;const s=o.upper?str.toLocaleUpperCase('es'):str;let fs=h*(o.fs||.42);ctx.font=ft(o.weight||700,fs);
   if('letterSpacing' in ctx)ctx.letterSpacing=o.upper?`${fs*.06}px`:'0px';
@@ -452,9 +466,9 @@ let qrCache={k:'',c:null};
 function qrCanvas(t){if(qrCache.k===t)return qrCache.c;if(typeof QRCode==='undefined')return null;const el=document.getElementById('qrTmp');el.innerHTML='';try{new QRCode(el,{text:t,width:512,height:512,colorDark:C.navy,colorLight:C.cream,correctLevel:QRCode.CorrectLevel.M});}catch{return null}const c=el.querySelector('canvas');qrCache={k:t,c};return c;}
 function qr(ctx,R,x,y,s,print){
   if(!S.extras.qr)return false;const c=qrCanvas(S.extras.qr);if(!c){R.checks.push({lvl:'warn',msg:'No se pudo generar el QR.'});return false;}
-  rr(ctx,x,y,s,s*1.18,s*.08);ctx.fillStyle=C.cream;ctx.fill();ctx.strokeStyle=C.navy;ctx.lineWidth=Math.max(1,s*.01);ctx.stroke();ctx.drawImage(c,x+s*.08,y+s*.08,s*.84,s*.84);
+  ctx.beginPath();ctx.rect(x,y,s,s*1.18);ctx.fillStyle=C.cream;ctx.fill();ctx.strokeStyle=C.navy;ctx.lineWidth=Math.max(1,s*.01);ctx.stroke();ctx.drawImage(c,x+s*.08,y+s*.08,s*.84,s*.84);
   ctx.fillStyle=C.navy;ctx.font=ft(700,s*.095);ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('ESCANEA AQUÍ',x+s/2,y+s*1.06);
-  R.qr=true;R.blocks=(R.blocks||0)+1;if(print&&s<300)R.checks.push({lvl:'warn',msg:'El QR mide menos de 2,5 cm impreso: puede costar leerlo.'});if(!print&&s<150)R.checks.push({lvl:'warn',msg:'El QR queda pequeño en pantalla.'});return true;
+  R.qr=true;if(print&&s<300)R.checks.push({lvl:'warn',msg:'El QR mide menos de 2,5 cm impreso: puede costar leerlo.'});if(!print&&s<150)R.checks.push({lvl:'warn',msg:'El QR queda pequeño en pantalla.'});return true;
 }
 const hiOpts=sc=>({hi:sc.hi,hiMode:sc.hiMode});
 
@@ -476,7 +490,7 @@ L.hero=(ctx,W,H,d,sc,R,o)=>{
     text(ctx,R,'Subtítulo',d.subtitulo,{x:p,y,w:cw*.92,h:Math.max(0,yb-y-H*.03)},{font:'t',max:H*.042,min:H*.026,color:sc.fg,bg:sc.bg,lh:1.3,maxLines:3});
     let x=p;const rowH=H*.12;
     if(d.destacado)x+=offer(ctx,R,d,x,yb,rowH*1.1,cw*.55,sc)+W*.018;
-    if(d.cta)x+=pill(ctx,R,d.cta,x,yb+rowH*.18,rowH*.8,sc.ctaBg,sc.ctaFg,{maxW:Math.max(60,cw-(x-p)),label:'CTA'})+W*.015;
+    if(d.cta)x+=ctaText(ctx,R,d.cta,x,yb+rowH*.18,rowH*.8,sc.hi,sc.bg,{maxW:Math.max(60,cw-(x-p))})+W*.015;
     if(d.codigo&&cw-(x-p)>W*.1)tag(ctx,R,'Código: '+d.codigo,x+W*.005,yb+rowH*.18,rowH*.8,sc.fg,{maxW:cw-(x-p),label:'Código',bg:sc.bg});
     if(S.extras.qr)qr(ctx,R,W-p-H*.26,H-p*.6-H*.26*1.18,H*.26,curFormatFor(R).print);
     text(ctx,R,'Legal',d.legal,{x:p,y:H-p*.6-legalH,w:cw*1.05,h:legalH},{font:'t',max:H*.026,min:H*.017,color:sc.fg,bg:sc.bg,lh:1.2,maxLines:2,valign:'bottom'});
@@ -495,7 +509,7 @@ L.hero=(ctx,W,H,d,sc,R,o)=>{
     else{R.checks.push({lvl:'warn',msg:'No queda espacio para el visual: acorta titular o subtítulo.'});if(S.extras.qr)R.checks.push({lvl:'warn',msg:'Tampoco hay espacio para el QR.'});}
     let x=p;
     if(d.destacado)x+=offer(ctx,R,d,x,yb,rowH*1.1,iw*.58,sc)+W*.025;
-    if(d.cta)x+=pill(ctx,R,d.cta,x,yb+rowH*.15,rowH*.8,sc.ctaBg,sc.ctaFg,{maxW:Math.max(80,iw-(x-p)),label:'CTA'})+W*.025;
+    if(d.cta)x+=ctaText(ctx,R,d.cta,x,yb+rowH*.15,rowH*.8,sc.hi,sc.bg,{maxW:Math.max(80,iw-(x-p))})+W*.025;
     if(codeInline)tag(ctx,R,'Código: '+d.codigo,x,yb+rowH*.15,rowH*.8,sc.fg,{maxW:p+iw-x,label:'Código',bg:sc.bg});
     else if(d.codigo){const cy=yb-rowH*.6-A*.015;if(cy>y)tag(ctx,R,'Código: '+d.codigo,p,cy,rowH*.6,sc.fg,{maxW:iw*.6,label:'Código',bg:sc.bg});}
     text(ctx,R,'Legal',d.legal,{x:p,y:top+A-p*.8-legalH,w:iw,h:legalH},{font:'t',max:W*.022,min:W*.016,color:sc.fg,bg:sc.bg,lh:1.25,maxLines:3,valign:'bottom'});
@@ -518,7 +532,7 @@ L.tab=(ctx,W,H,d,sc,R,o)=>{
     text(ctx,R,'Subtítulo',d.subtitulo,{x:p,y,w:cw,h:Math.max(0,yb-y-H*.03)},{font:'t',max:H*.04,min:H*.025,color:sc.fg,bg:sc.bg,lh:1.3,maxLines:3});
     let x=p;const rowH=H*.115;
     if(d.destacado)x+=offer(ctx,R,d,x,yb,rowH,cw*.6,sc)+W*.015;
-    if(d.cta)pill(ctx,R,d.cta,x,yb+rowH*.12,rowH*.76,sc.ctaBg,sc.ctaFg,{maxW:Math.max(60,cw-(x-p)),label:'CTA'});
+    if(d.cta)ctaText(ctx,R,d.cta,x,yb+rowH*.12,rowH*.76,sc.hi,sc.bg,{maxW:Math.max(60,cw-(x-p))});
     const card={x:W*.56,y:H*.14,w:W*.4,h:H*.76};const cf=cardFill(sc),cp=cardPills(cf);rr(ctx,card.x,card.y,card.w,card.h,card.h*.12);ctx.fillStyle=cf;ctx.fill();
     drawCardVisual(ctx,R,card,sc);
     if(d.fecha)tag(ctx,R,d.fecha,card.x+card.w*.06,card.y+card.h-card.h*.05-H*.075,H*.075,cp.t,{maxW:card.w*.6,label:'Fecha',bg:cf});
@@ -539,12 +553,11 @@ L.tab=(ctx,W,H,d,sc,R,o)=>{
     else R.checks.push({lvl:'warn',msg:'No queda espacio para la tarjeta de producto: acorta los textos.'});
     const ow=d.destacado?offerWidth(ctx,d,rowH):0;const cw0=d.cta?ctaWidth(ctx,d.cta,rowH*.78):0;const gap=ow&&cw0?W*.025:0;let tot=Math.min(iw,ow+cw0+gap);let x=W/2-tot/2;
     if(d.destacado)x+=offer(ctx,R,d,x,yb,rowH,iw*.6,sc)+gap;
-    if(d.cta)pill(ctx,R,d.cta,x,yb+rowH*.11,rowH*.78,sc.ctaBg,sc.ctaFg,{maxW:Math.max(80,p+iw-x),label:'CTA'});
+    if(d.cta)ctaText(ctx,R,d.cta,x,yb+rowH*.11,rowH*.78,sc.hi,sc.bg,{maxW:Math.max(80,p+iw-x)});
     text(ctx,R,'Legal',d.legal,{x:p,y:top+A-W*.05-legalH,w:iw,h:legalH},{font:'t',max:W*.021,min:W*.015,color:sc.fg,bg:sc.bg,lh:1.25,maxLines:3,align:'center',valign:'bottom'});
   }
 };
 function offerWidth(ctx,d,h){ctx.font=fd(h*.82);let w=ctx.measureText(d.destacado.toLocaleUpperCase('es')).width;if(d.nota){ctx.font=ft(700,h*.2);const ws=d.nota.split(/\s+/);const half=Math.ceil(ws.length/2);w+=h*.12+Math.max(ctx.measureText(ws.slice(0,half).join(' ')).width,ctx.measureText(ws.slice(half).join(' ')).width);}return w;}
-function ctaWidth(ctx,t,h){ctx.font=ft(700,h*.42);return ctx.measureText(t).width+h*1.1;}
 function logoRowAliados(ctx,R,rightX,y,h,color){let x=rightX;[...S.extras.aliados].slice(0,3).reverse().forEach(a=>{const im=a.img;const w=h*im.width/im.height;x-=w;ctx.drawImage(a.white?tinted(im,color):im,x,y,w,h);x-=h*.6;});}
 /* Tarjeta de la composición pestaña: verde para producto o cinta; con ilustración, contraste inverso al fondo */
 function cardFill(sc){return isIllus(S.extras.visual)?(sc.bg===C.navy?C.cream:C.navy):C.green;}
@@ -580,10 +593,10 @@ L.cupon=(ctx,W,H,d,sc,R,o)=>{
   text(ctx,R,'Subtítulo',d.subtitulo,{x:cx,y,w:cw,h:Math.max(0,card.y+card.h-p-y-(wide?0:card.w*.12))},{font:'t',max:wide?card.h*.055:card.w*.034,min:wide?card.h*.026:card.w*.018,color:fg,bg,lh:1.3,maxLines:4});
   if(wide){const rx=card.x+card.w-p-rightW,ry=card.y+card.h*.3;
     if(qrOn){const s=Math.min(rightW,(card.y+card.h-p-ry)/1.18);qr(ctx,R,rx+(rightW-s)/2,card.y+card.h-p-s*1.18,s,curFormatFor(R).print);}
-    else{visual(ctx,R,{x:rx-rightW*.1,y:ry-card.h*.05,w:rightW*1.2,h:card.h*.5},{...sc,bg,line:fg});if(d.cta)pill(ctx,R,d.cta,rx+rightW/2,card.y+card.h-p-card.h*.13,card.h*.13,sc.ctaBg===C.green?C.navy:sc.ctaBg,C.green,{align:'center',maxW:rightW,label:'CTA'});}}
+    else{visual(ctx,R,{x:rx-rightW*.1,y:ry-card.h*.05,w:rightW*1.2,h:card.h*.5},{...sc,bg,line:fg});if(d.cta)ctaText(ctx,R,d.cta,rx+rightW/2,card.y+card.h-p-card.h*.13,card.h*.13,fg,bg,{align:'center',maxW:rightW});}}
   else{const by=card.y+card.h-p-card.w*.09;
     if(qrOn){const s=card.w*.24;qr(ctx,R,card.x+card.w-p-s,card.y+card.h-p-s*1.18,s,curFormatFor(R).print);}
-    else if(d.cta)pill(ctx,R,d.cta,card.x+card.w-p,by,card.w*.09,C.navy,C.green,{align:'right',maxW:card.w*.45,label:'CTA'});}
+    else if(d.cta)ctaText(ctx,R,d.cta,card.x+card.w-p,by,card.w*.09,fg,bg,{align:'right',maxW:card.w*.45});}
   text(ctx,R,'Legal',d.legal,{x:card.x,y:card.y+card.h+(wide?H*.03:A*.025),w:card.w,h:legalH},{font:'t',max:wide?H*.03:W*.021,min:wide?H*.02:W*.015,color:outerFg,bg:sc.cuponBg,lh:1.25,maxLines:3,align:'center'});
 };
 const curFormatFor=R=>FORMATS[R.fmt];
@@ -633,7 +646,7 @@ const BRAND_RULES=[
   {id:'n_title7',kind:'dont',check:'auto',sev:'warn',text:'Titulares de más de 7 palabras.'},
   {id:'n_sub15',kind:'dont',check:'auto',sev:'warn',text:'Subtítulos de más de 15 palabras.'},
   {id:'n_cta1',kind:'dont',check:'auto',sev:'warn',text:'Más de un CTA por pieza.'},
-  {id:'n_stroke',kind:'dont',check:'auto',sev:'warn',scope:'design',text:'Más de un bloque redondeado con texto por pieza (máximo uno: el CTA). Sin textos con contorno.'},
+  {id:'n_stroke',kind:'dont',check:'auto',sev:'warn',scope:'design',text:'Botones o bloques redondeados con texto. El CTA va como texto en Noland con flecha, sin contenedor. Sin textos con contorno.'},
   {id:'n_overinfo',kind:'dont',check:'auto',sev:'warn',text:'Sobreinformar: más de 30 palabras de mensaje (sin contar fecha, código ni legal) o demasiados elementos a la vez.'},
   {id:'n_emoji',kind:'dont',check:'auto',sev:'block',text:'Emojis en la gráfica (van en el mensaje que la acompaña).'},
   {id:'n_phrases',kind:'dont',check:'auto',sev:'warn',text:'Frases prohibidas: "Te invitamos a", "Puedes", "Recuerda que puedes".'},
@@ -795,10 +808,10 @@ function evaluate(R,tpl){
     n_title7:()=>{const n=words(d.titular).length;return n>7?fail(`El titular tiene ${n} palabras (máximo 7).`):ok(`${n} palabras.`);},
     n_sub15:()=>{const n=words(d.subtitulo).length;return n>15?fail(`El subtítulo tiene ${n} palabras (máximo 15).`):ok(`${n} palabras.`);},
     n_cta1:()=>{const n=(R.ctas||0)+(R.qr?1:0);const multi=/\s+(y|o)\s+|\/|\|/i.test(d.cta||'');
-      if(n>1)return fail(`La pieza muestra ${n} llamados a la acción${R.qr?' (botón y QR "Escanea aquí")':''}. Deja uno.`);if(multi)return fail('El CTA pide dos acciones a la vez. Deja una.');return ok();},
+      if(n>1)return fail(`La pieza muestra ${n} llamados a la acción${R.qr?' (CTA y QR "Escanea aquí")':''}. Deja uno.`);if(multi)return fail('El CTA pide dos acciones a la vez. Deja una.');return ok();},
     n_overinfo:()=>{const n=['eyebrow','titular','subtitulo','destacado','nota','cta'].reduce((a,f)=>a+words(d[f]).length,0);const els=[d.eyebrow,d.destacado,d.codigo,d.fecha,d.cta,S.extras.qr,S.extras.aliados.length].filter(Boolean).length;
       if(n>30)return fail(`La pieza tiene ${n} palabras sin contar fecha, código ni legal (máximo 30). Quita lo que no ayuda a decidir.`);if(els>=7)return fail('La pieza combina demasiados elementos a la vez (antetítulo, destacado, código, fecha, CTA, QR y aliados).');return ok(`${n} palabras.`);},
-    n_stroke:()=>(R.blocks||0)>1?fail(`La pieza tiene ${R.blocks} bloques (${[R.ctas&&'CTA',R.qr&&'QR'].filter(Boolean).join(' + ')}). Deja uno para no sobrecargarla.`):ok(),
+    n_stroke:()=>(R.blocks||0)>0?fail(`La pieza tiene ${R.blocks} bloque(s) redondeado(s) con texto. Pasa el texto a tipografía, sin contenedor.`):ok(),
     n_emoji:()=>/\p{Extended_Pictographic}/u.test(Object.values(d).join(' '))?fail('Hay emojis en la gráfica. Pásalos al mensaje que la acompaña.'):ok(),
     n_phrases:()=>{const t=PIECE_FIELDS.map(f=>d[f]).join(' · ')+' · '+S.waMsg;const m=t.match(FORBIDDEN);return m?fail(`Aparece "${m[0]}". Usa un verbo de acción directo.`):ok();},
   };
@@ -1150,7 +1163,7 @@ Si el pedido pide un dato de negocio (tarifa, tiempo, condición) que contradice
 Plantilla: ${curFormat().label} — "${t.name}" (${t.w}×${t.h}px). Copy actual: titular "${S.copy.titular}", destacado "${S.copy.destacado}".
 Archivos ya subidos: aliados [${S.extras.aliados.map(a=>a.name).join(', ')||'ninguno'}], foto de producto: ${S.extras.producto?'sí':'no'}.
 
-Sistema de diseño del Brandbook 2025 (NO negociable): solo tres colores (Upper Dark Blue #141D30, Green #CDF5A3, Cream Green #F0FFE8); titulares en Noland mayúsculas y cuerpo en Rethink Sans; logo oficial sin distorsionar, girar, sombrear, recolorear ni poner sobre fondos sobrecargados; ilustraciones oficiales de línea con bloques verdes (no se dibujan otras); cinta gruesa verde como elemento gráfico; sin emojis en la gráfica; sin fondos fotográficos completos; máximo 3 logos de aliados.
+Sistema de diseño del Brandbook 2025 (NO negociable): solo tres colores (Upper Dark Blue #141D30, Green #CDF5A3, Cream Green #F0FFE8); titulares en Noland mayúsculas y cuerpo en Rethink Sans; el CTA es texto en Noland con flecha, nunca un botón ni bloque redondeado; logo oficial sin distorsionar, girar, sombrear, recolorear ni poner sobre fondos sobrecargados; ilustraciones oficiales de línea con bloques verdes (no se dibujan otras); cinta gruesa verde como elemento gráfico; sin emojis en la gráfica; sin fondos fotográficos completos; máximo 3 logos de aliados.
 Elementos que la plataforma SÍ puede agregar:
 - qr: una URL
 - fecha: ≤ ${LIMITS.fecha} caracteres
