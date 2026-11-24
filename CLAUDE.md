@@ -30,6 +30,7 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
 - El país elegido en Formato decide qué conocimiento y qué reglas aplica Claude: `knowledgeBlock()` se agrega a los prompts de validar mensaje, revisar tono e interpretar pedidos. Claude no debe afirmar datos que no estén ahí.
 - Diferencias clave: Ecuador tiene bodegas en Miami y Madrid, tarifas con "+ IVA", tasa de USD 20 por orden (la cobra el gobierno), 4x4 y retiro en 4 agencias (domicilio cuesta USD 3,50 + IVA). Colombia solo tiene bodega en Miami (Doral), USD 5 por libra con entrega a la puerta incluida e impuestos desde USD 200.
 - Tiempos de Ecuador: el dato operativo es de 7 a 10 días hábiles desde Miami (confirmado por el equipo). "En 7 días" se mantiene como claim de marketing aprobado para Ecuador; en Colombia solo se usan los tiempos publicados.
+- Sección "Formatos de diseño para redes" (`ec_disenos`, `co_disenos`): patrones de las piezas de referencia en `docs/referencias/social/`; Claude la usa al interpretar pedidos de diseño. Lo que choca con la revisión de marca (emojis, cápsulas redondeadas, degradados) no se replica. Si el conocimiento ya fue editado, `kbOf` suma al final las secciones nuevas de `KB_DEFAULT`.
 - Lo editado se guarda compartido: `config/conocimiento` en el artifact y `conocimiento.json` en `DATA_DIR`. Los cambios quedan en el historial.
 
 ## Revisión de marca

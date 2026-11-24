@@ -700,6 +700,16 @@ A domicilio con Servientrega a todo el país (ver Tarifas).`},
 - Madrid: Oficina E + código UEC. Recibe de lunes a viernes, 9:00 a 17:00 (hora de Madrid).
 - En Amazon, tipo de dirección: "Muelle de carga".
 - "Entregado" en la tienda significa que llegó a la bodega, no a la casa del cliente.`},
+ {id:'ec_disenos',titulo:'Formatos de diseño para redes',texto:`Referencias aprobadas de piezas para redes (feed 4:5 y portadas de carrusel; imágenes en docs/referencias/social/). Patrones a seguir:
+- Titular en Noland, grande y con jerarquía: dos niveles de tamaño o de color (una línea en crema y el remate en verde sobre azul oscuro; o todo en azul oscuro sobre fondo claro). Ej.: "LO MISMO PERO / MÁS BARATO", "LAS 4 CATEGORÍAS / QUE SIEMPRE CONVIENE TRAER DEL EXTRANJERO".
+- Titular escalonado y expresivo: líneas de distinto tamaño, alineado a la izquierda, con las palabras clave mucho más grandes ("TIENDAS EN / USA / CON / CARTERAS TOP EN OFERTA").
+- Antetítulo o remate en Rethink Sans, mayúsculas con espaciado amplio, con palabras clave en verde ("AMAZON tiene una tienda llena de OFERTAS"; "BENEFICIO POR TODO OCTUBRE").
+- Dato fuerte bajo el subtítulo, en Rethink Sans negrita ("30% OFF").
+- Fotos de producto o persona recortadas (sin fondo), grandes, a veces rotadas o saliendo del borde de la pieza: productos en las esquinas, un bodegón en caja de cartón, una persona ocupando la mitad derecha, la camioneta Upper al centro.
+- La cinta o arco verde grueso como base o fondo de la foto (horizonte curvo, arco detrás de la persona o la caja).
+- Fondo liso de la paleta con el patrón de ilustraciones de línea muy tenue; acentos sueltos de ilustración oficial (destello, mano que señala).
+- Tarjetas de producto tipo captura de tienda (precio, precio anterior, ahorro) en fila, cortadas por los bordes, para carruseles de ofertas.
+Lo que NO se replica de estas referencias (manda la revisión de marca): emojis en la gráfica, botones o cápsulas redondeadas como "Desliza para ver más" (si se necesita, va como texto o como CTA con resaltado recto), degradados y efectos de vidrio.`},
 ],
 co:[
  {id:'co_que',titulo:'Qué es Upper Colombia',texto:`Tu compra de EE. UU., hasta tu puerta en Colombia. Upper (Upper Express Colombia) se encarga de la bodega en Miami, el vuelo, la aduana y la entrega.
@@ -744,6 +754,16 @@ No: baterías sueltas, drones, vapes, cannabis, armas, dinero, falsificaciones, 
 - La bodega recibe de lunes a viernes, 8:30 a 17:00 (hora de Miami).
 - En Amazon, tipo de dirección: "Muelle de carga".
 - "Entregado" en la tienda significa que llegó a la bodega de Doral, no a la casa del cliente.`},
+ {id:'co_disenos',titulo:'Formatos de diseño para redes',texto:`Referencias aprobadas de piezas para redes (feed 4:5 y portadas de carrusel; imágenes en docs/referencias/social/). Patrones a seguir:
+- Titular en Noland, grande y con jerarquía: dos niveles de tamaño o de color (una línea en crema y el remate en verde sobre azul oscuro; o todo en azul oscuro sobre fondo claro). Ej.: "LO MISMO PERO / MÁS BARATO", "LAS 4 CATEGORÍAS / QUE SIEMPRE CONVIENE TRAER DEL EXTRANJERO".
+- Titular escalonado y expresivo: líneas de distinto tamaño, alineado a la izquierda, con las palabras clave mucho más grandes ("TIENDAS EN / USA / CON / CARTERAS TOP EN OFERTA").
+- Antetítulo o remate en Rethink Sans, mayúsculas con espaciado amplio, con palabras clave en verde ("AMAZON tiene una tienda llena de OFERTAS"; "BENEFICIO POR TODO OCTUBRE").
+- Dato fuerte bajo el subtítulo, en Rethink Sans negrita ("30% OFF").
+- Fotos de producto o persona recortadas (sin fondo), grandes, a veces rotadas o saliendo del borde de la pieza: productos en las esquinas, un bodegón en caja de cartón, una persona ocupando la mitad derecha, la camioneta Upper al centro.
+- La cinta o arco verde grueso como base o fondo de la foto (horizonte curvo, arco detrás de la persona o la caja).
+- Fondo liso de la paleta con el patrón de ilustraciones de línea muy tenue; acentos sueltos de ilustración oficial (destello, mano que señala).
+- Tarjetas de producto tipo captura de tienda (precio, precio anterior, ahorro) en fila, cortadas por los bordes, para carruseles de ofertas.
+Lo que NO se replica de estas referencias (manda la revisión de marca): emojis en la gráfica, botones o cápsulas redondeadas como "Desliza para ver más" (si se necesita, va como texto o como CTA con resaltado recto), degradados y efectos de vidrio.`},
 ],
 };
 /* Reglas de negocio por país (complementan a BRAND_RULES; las revisa Claude con el conocimiento del país) */
@@ -765,7 +785,8 @@ const BUSINESS_RULES=[
  {id:'b_co_celular',kind:'do',pais:'co',check:'ai',sev:'info',text:'Si la pieza habla de celulares: uno por paquete, con factura e IMEI registrado en la app antes de embarcar.'},
 ];
 const KB={data:{},updatedAt:0};
-function kbOf(p){const s=KB.data?.[p];return Array.isArray(s)&&s.length?s:KB_DEFAULT[p];}
+/* Si el equipo ya editó el conocimiento, las secciones nuevas de la base se suman al final (sin pisar lo editado) */
+function kbOf(p){const s=KB.data?.[p];if(!(Array.isArray(s)&&s.length))return KB_DEFAULT[p];const ids=new Set(s.map(x=>x.id));return[...s,...KB_DEFAULT[p].filter(x=>!ids.has(x.id))];}
 function kbIsEdited(p){return Array.isArray(KB.data?.[p]);}
 function applyKb(d){KB.data=d&&typeof d==='object'?{ec:d.ec,co:d.co}:{};KB.updatedAt=d?.updatedAt||0;try{if(!$('#kb').hidden)drawKb();}catch{}}
 const paisActual=()=>PAISES[S.req.pais]?S.req.pais:'ec';
