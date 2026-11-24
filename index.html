@@ -455,15 +455,20 @@ function drawIllus(ctx,R,k,b,bg){const v=lum(bg)<.3?'oscuro':'claro';const im=IL
 function contain(ctx,img,x,y,w,h){const k=Math.min(w/img.width,h/img.height);const iw=img.width*k,ih=img.height*k;ctx.drawImage(img,x+(w-iw)/2,y+(h-ih)/2,iw,ih);}
 /* Productos recortados (PNG sin fondo): 1 a 4, grandes y algo girados, como las referencias de redes */
 const RECORTE_SLOTS={1:[[.5,.5,1,0]],2:[[.3,.52,.64,-8],[.7,.48,.64,8]],3:[[.18,.6,.44,-12],[.82,.6,.44,12],[.5,.48,.62,0]],4:[[.28,.3,.5,-10],[.72,.3,.5,10],[.28,.72,.5,8],[.72,.72,.5,-8]]};
-function drawRecortes(ctx,R,b,items){const ps=(items||S.extras.productos).filter(p=>p.img).slice(0,4);
-  if(!ps.length){R.checks.push({lvl:'warn',msg:'Elegiste productos recortados pero no hay PNG cargados.'});return false;}
+/* Marcadores de posición: se ven en la vista previa hasta que el ejecutor sube sus productos (la revisión avisa que faltan) */
+let PH_IMG=null;function phImg(){if(PH_IMG)return PH_IMG;const c=document.createElement('canvas');c.width=300;c.height=360;const x=c.getContext('2d');
+  x.fillStyle=C.green;x.fillRect(40,90,220,230);x.fillStyle=C.navy;x.fillRect(40,90,220,26);x.fillRect(138,90,24,230);
+  x.font=ft(700,30);x.textAlign='center';x.textBaseline='middle';x.fillStyle=C.navy;x.fillText('TU PNG',150,40);return PH_IMG=c;}
+const PH_PRODUCTS=()=>[{img:phImg(),nombre:'Nombre del producto',precio:'USD 00,00',antes:'USD 00,00'},{img:phImg(),nombre:'Nombre del producto',precio:'USD 00,00',antes:'USD 00,00'},{img:phImg(),nombre:'Nombre del producto',precio:'USD 00,00',antes:'USD 00,00'}];
+function drawRecortes(ctx,R,b,items){let ps=(items||S.extras.productos).filter(p=>p.img).slice(0,4);
+  if(!ps.length){R.checks.push({lvl:'warn',msg:'Productos recortados: lo que ves son marcadores. Sube tus PNG debajo de los visuales.'});ps=PH_PRODUCTS();}
   RECORTE_SLOTS[ps.length].forEach(([cx,cy,k,deg],i)=>{const w=b.w*k,h=b.h*k;ctx.save();ctx.translate(b.x+b.w*cx,b.y+b.h*cy);ctx.rotate(deg*Math.PI/180);contain(ctx,ps[i].img,-w/2,-h/2,w,h);ctx.restore();});
   R.visual=true;return true;}
 /* Cards de producto tipo captura de tienda: foto, precio en Noland, precio anterior tachado y nombre. Esquinas rectas (sin bloques redondeados). */
 function fitLines(ctx,t,w,max){const out=[];let line='';for(const word of String(t).split(/\s+/).filter(Boolean)){const tr=line?line+' '+word:word;if(ctx.measureText(tr).width<=w||!line)line=tr;else{out.push(line);line=word;}}if(line)out.push(line);
   if(out.length>max){out.length=max;let l=out[max-1];while(l.length>1&&ctx.measureText(l+'…').width>w)l=l.slice(0,-1);out[max-1]=l+'…';}return out;}
-function drawCards(ctx,R,b,bg,items){const ps=(items||S.extras.productos).filter(p=>p.img||p.nombre||p.precio).slice(0,3);
-  if(!ps.length){R.checks.push({lvl:'warn',msg:'Elegiste cards de producto pero no hay productos cargados.'});return false;}
+function drawCards(ctx,R,b,bg,items){let ps=(items||S.extras.productos).filter(p=>p.img||p.nombre||p.precio).slice(0,3);
+  if(!ps.length){R.checks.push({lvl:'warn',msg:'Cards de producto: lo que ves son marcadores. Sube tus productos y sus precios debajo de los visuales.'});ps=PH_PRODUCTS();}
   const n=ps.length,gap=b.w*.04;const cw=Math.min((b.w-gap*(n-1))/n,b.h*.74),ch=Math.min(b.h,cw*1.36);
   let x=b.x+(b.w-(cw*n+gap*(n-1)))/2;const y=b.y+(b.h-ch)/2;const fill=bg===C.cream?C.green:C.cream,fg=C.navy,pad=cw*.08;
   for(const p of ps){ctx.fillStyle=fill;ctx.fillRect(x,y,cw,ch);
@@ -581,7 +586,7 @@ function offerWidth(ctx,d,h){ctx.font=fd(h*.82);let w=ctx.measureText(d.destacad
 function logoRowAliados(ctx,R,rightX,y,h,color){let x=rightX;[...S.extras.aliados].slice(0,3).reverse().forEach(a=>{const im=a.img;const w=h*im.width/im.height;x-=w;ctx.drawImage(a.white?tinted(im,color):im,x,y,w,h);x-=h*.6;});}
 /* Tarjeta de la composición pestaña: verde para producto o cinta; con ilustración, contraste inverso al fondo */
 /* Recortes y cards van sueltos sobre el fondo, con la cinta verde como base (referencias de redes); el resto, sobre la tarjeta */
-const freeVisual=()=>{const v=S.extras.visual,ps=S.extras.productos;return(v==='recortes'&&ps.some(p=>p.img))||(v==='cards'&&ps.some(p=>p.img||p.nombre||p.precio));};
+const freeVisual=()=>S.extras.visual==='recortes'||S.extras.visual==='cards';
 function tabCard(ctx,card,sc,cf,r){if(freeVisual()){const t=Math.min(card.w,card.h)*.12;ribbon(ctx,[[card.x+card.w*.06,card.y+card.h*1.02],[card.x+card.w*.06,card.y+card.h*.5],[card.x+card.w*2,card.y+card.h*.5]],t,Math.min(card.w*.35,card.h*.45),C.green);return;}
   rr(ctx,card.x,card.y,card.w,card.h,r);ctx.fillStyle=cf;ctx.fill();}
 function cardFill(sc){return isIllus(S.extras.visual)?(sc.bg===C.navy?C.cream:C.navy):C.green;}
@@ -1199,8 +1204,8 @@ function bind4(){
   $('#cas').oninput=e=>S.casilla=e.target.value;$('#interp').onclick=interpret;
   document.querySelectorAll('canvas[data-vis]').forEach(c=>{const ctx=c.getContext('2d');const sc=SCHEMES.oscuro;ctx.fillStyle=sc.bg;ctx.fillRect(0,0,240,160);const v=c.dataset.vis;
     if(isIllus(v)){const im=ILUS_IMG[v]?.oscuro;if(im)contain(ctx,im,30,8,180,144);}
-    else if(v==='recortes'){const R0={checks:[],pairs:[]};if(!S.extras.productos.some(p=>p.img)){ribbon(ctx,[[70,0],[70,120],[170,120],[170,0]],22,40,C.green);ctx.fillStyle=C.cream;ctx.font=ft(700,14);ctx.textAlign='center';ctx.fillText('Sube tus PNG',120,150);}else drawRecortes(ctx,R0,{x:20,y:8,w:200,h:144});}
-    else if(v==='cards'){const R0={checks:[],pairs:[]};const sample=[{nombre:'Producto',precio:'USD 35',antes:'USD 70'},{nombre:'Producto',precio:'USD 70',antes:'USD 99'}];drawCards(ctx,R0,{x:16,y:10,w:208,h:140},sc.bg,S.extras.productos.length?null:sample);}
+    else if(v==='recortes'){drawRecortes(ctx,{checks:[],pairs:[]},{x:20,y:8,w:200,h:144});}
+    else if(v==='cards'){drawCards(ctx,{checks:[],pairs:[]},{x:16,y:10,w:208,h:140},sc.bg);}
     else if(v==='producto'){if(S.extras.producto){rr(ctx,50,40,140,110,16);ctx.fillStyle=C.green;ctx.fill();contain(ctx,S.extras.producto,60,10,120,140);}else{rr(ctx,50,40,140,110,16);ctx.fillStyle=C.green;ctx.fill();ctx.fillStyle=C.navy;ctx.font=ft(700,14);ctx.textAlign='center';ctx.fillText('Sube tu PNG',120,100);}}
     else ribbon(ctx,[[70,0],[70,120],[170,120],[170,0]],22,40,C.green);});
   document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{S.extras.visual=b.dataset.v;saveDraft();drawMain();drawLive();});
@@ -1604,6 +1609,7 @@ class SvgCtx{
       t=t.replace(/<svg\b([^>]*)>/,(all,attrs)=>`<svg${attrs.replace(/\s(width|height|x|y|preserveAspectRatio)="[^"]*"/g,'')} x="${X}" y="${Y}" width="${Wd}" height="${Hd}" preserveAspectRatio="none"${this.op()}>`);
       this.out.push(`<g data-name="${xmlEsc(img.__name||'Ilustración')}">${t}</g>`);return;}
     let src='';try{if(img instanceof HTMLCanvasElement)src=img.toDataURL('image/png');else if(/^data:/.test(img.src))src=img.src;else{const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;c.getContext('2d').drawImage(img,0,0);src=c.toDataURL('image/png');}}catch{return;}
+    const m=this.st.m;if(Math.abs(m[1])>1e-9||Math.abs(m[2])>1e-9){this.out.push(`<image x="${n2(dx)}" y="${n2(dy)}" width="${n2(dw)}" height="${n2(dh)}" preserveAspectRatio="none" xlink:href="${src}"${this.mattr()}${this.op()}/>`);return;}
     this.out.push(`<image x="${X}" y="${Y}" width="${Wd}" height="${Hd}" preserveAspectRatio="none" xlink:href="${src}"${this.op()}/>`);}
   toString(title){this.flush();return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${this.W}" height="${this.H}" viewBox="0 0 ${this.W} ${this.H}">\n<title>${xmlEsc(title||'Upper')}</title>\n<!-- Generado por Upper Studio. Tipografías: Noland Bold (titulares) y Rethink Sans (textos); instálalas para editar los textos. -->\n${this.out.join('\n')}\n</svg>\n`;}
 }
