@@ -334,6 +334,8 @@ const FORMATS={
     {id:'story',name:'Historia 9:16',w:1080,h:1920,layout:'hero',opt:{safeTop:.11,safeBot:.14},desc:'Con zonas seguras para la interfaz.'},
     {id:'sq',name:'Cuadrado',w:1080,h:1080,layout:'cupon',desc:'Cupón para anuncios y carrusel.'},
     {id:'foto',name:'Foto de fondo 4:5',w:1080,h:1350,layout:'foto',desc:'Foto a sangre con el texto de marca abajo. Para UGC y portadas de carrusel.'},
+    {id:'campana',name:'Campaña 3:4',w:1080,h:1440,layout:'campana',desc:'Fondo azul con patrón difuminado, título 3D, recuadro de información y personas recortadas (Black Friday 2025).'},
+    {id:'campanastory',name:'Campaña 9:16',w:1080,h:1920,layout:'campana',desc:'La misma campaña para historias.'},
     {id:'fotostory',name:'Foto de fondo 9:16',w:1080,h:1920,layout:'foto',opt:{safeTop:.11,safeBot:.14},desc:'Foto a sangre para historias, con zonas seguras.'}]},
   wa:{label:'Imagen WhatsApp',canal:'WhatsApp',templates:[
     {id:'wsq',name:'Post cuadrado',w:1080,h:1080,layout:'tab',desc:'Se entiende en miniatura dentro del chat.'},
@@ -358,7 +360,7 @@ const DEFAULTS={
 const S={step:2,formato:'inapp',tpl:'hero',scheme:'oscuro',car:{on:false,n:3,idx:0,slides:[]},
   req:{...DEFAULTS.req},propuesta:DEFAULTS.propuesta,copy:{...DEFAULTS.copy},waMsg:DEFAULTS.waMsg,
   evalr:null,opciones:[],optSel:-1,casilla:'',extrasAI:null,
-  extras:{textos:[],aliados:[],producto:null,productos:[],fondo:null,fondoY:.5,video:null,videoName:'',mute:false,visual:DEFAULTS.visual,qr:DEFAULTS.qr},
+  extras:{icono:'none',textos:[],aliados:[],producto:null,productos:[],fondo:null,fondoY:.5,video:null,videoName:'',mute:false,visual:DEFAULTS.visual,qr:DEFAULTS.qr},
   fonts:{display:false,text:false},manual:{},aiReview:null,msgAI:null};
 const curFormat=()=>FORMATS[S.formato];
 const curTpl=()=>curFormat().templates.find(t=>t.id===S.tpl)||curFormat().templates[0];
@@ -433,6 +435,7 @@ function text(ctx,R,label,str,b,o){
   res.lines.forEach((ln,i)=>{let x=o.align==='center'?b.x+(b.w-ln.w)/2:o.align==='right'?b.x+b.w-ln.w:b.x;const LH=(ln.k||1)*size*lh,cy=yy+LH/2;yy+=LH;mw=Math.max(mw,ln.w);
     ln.t.forEach((tk,j)=>{let col=o.color;const k=tk.k||1,ws=size*k,dy=size*.35*((ln.k||1)-k);if(k!==1||ctx.font!==font(size))ctx.font=font(ws);
       if(tk.hi){hiCount++;if(o.hiMode==='marker'){ctx.fillStyle=C.green;const ext=j<ln.t.length-1&&ln.t[j+1].hi?res.sp:0;ctx.fillRect(x-ws*.08,cy+dy-ws*.5,tk.ww+ext+ws*.16,ws*1.0);col=C.navy;}else col=o.hi||o.color;}
+      if(o.extrude){const X=o.extrude,n=Math.max(4,Math.round(X.d/2));ctx.fillStyle=X.color;for(let st=n;st>=1;st--){const kk=X.d*st/n;ctx.fillText(tk.w,x+kk*X.dx,cy+dy+ws*(o.font==='d'?.04:.02)+kk*X.dy);}}
       ctx.fillStyle=col;ctx.fillText(tk.w,x,cy+dy+ws*(o.font==='d'?.04:.02));if(k!==1)ctx.font=font(size);x+=tk.ww+res.sp;});});
   ctx.restore();
   if(o.bg)R.pairs.push({fg:o.color,bg:o.bg,large:size>=24||((o.weight||400)>=700&&size>=18.7),label});
@@ -767,12 +770,12 @@ function drawExtras(ctx,W,H,sc,R){(S.extras.textos||[]).slice(0,XT_MAX).forEach(
   elEnd(ctx,R,id);});}
 /* ELEMENTOS LIBRES (Video y Foto de fondo): cada elemento se puede mover arrastrándolo en la vista previa, ocultar y llevar borde.
    Posiciones en fracciones del lienzo (sirven para 4:5 y 1:1). Bordes siempre rectos, en colores de la paleta. */
-const EL_NAMES={x0:'Texto adicional 1',x1:'Texto adicional 2',x2:'Texto adicional 3',p0:'Producto 1',p1:'Producto 2',p2:'Producto 3',p3:'Producto 4',logo:'Logo de Upper',titular:'Titular',eyebrow:'Antetítulo',subtitulo:'Subtítulo',destacado:'Destacado',codigo:'Código',fecha:'Fecha',legal:'Legal',tarjeta:'Tarjeta del visual',producto:'Card de producto',cta:'CTA',mensaje:'Mensaje (subtítulo)',textos:'Textos',visual:'Visual',cinta:'Cinta verde',oferta:'Destacado y CTA'};
+const EL_NAMES={patron:'Fondo con patrón',destellos:'Destellos',info:'Recuadro de información',x0:'Texto adicional 1',x1:'Texto adicional 2',x2:'Texto adicional 3',p0:'Producto 1',p1:'Producto 2',p2:'Producto 3',p3:'Producto 4',logo:'Logo de Upper',titular:'Titular',eyebrow:'Antetítulo',subtitulo:'Subtítulo',destacado:'Destacado',codigo:'Código',fecha:'Fecha',legal:'Legal',tarjeta:'Tarjeta del visual',producto:'Card de producto',cta:'CTA',mensaje:'Mensaje (subtítulo)',textos:'Textos',visual:'Visual',cinta:'Cinta verde',oferta:'Destacado y CTA'};
 const EL_X=['x0','x1','x2'];
-const EL_SETS={video:['logo','titular','producto','cta','mensaje',...EL_X],foto:['logo','eyebrow','titular','destacado','fecha','subtitulo','cta','legal',...EL_X],
+const EL_SETS={campana:['logo','patron','destellos','eyebrow','titular','info','visual','mensaje',...EL_X],video:['logo','titular','producto','cta','mensaje',...EL_X],foto:['logo','eyebrow','titular','destacado','fecha','subtitulo','cta','legal',...EL_X],
   hero:['logo','fecha','eyebrow','titular','subtitulo','visual','tarjeta','cinta','destacado','cta','codigo','legal',...EL_X],tab:['logo','eyebrow','titular','subtitulo','visual','tarjeta','cinta','destacado','cta','fecha','codigo','legal',...EL_X],
   cupon:['tarjeta','logo','fecha','cinta','titular','destacado','codigo','subtitulo','visual','cta','legal',...EL_X]};
-const EL_LOGO_OPT=new Set(['video','foto']);
+const EL_LOGO_OPT=new Set(['video','foto','campana']);
 const EL_DEF={'video.producto':{t:'fino',c:'green'}};
 const STROKES=[['none','Sin borde'],['fino','Fino'],['grueso','Grueso'],['doble','Doble'],['punteado','Punteado']];
 const STROKE_COL=[['green','Verde',C.green],['cream','Crema',C.cream],['navy','Azul',C.navy]];
@@ -865,6 +868,56 @@ L.video=(ctx,W,H,d,sc,R,o)=>{
     else{const r=text(ctx,R,'Destacado',d.destacado,{x:p,y:yb-H*.09,w:iw,h:H*.09},{font:'d',upper:true,max:W*.1,min:W*.05,color:C.green,bg:C.navy,lh:1,maxLines:1,align:'center',valign:'bottom'});bb={x:(W-r.w)/2,y:yb-r.h,w:r.w,h:r.h};}
     elEnd(ctx,R,'producto');}
   if(d.codigo||S.extras.qr||d.fecha)R.checks.push({lvl:'warn',msg:'El video no muestra fecha, código ni QR: ponlos en el mensaje o en el subtítulo.'});
+};
+/* CAMPAÑA (componentes del editable "Post y Story - Black Friday.ai"): fondo azul con patrón difuminado, destellos, título 3D,
+   recuadro de información con divisor e ícono, personas o productos recortados y recuadro de mensaje. Componentes aprobados por el equipo:
+   llevan recuadros redondeados con borde, como en la campaña original. Medidas tomadas del archivo (fracciones del lienzo). */
+const DESTELLO_D="M0.9228 0.7406C0.9222 0.7400 0.9216 0.7394 0.9211 0.7388C0.8845 0.7011 0.8467 0.6621 0.8096 0.6221C0.7075 0.5117 0.6732 0.3830 0.7076 0.2395C0.7196 0.1894 0.7341 0.1392 0.7480 0.0907C0.7496 0.0851 0.7512 0.0796 0.7528 0.0740C0.7492 0.0774 0.7456 0.0808 0.7420 0.0842C0.6992 0.1243 0.6549 0.1659 0.6093 0.2055C0.5142 0.2882 0.4023 0.3187 0.2766 0.2961C0.2714 0.2952 0.2663 0.2944 0.2611 0.2936C0.2509 0.2921 0.2403 0.2906 0.2297 0.2878C0.1810 0.2752 0.1324 0.2623 0.0840 0.2494C0.1512 0.3119 0.2031 0.3710 0.2453 0.4327C0.2975 0.5090 0.3184 0.5913 0.3073 0.6774C0.2997 0.7363 0.2914 0.7840 0.2810 0.8274C0.2738 0.8575 0.2650 0.8867 0.2556 0.9168C0.2573 0.9151 0.2590 0.9133 0.2607 0.9115C0.2926 0.8789 0.3255 0.8452 0.3594 0.8133C0.4757 0.7040 0.6075 0.6648 0.7512 0.6968C0.7575 0.6982 0.7639 0.6993 0.7702 0.7004C0.7798 0.7021 0.7898 0.7038 0.7997 0.7065C0.8414 0.7178 0.8829 0.7294 0.9228 0.7406M0.7951 0.0031C0.7963 0.0038 0.7973 0.0046 0.7983 0.0056C0.8066 0.0134 0.8037 0.0238 0.8018 0.0307C0.7954 0.0540 0.7887 0.0772 0.7821 0.1004C0.7682 0.1486 0.7539 0.1984 0.7421 0.2477C0.7106 0.3790 0.7421 0.4969 0.8357 0.5982C0.8725 0.6379 0.9101 0.6767 0.9465 0.7143C0.9626 0.7308 0.9783 0.7471 0.9935 0.7629C0.9990 0.7686 1.0000 0.7773 0.9959 0.7842C0.9918 0.7910 0.9836 0.7942 0.9760 0.7921L0.9292 0.7790C0.8846 0.7666 0.8376 0.7534 0.7904 0.7406C0.7821 0.7383 0.7733 0.7368 0.7641 0.7352C0.7572 0.7340 0.7503 0.7328 0.7434 0.7312C0.6101 0.7015 0.4925 0.7368 0.3838 0.8390C0.3504 0.8704 0.3177 0.9038 0.2861 0.9362C0.2713 0.9513 0.2566 0.9664 0.2417 0.9815C0.2396 0.9835 0.2375 0.9855 0.2349 0.9881L0.2297 0.9932C0.2239 0.9989 0.2152 1.0000 0.2081 0.9958C0.2012 0.9916 0.1980 0.9833 0.2003 0.9756C0.2053 0.9587 0.2105 0.9422 0.2156 0.9259C0.2272 0.8892 0.2380 0.8546 0.2465 0.8192C0.2567 0.7770 0.2648 0.7306 0.2722 0.6729C0.2822 0.5946 0.2639 0.5225 0.2160 0.4526C0.1672 0.3811 0.1044 0.3130 0.0187 0.2381C0.0148 0.2348 0.0115 0.2312 0.0090 0.2287L0.0068 0.2264C0.0012 0.2208 0.0000 0.2121 0.0040 0.2051C0.0080 0.1982 0.0162 0.1949 0.0239 0.1969L0.0802 0.2119C0.1328 0.2259 0.1857 0.2399 0.2386 0.2536C0.2474 0.2559 0.2566 0.2573 0.2663 0.2587C0.2718 0.2596 0.2774 0.2604 0.2829 0.2614C0.3975 0.2820 0.4994 0.2543 0.5860 0.1790C0.6311 0.1397 0.6751 0.0984 0.7177 0.0585C0.7361 0.0412 0.7544 0.0240 0.7725 0.0072C0.7746 0.0047 0.7774 0.0027 0.7805 0.0016C0.7855 0.0000 0.7908 0.0006 0.7951 0.0031Z",DESTELLO_AR=0.9962;
+const TIKTOK_D="M0.7306 0.3316L0.7306 0.6733C0.7306 0.8553 0.5624 1.0000 0.3587 0.9921C0.1565 0.9843 0.0000 0.8285 0.0188 0.6491C0.0372 0.4739 0.2197 0.3421 0.4221 0.3676L0.4219 0.5413C0.3294 0.5171 0.2350 0.5662 0.2147 0.6482C0.1950 0.7275 0.2552 0.8066 0.3484 0.8199C0.4380 0.8327 0.5348 0.7731 0.5350 0.6865L0.5367 0.0000L0.7303 0.0000C0.7312 0.1308 0.8486 0.2357 0.9994 0.2373L1.0000 0.4078C0.9037 0.4078 0.8133 0.3833 0.7306 0.3316Z",TIKTOK_AR=0.8811;
+const CAMP={'3x4':{info:[.2565,.4235,.487,.1226,25],msg:[.1318,.8831,.7364,.0775,20],div:.5018,tit:[.17,.075,.66,.33],dest:[[.1317,.1498],[.8502,.4722],[.0878,.5704]],ds:.0302,
+    per:[[.0948,.5724,.4817,.4441],[.4,.568,.5036,.761],[.62,.62,.35,.4],[.02,.62,.35,.4]]},
+  '9x16':{info:[.1945,.3518,.6109,.1012,25],msg:[.0749,.8353,.8502,.1385,20],div:.5329,tit:[.16,.06,.68,.28],dest:[[.1056,.0915],[.8499,.1876],[.1112,.3371]],ds:.0302,
+    per:[[.1367,.6448,.4143,.2865],[.3992,.6424,.4328,.4906],[.62,.66,.35,.3],[.02,.66,.35,.3]]}};
+const CAMP_IMG={};
+async function loadCampPeople(){const ims=await Promise.all(['persona-1','persona-2'].map(n=>new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=`assets/campana/${n}.png`;})));
+  S.extras.productos=ims.filter(Boolean).map((img,i)=>({img,name:'persona-'+(i+1),nombre:'',precio:'',antes:''}));}
+async function loadCyberDay(){setCarousel(false);S.formato='social';S.tpl='campana';S.scheme='oscuro';S.req.pais=S.req.pais||'ec';
+  S.copy={...emptyCopy(),titular:'~El~ verdadero|^*Cyber|Day*^|está en 🇺🇸',destacado:'Hoy|9:00 PM',cta:'Live en',subtitulo:'Tendremos sorteos para aprovechar la temporada de ofertas'};
+  S.extras.icono='tiktok';S.extras.textos=[];S.extras.visual='recortes';const L2=LAY();for(const o of[L2.pos,L2.sty,L2.hide])for(const k of Object.keys(o))if(k.startsWith('campana.'))delete o[k];L2.hide['campana.logo']=true;
+  await loadCampPeople();saveDraft();drawSteps();go(4);toast('Pieza Cyber Day cargada: ajusta lo que necesites en la vista previa.');}
+function loadCampana(){return Promise.all(['patron-3x4','patron-9x16'].map(n=>new Promise(res=>{const im=new Image();im.onload=()=>{CAMP_IMG[n]=im;res();};im.onerror=()=>res();im.src=`assets/campana/${n}.png`;})));}
+/* Trazado normalizado (0..1) dibujado con moveTo/lineTo/bezierCurveTo: funciona igual en canvas y en el SVG */
+function normPath(ctx,d,x,y,w,h){const t=d.match(/[MLCZ]|-?[\d.]+/g);let i=0,c='';const P=()=>[x+parseFloat(t[i++])*w,y+parseFloat(t[i++])*h];ctx.beginPath();
+  while(i<t.length){if(/[MLCZ]/.test(t[i]))c=t[i++];if(c==='M')ctx.moveTo(...P());else if(c==='L')ctx.lineTo(...P());else if(c==='C'){const a=P(),b=P(),e=P();ctx.bezierCurveTo(...a,...b,...e);}else if(c==='Z'){ctx.closePath();}}}
+function twoLines(t){t=String(t).replace(/\s*\|\s*/g,'|');if(t.includes('|')||t.length<28)return t;const mid=t.length/2;let best=-1;for(let i=0;i<t.length;i++)if(t[i]===' '&&(best<0||Math.abs(i-mid)<Math.abs(best-mid)))best=i;return best<0?t:t.slice(0,best)+'|'+t.slice(best+1);}
+function campBox(ctx,x,y,w,h,r,fill,stroke,lw){rr(ctx,x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();ctx.lineWidth=lw;ctx.strokeStyle=stroke;ctx.stroke();}
+/* Texto espaciado en mayúsculas por líneas (|), ajustado al ancho */
+function campLines(ctx,str,cx,cy,maxW,maxH,size,color,weight=600,track=.08){const lines=String(str).replace(/[*^~]/g,'').toLocaleUpperCase('es').split('|').map(x=>x.trim()).filter(Boolean);if(!lines.length)return;
+  let fs=size;const meas=()=>{ctx.font=ft(weight,fs);if('letterSpacing' in ctx)ctx.letterSpacing=`${fs*track}px`;return Math.max(...lines.map(l=>ctx.measureText(l).width));};
+  while(fs>8&&(meas()>maxW||lines.length*fs*1.2>maxH))fs*=.94;
+  ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';const y0=cy-(lines.length-1)*fs*1.2/2;lines.forEach((l,i)=>ctx.fillText(l,cx,y0+i*fs*1.2));if('letterSpacing' in ctx)ctx.letterSpacing='0px';}
+L.campana=(ctx,W,H,d,sc,R,o)=>{
+  const G=CAMP[H/W>1.5?'9x16':'3x4'],dark=sc.bg===C.navy,fg=dark?C.cream:C.navy,line=dark?C.cream:C.navy,boxFill=dark?C.navy:C.cream,u=W/1080;R.logoOptional=true;
+  ctx.fillStyle=dark?C.navy:C.cream;ctx.fillRect(0,0,W,H);
+  elBegin(ctx,'patron');const pim=CAMP_IMG[H/W>1.5?'patron-9x16':'patron-3x4'];if(pim){ctx.save();if(!dark)ctx.globalAlpha=.45;coverMedia(ctx,tinted(pim,dark?'#384D66':'#9FB3A0'),W,H);ctx.restore();}elEnd(ctx,R,'patron');
+  elBegin(ctx,'destellos');G.dest.forEach(([x,y])=>{const w=G.ds*W;normPath(ctx,DESTELLO_D,x*W,y*H,w,w/DESTELLO_AR);ctx.fillStyle=line;ctx.fill();});elEnd(ctx,R,'destellos');
+  elBegin(ctx,'visual');S.extras.productos.filter(p=>p.img).slice(0,4).forEach((pr,i)=>{const[x,y,w,h]=G.per[i];elBegin(ctx,'p'+i);const im=silImg(pr),k=Math.min(w*W/im.width,h*H/im.height),iw=im.width*k,ih=im.height*k;
+    ctx.save();if(pr.rot){ctx.translate(x*W+w*W/2,y*H+h*H/2);ctx.rotate(pr.rot*Math.PI/180);ctx.translate(-(x*W+w*W/2),-(y*H+h*H/2));}ctx.drawImage(im,x*W+(w*W-iw)/2,y*H,iw,ih);ctx.restore();elEnd(ctx,R,'p'+i);});R.visual=true;elEnd(ctx,R,'visual');
+  if(!elHidden('logo')){elBegin(ctx,'logo');const tabH=Math.max(W*.09,minLogo(R)/.42),tabW=tabH*2.6,tx=(W-tabW)/2;rr(ctx,tx,-tabH*.5,tabW,tabH*1.5,tabH*.32);ctx.fillStyle=C.green;ctx.fill();
+    const lgh=Math.max(tabH*.42,minLogo(R));drawLogo(ctx,tx+(tabW-lgh*LB.w/LB.h)/2,(tabH-lgh)/2,lgh,C.navy);R.logo=true;R.logoH=lgh;R.pairs.push({fg:C.navy,bg:C.green,large:true,label:'Logo'});elEnd(ctx,R,'logo');}
+  if(d.eyebrow){elBegin(ctx,'eyebrow');campLines(ctx,d.eyebrow,W/2,G.tit[1]*H-H*.01,W*.7,H*.03,W*.032,C.green,700,.12);elEnd(ctx,R,'eyebrow');}
+  if(d.titular){elBegin(ctx,'titular');const[tx,ty,tw,th]=G.tit,cx=(tx+tw/2)*W,cy=(ty+th/2)*H;ctx.save();ctx.translate(cx,cy);ctx.rotate(-3.5*Math.PI/180);ctx.translate(-cx,-cy);
+    text(ctx,R,'Titular',d.titular,{x:tx*W,y:ty*H,w:tw*W,h:th*H},{font:'d',upper:true,max:W*.2,min:W*.06,color:fg,bg:dark?C.navy:C.cream,lh:.92,maxLines:6,align:'center',valign:'middle',hi:C.green,hiMode:'color',extrude:{d:W*.016,dx:.35,dy:1,color:dark?'#070E1A':C.green}});
+    ctx.restore();elEnd(ctx,R,'titular');}
+  if(d.destacado||d.cta){elBegin(ctx,'info');const[x,y,w,h,r]=G.info,X=x*W,Y=y*H,BW=w*W,BH=h*H,dv=G.div*W;campBox(ctx,X,Y,BW,BH,r*u,boxFill,line,Math.max(1.5,1.6*u));
+    const two=d.destacado&&d.cta;if(two){ctx.fillStyle=C.green;ctx.fillRect(dv-1.5*u,Y+BH*.26,3*u,BH*.48);}
+    const lw=two?dv-X:BW,rx=two?dv:X;
+    if(d.destacado)campLines(ctx,d.destacado,X+lw/2,Y+BH/2,lw*.8,BH*.72,W*.055,fg,600,.06);
+    if(d.cta){const rw=two?X+BW-dv:BW,icon=S.extras.icono==='tiktok',cyT=icon?Y+BH*.34:Y+BH/2;campLines(ctx,d.cta,rx+rw/2,cyT,rw*.8,icon?BH*.3:BH*.72,W*.055,fg,600,.08);
+      if(icon){const ih=BH*.3,iw=ih*TIKTOK_AR;normPath(ctx,TIKTOK_D,rx+rw/2-iw/2,Y+BH*.55,iw,ih);ctx.fillStyle=fg;ctx.fill();}}
+    R.pairs.push({fg,bg:boxFill,large:true,label:'Recuadro de información'});elEnd(ctx,R,'info');}
+  if(d.subtitulo){elBegin(ctx,'mensaje');const[x,y,w,h,r]=G.msg;campBox(ctx,x*W,y*H,w*W,h*H,r*u,boxFill,line,Math.max(1.5,1.6*u));campLines(ctx,twoLines(d.subtitulo),(x+w/2)*W,(y+h/2)*H,w*W*.86,h*H*.78,W*.036,fg,500,.08);
+    R.pairs.push({fg,bg:boxFill,large:false,label:'Mensaje'});elEnd(ctx,R,'mensaje');}
 };
 const curFormatFor=R=>FORMATS[R.fmt];
 const minLogo=R=>curFormatFor(R).print?64:40;
@@ -972,6 +1025,14 @@ A domicilio con Servientrega a todo el país (ver Tarifas).`},
 - Madrid: Oficina E + código UEC. Recibe de lunes a viernes, 9:00 a 17:00 (hora de Madrid).
 - En Amazon, tipo de dirección: "Muelle de carga".
 - "Entregado" en la tienda significa que llegó a la bodega, no a la casa del cliente.`},
+ {id:'ec_campana',titulo:'Componentes de campaña',texto:`Componentes oficiales de campaña tomados del editable "Post y Story - Black Friday.ai" (composición Campaña 3:4 y 9:16 en la plataforma; referencias en docs/referencias/campana/):
+- Fondo azul Upper con el patrón de ilustraciones de línea difuminado (más visible en la mitad inferior).
+- Título 3D: Noland en mayúsculas, levemente girado, con extrusión azul oscuro; jerarquía por tamaños (palabras pequeñas como "el", la palabra clave enorme en verde) y bandera o emoji al final si suma.
+- Recuadro de información redondeado con borde claro y divisor verde vertical: a la izquierda cuándo (HOY / 9:00 PM), a la derecha dónde (LIVE EN + ícono de la red).
+- Personas del equipo o productos recortados (PNG sin fondo) en la mitad inferior, señalando el título.
+- Recuadro de mensaje abajo, redondeado con borde claro, en mayúsculas espaciadas (Rethink Sans): la acción o el beneficio ("Tendremos sorteos…", "Desliza para ver los premios…").
+- Destellos de cuatro puntas en crema como acento.
+- Carrusel de la campaña: portada + una lámina por premio (GIVEAWAY + categoría, productos al centro, requisitos en el recuadro de abajo).`},
  {id:'ec_disenos',titulo:'Formatos de diseño para redes',texto:`Referencias aprobadas de piezas para redes (feed 4:5 y portadas de carrusel; imágenes en docs/referencias/social/). Patrones a seguir:
 - Titular en Noland, grande y con jerarquía: dos niveles de tamaño o de color (una línea en crema y el remate en verde sobre azul oscuro; o todo en azul oscuro sobre fondo claro). Ej.: "LO MISMO PERO / MÁS BARATO", "LAS 4 CATEGORÍAS / QUE SIEMPRE CONVIENE TRAER DEL EXTRANJERO".
 - Titular escalonado y expresivo: líneas de distinto tamaño, alineado a la izquierda, con las palabras clave mucho más grandes ("TIENDAS EN / USA / CON / CARTERAS TOP EN OFERTA").
@@ -1026,6 +1087,14 @@ No: baterías sueltas, drones, vapes, cannabis, armas, dinero, falsificaciones, 
 - La bodega recibe de lunes a viernes, 8:30 a 17:00 (hora de Miami).
 - En Amazon, tipo de dirección: "Muelle de carga".
 - "Entregado" en la tienda significa que llegó a la bodega de Doral, no a la casa del cliente.`},
+ {id:'co_campana',titulo:'Componentes de campaña',texto:`Componentes oficiales de campaña tomados del editable "Post y Story - Black Friday.ai" (composición Campaña 3:4 y 9:16 en la plataforma; referencias en docs/referencias/campana/):
+- Fondo azul Upper con el patrón de ilustraciones de línea difuminado (más visible en la mitad inferior).
+- Título 3D: Noland en mayúsculas, levemente girado, con extrusión azul oscuro; jerarquía por tamaños (palabras pequeñas como "el", la palabra clave enorme en verde) y bandera o emoji al final si suma.
+- Recuadro de información redondeado con borde claro y divisor verde vertical: a la izquierda cuándo (HOY / 9:00 PM), a la derecha dónde (LIVE EN + ícono de la red).
+- Personas del equipo o productos recortados (PNG sin fondo) en la mitad inferior, señalando el título.
+- Recuadro de mensaje abajo, redondeado con borde claro, en mayúsculas espaciadas (Rethink Sans): la acción o el beneficio ("Tendremos sorteos…", "Desliza para ver los premios…").
+- Destellos de cuatro puntas en crema como acento.
+- Carrusel de la campaña: portada + una lámina por premio (GIVEAWAY + categoría, productos al centro, requisitos en el recuadro de abajo).`},
  {id:'co_disenos',titulo:'Formatos de diseño para redes',texto:`Referencias aprobadas de piezas para redes (feed 4:5 y portadas de carrusel; imágenes en docs/referencias/social/). Patrones a seguir:
 - Titular en Noland, grande y con jerarquía: dos niveles de tamaño o de color (una línea en crema y el remate en verde sobre azul oscuro; o todo en azul oscuro sobre fondo claro). Ej.: "LO MISMO PERO / MÁS BARATO", "LAS 4 CATEGORÍAS / QUE SIEMPRE CONVIENE TRAER DEL EXTRANJERO".
 - Titular escalonado y expresivo: líneas de distinto tamaño, alineado a la izquierda, con las palabras clave mucho más grandes ("TIENDAS EN / USA / CON / CARTERAS TOP EN OFERTA").
@@ -1223,9 +1292,10 @@ function step2(){const f=curFormat();
   <div class="fmts" role="group" aria-label="Vista" style="margin:0"><button class="fmt ${v==='mockup'?'sel':''}" data-view="mockup" aria-pressed="${v==='mockup'}">Mockup</button><button class="fmt ${v==='esquema'?'sel':''}" data-view="esquema" aria-pressed="${v==='esquema'}">Esquema</button></div></div>
   ${S.formato==='social'?`<div class="row" style="margin:0 0 12px;gap:10px"><b style="font-size:13px">Tipo</b><div class="fmts" role="group" aria-label="Post o carrusel" style="margin:0"><button class="fmt ${!S.car.on?'sel':''}" data-car="0" aria-pressed="${!S.car.on}">Post</button><button class="fmt ${S.car.on?'sel':''}" data-car="1" aria-pressed="${S.car.on}">Carrusel</button></div>
     ${S.car.on?`<span class="row" style="gap:6px"><span class="hint">Láminas</span><button class="btn sm" data-n="-1" aria-label="Quitar lámina" ${S.car.n<=CAR_MIN?'disabled':''}>−</button><b>${S.car.n}</b><button class="btn sm" data-n="1" aria-label="Agregar lámina" ${S.car.n>=CAR_MAX?'disabled':''}>+</button><span class="hint">máx. ${CAR_MAX}. Todas comparten formato, plantilla y colores.</span></span>`:'<span class="hint">Carrusel: hasta 10 láminas coherentes entre sí.</span>'}</div>`:''}
+  ${S.formato==='social'?`<div class="row" style="margin:0 0 12px;gap:10px;align-items:center"><b style="font-size:13px">Piezas de campaña</b><button class="btn sm" id="cyberDay">Abrir "El verdadero Cyber Day" (editable)</button><span class="hint">Usa los componentes del editable de Black Friday.</span></div>`:''}
   <div class="tpls">${f.templates.map(t=>`<button class="tpl ${t.id===S.tpl?'sel':''}" data-t="${t.id}" aria-pressed="${t.id===S.tpl}" ${S.car.on&&S.formato==='social'&&t.h/t.w>1.5?'disabled title="Las historias no van en carrusel"':''}><div class="thumb ${v==="mockup"?"mock":""}"><canvas data-th="${t.id}" aria-label="${v==="mockup"?"Mockup de ejemplo":"Esquema"} de ${esc(t.name)}"></canvas></div>${v==="mockup"?'<span class="mock-tag">Ejemplo con mensaje de muestra</span>':''}<b>${esc(t.name)}</b><span class="dim">${t.w}×${t.h} px</span><p>${esc(t.desc)}</p></button>`).join('')}</div>
   ${navHtml('Escribir mensaje')}`;}
-function bind2(){document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{if(b.dataset.f!=='social')setCarousel(false);S.formato=b.dataset.f;S.tpl=FORMATS[S.formato].templates[0].id;drawMain();drawLive();saveDraft();});
+function bind2(){$('#cyberDay')&&($('#cyberDay').onclick=loadCyberDay);document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{if(b.dataset.f!=='social')setCarousel(false);S.formato=b.dataset.f;S.tpl=FORMATS[S.formato].templates[0].id;drawMain();drawLive();saveDraft();});
   document.querySelectorAll('[data-car]').forEach(b=>b.onclick=()=>{setCarousel(b.dataset.car==='1');saveDraft();drawMain();drawLive();});
   document.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{setSlides(S.car.n+(+b.dataset.n));saveDraft();drawMain();});
   curFormat().templates.forEach(t=>{const c=document.querySelector(`canvas[data-th="${t.id}"]`);S.fmtView==='esquema'?drawWire(c,t):drawMockup(c,t);});
@@ -1235,7 +1305,7 @@ function bind2(){document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>
 
 /* Mockup de ejemplo: la composición con un mensaje de muestra, puesta en su contexto real (app, feed, chat, mostrador) */
 const SAMPLE={copy:{eyebrow:'Compra desde USA',titular:'Tus compras, *sin fronteras*',subtitulo:'Compra en tus tiendas favoritas y tráelo con Upper.',destacado:'10 USD',cta:'Compra ya',nota:'de regalo',codigo:'',fecha:'',legal:''},visual:'celular-bolsa'};
-const MOCK_KIND={video:{vfeed:'feed',vsq:'feed'},inapp:{hero:'app',tab:'app',cupon:'app'},social:{feed:'feed',story:'story',sq:'feed',foto:'feed',fotostory:'story'},wa:{wsq:'chat',estado:'story',wv:'chat'},hablador:{a5:'stand',a6:'stand',colg:'hang'}};
+const MOCK_KIND={video:{vfeed:'feed',vsq:'feed'},inapp:{hero:'app',tab:'app',cupon:'app'},social:{feed:'feed',story:'story',sq:'feed',foto:'feed',fotostory:'story',campana:'feed',campanastory:'story'},wa:{wsq:'chat',estado:'story',wv:'chat'},hablador:{a5:'stand',a6:'stand',colg:'hang'}};
 /* El mockup de ejemplo usa siempre la composición original: sin la disposición, los textos adicionales ni los archivos del ejecutor */
 function renderSample(t,k){const X=S.extras,keep={copy:S.copy,visual:X.visual,qr:X.qr,aliados:X.aliados,producto:X.producto,productos:X.productos,fondo:X.fondo,textos:X.textos,lay:X.lay};
   S.copy={...SAMPLE.copy};Object.assign(X,{visual:SAMPLE.visual,qr:'',aliados:[],producto:null,productos:[],fondo:null,textos:[],lay:{pos:{},sty:{},hide:{}}});
@@ -1350,6 +1420,7 @@ function drawWire(c,t){const k=Math.min(.4,340/Math.max(t.w,t.h));const W=t.w,H=
     else{const p=W*.08;box(p,top+p,W*.28,W*.06,ln);bars(p,top+A*.14,W*.8,2,A*.05,A*.02);bars(p,top+A*.3,W*.75,2,A*.015,A*.012);box(p,top+A*.38,W-p*2,A*.4);box(p,top+A*.84,W*.3,A*.06,ac,A*.03);}}
   else if(t.layout==='tab'){if(wide){box(W*.06,-H*.05,H*.36,H*.19,ln);bars(W*.06,H*.28,W*.42,2,H*.1,H*.04);bars(W*.06,H*.56,W*.4,2,H*.035,H*.025);box(W*.06,H*.76,W*.13,H*.11,ac,H*.055);box(W*.56,H*.14,W*.4,H*.76);}
     else{const p=W*.08;box(W/2-W*.13,top-W*.05,W*.26,W*.15,ln);bars(W*.18,top+A*.12,W*.64,2,A*.05,A*.02);bars(W*.22,top+A*.27,W*.56,1,A*.015,A*.01);box(p,top+A*.33,W-p*2,A*.45);box(W/2-W*.16,top+A*.83,W*.32,A*.06,ac,A*.03);}}
+  else if(t.layout==='campana'){x.fillStyle=dark?'#2A3756':'#DCE6D3';x.fillRect(0,0,W,H);box(W*.2,H*.08,W*.6,H*.3,ac);box(W*.26,H*.43,W*.48,H*.12);box(W*.1,H*.58,W*.8,H*.3,fl);box(W*.13,H*.88,W*.74,H*.08);}
   else if(t.layout==='video'){x.fillStyle=dark?'#3A4A6B':'#C9D6BE';x.fillRect(0,0,W,H);const p=W*.07;box(W/2-W*.12,-W*.04,W*.24,W*.13,ac);box(W*.15,H*.1,W*.7,H*.08,ac,0);box(W*.25,H*.62,W*.5,H*.15,'#FFFFFF',0);box(W*.38,H*.79,W*.24,H*.04,ac,0);box(p,H*.85,W-p*2,H*.08,ac,0);}
   else if(t.layout==='foto'){x.fillStyle=dark?'#3A4A6B':'#C9D6BE';x.fillRect(0,0,W,H);const p=W*.08;box(W/2-W*.13,top-W*.05,W*.26,W*.15,ac);bars(W*.3,top+A*.62,W*.4,1,A*.02,0);box(p,top+A*.67,W-p*2,A*.05,ac,0);bars(W*.18,top+A*.74,W*.64,1,A*.05,0);bars(W*.25,top+A*.82,W*.5,2,A*.015,A*.012);box(W/2-W*.14,top+A*.89,W*.28,A*.05,ac,0);}
   else{const cw=wide?W*.86:W*.84,ch=wide?H*.72:A*.7,cx=(W-cw)/2,cy=wide?H*.1:top+A*.1;box(cx,cy,cw,ch,dark?'#1B2740':'#F7FBF3');const p=Math.min(cw,ch)*.09;
@@ -1509,7 +1580,7 @@ function step4(){const x=S.extras,a=S.extrasAI,t=curTpl();const filled=new Set(a
   <details class="box qedit"><summary><b>Editar textos aquí</b> <span class="hint">titular y subtítulo, con jerarquía</span></summary>
     <div class="fields" style="margin-top:8px">${['titular','subtitulo'].map(k=>`<label class="f full">${k==='titular'?'Titular':'Subtítulo'}${fmtBar(k,'q_'+k)}<input type="text" id="q_${k}" value="${esc(S.copy[k])}"></label>`).join('')}</div></details>
   <div class="box"><h3>1. Visual de la pieza</h3>
-    ${isVid()?videoEditor():isFoto()?fotoEditor():`
+    ${isVid()?videoEditor():isFoto()?fotoEditor():curTpl().layout==='campana'?campEditor():`
     <div class="visuals">${VISUALS.map(([k,l])=>`<button class="vis ${x.visual===k?'sel':''}" data-v="${k}" aria-pressed="${x.visual===k}"><canvas width="240" height="160" data-vis="${k}"></canvas>${l}</button>`).join('')}</div>
     ${x.visual==='producto'?fotoProdField():''}
     ${x.visual==='recortes'||x.visual==='cards'?prodEditor():''}
@@ -1532,7 +1603,7 @@ function step4(){const x=S.extras,a=S.extrasAI,t=curTpl();const filled=new Set(a
   </div></div>
   <div class="box review-box"><div id="d_review"></div></div>
   ${navHtml('Ir a descarga')}`;}
-const elPresent=id=>{const d=S.copy;const m={eyebrow:d.eyebrow,titular:d.titular,subtitulo:d.subtitulo,destacado:d.destacado,cta:d.cta,codigo:d.codigo,fecha:d.fecha,legal:d.legal,mensaje:d.subtitulo};return id in m?!!m[id]:true;};
+const elPresent=id=>{const d=S.copy;const m={info:d.destacado||d.cta,eyebrow:d.eyebrow,titular:d.titular,subtitulo:d.subtitulo,destacado:d.destacado,cta:d.cta,codigo:d.codigo,fecha:d.fecha,legal:d.legal,mensaje:d.subtitulo};return id in m?!!m[id]:true;};
 function elPanel(){const lay=curTpl().layout,set=EL_SETS[lay];if(!set)return'';const L2=LAY(),key=id=>lay+'.'+id;
   return `<div class="f full" style="margin-top:14px"><b>Elementos</b><span class="hint">El tamaño y la posición se ajustan en la vista previa: arrastra un elemento para moverlo y su esquina para cambiar el tamaño. Aquí eliges si se muestra y su borde.</span>
   <div class="els">${set.filter(id=>elPresent(id)&&!/^x\d$/.test(id)).map(id=>{const nm=lay==='video'&&id==='titular'?'Antetítulo y titular':lay==='cupon'&&id==='tarjeta'?'Tarjeta del cupón':EL_NAMES[id];const k=key(id),st=L2.sty[k]||EL_DEF[k]||{},sz=Math.round((L2.pos[k]?.s||1)*100),canHide=id!=='logo'||EL_LOGO_OPT.has(lay);
@@ -1540,6 +1611,9 @@ function elPanel(){const lay=curTpl().layout,set=EL_SETS[lay];if(!set)return'';c
     ${id==='logo'?(canHide?'<span class="hint">Opcional en este formato.</span>':'<span class="hint">Obligatorio en esta composición.</span>'):`<select data-els="${id}" aria-label="Borde de ${nm}">${STROKES.map(([v,l])=>`<option value="${v}" ${(st.t||'none')===v?'selected':''}>${l}</option>`).join('')}</select>
     <select data-elc="${id}" aria-label="Color del borde">${STROKE_COL.map(([v,l])=>`<option value="${v}" ${(st.c||'green')===v?'selected':''}>${l}</option>`).join('')}</select>`}</div>`;}).join('')}</div>
   <div class="row" style="margin-top:8px"><button class="btn sm" id="elReset" ${layHas(lay)?'':'disabled'}>Restablecer diseño</button></div></div>`;}
+function campEditor(){return `<p class="hint" style="margin:0 0 8px">Campaña: el <b>titular</b> va en 3D (usa A+, A−, Resaltar y Salto para la jerarquía), el <b>destacado</b> y el <b>CTA</b> van en el recuadro de información y el <b>subtítulo</b> en el recuadro de abajo.</p>
+  <div class="row" style="gap:10px"><b style="font-size:13px">Ícono del recuadro</b><div class="fmts" role="group" style="margin:0">${[['none','Ninguno'],['tiktok','TikTok']].map(([k,l])=>`<button class="fmt ${S.extras.icono===k?'sel':''}" data-ico="${k}" aria-pressed="${S.extras.icono===k}">${l}</button>`).join('')}</div>
+  <button class="btn sm" id="campFotos">Usar las personas del ejemplo</button></div>${prodEditor(false,true).replace('Productos recortados (máx.','Personas o productos recortados (máx.')}`;}
 function videoEditor(){const x=S.extras,v=x.video;
   return `<label class="f">Video madre<input type="file" id="vidIn" accept="video/mp4,video/quicktime,video/webm,.mov,.mp4"><span class="hint">MP4 o MOV, idealmente vertical 4:5 o cuadrado y de hasta 60 segundos. Se recorta a sangre al formato elegido.</span><div class="files">${v?`<span class="fileitem">🎬 ${esc(x.videoName.slice(0,28))} · ${v.duration?Math.round(v.duration)+' s':''} <button id="rmVid" aria-label="Quitar video">×</button></span>`:''}</div></label>
   ${v?`<div class="row" style="margin-top:10px;gap:8px;align-items:center"><button class="btn sm" id="vidPlay">${vidPlaying?'Pausar':'Reproducir vista previa'}</button><input type="range" id="vidSeek" min="0" max="${(v.duration||0).toFixed(2)}" step="0.05" value="${(v.currentTime||0).toFixed(2)}" style="flex:1" aria-label="Momento del video"><label class="hint" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="vidMute" ${x.mute?'checked':''}>Exportar sin audio</label></div>`:''}
@@ -1571,7 +1645,7 @@ function bindXtexts(){const ts=S.extras.textos;
   $('#xtAdd')&&($('#xtAdd').onclick=()=>{if(ts.length>=XT_MAX)return;ts.push({texto:'',fuente:'t',caso:'normal',color:'auto',bloque:'none',borde:'none',bordeColor:'green'});saveDraft();drawMain();drawLive();setTimeout(()=>$('#xt_'+(ts.length-1))?.focus(),0);});
   document.querySelectorAll('[data-xtrm]').forEach(b=>b.onclick=()=>{ts.splice(+b.dataset.xtrm,1);saveDraft();drawMain();drawLive();});
   document.querySelectorAll('[data-xt]').forEach(el=>{const h=()=>{const t=ts[+el.dataset.xt];t[el.dataset.xk]=el.value;const c=S.extrasAI?.campos;if(c)S.extrasAI.campos=c.filter(k=>k!=='x'+el.dataset.xt);saveDraft();drawLive();if(el.tagName==='SELECT'&&el.dataset.xk==='fuente')drawMain();};el.oninput=h;if(el.tagName==='SELECT')el.onchange=h;});}
-function prodEditor(force){const x=S.extras,cards=force||x.visual==='cards',filled=new Set(S.extrasAI?.campos||[]);
+function prodEditor(force,rec){const x=S.extras,cards=!rec&&(force||x.visual==='cards'),filled=new Set(S.extrasAI?.campos||[]);
   return `<div class="f full${filled.has('productos')?' ai-filled':''}" style="margin-top:12px"><b>${cards?`Cards de producto (máx. ${CARDS_MAX})`:`Productos recortados (máx. ${PROD_MAX})`}</b>${filled.has('productos')?' <span class="aitag">Completado con IA</span>':''}
     <input type="file" id="prods" accept="image/png,image/webp" multiple ${x.productos.length>=PROD_MAX?'disabled':''}>
     <span class="hint">${cards?`Foto, precio, precio anterior y nombre son opcionales. Si solo subes la foto (por ejemplo, una card ya diseñada), se muestra completa, sin recuadro de texto. ${force?'En video se usa el primer producto.':'Se usan las 3 primeras.'}`:'PNG o WebP sin fondo. Ordénalos con las flechas, arrástralos en la vista previa y cambia su tamaño desde la esquina. Cada uno puede llevar silueta: contorno, línea separada o sombra plana.'}</span>
@@ -1625,6 +1699,8 @@ function bindEls(){const L2=LAY(),lay=curTpl().layout,key=id=>lay+'.'+id;
   for(const el of[cv,sel.querySelector('.el-h')]){el.onpointermove=e=>{if(drag)move(e);else if(el===cv)cv.style.cursor=hit(pt(e))?'move':'default';};el.onpointerup=el.onpointercancel=up;}}
 
 function bind4(){
+  document.querySelectorAll('[data-ico]').forEach(b=>b.onclick=()=>{S.extras.icono=b.dataset.ico;saveDraft();drawMain();drawLive();});
+  $('#campFotos')&&($('#campFotos').onclick=async()=>{await loadCampPeople();drawMain();drawLive();});
   bindEls();bindFmt();['titular','subtitulo'].forEach(k=>{const el=$('#q_'+k);if(el)el.oninput=()=>{S.copy[k]=el.value;saveDraft();drawLive();};});  $('#vidIn')&&($('#vidIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;stopVid();$('#st4')&&($('#st4').textContent='Cargando video…');try{S.extras.video=await readVideo(f);S.extras.videoName=f.name;}catch{toast('No se pudo leer el video. Usa MP4 (H.264) o MOV.');}drawMain();drawLive();});
   $('#rmVid')&&($('#rmVid').onclick=()=>{stopVid();S.extras.video=null;drawMain();drawLive();});
   $('#vidPlay')&&($('#vidPlay').onclick=()=>{if(vidPlaying){stopVid();drawLive();$('#vidPlay').textContent='Reproducir vista previa';}else{playPreview();$('#vidPlay').textContent='Pausar';}});
@@ -2180,7 +2256,7 @@ $('#kitBtn').onclick=()=>{const k=$('#kit');k.hidden=!k.hidden;$('#kitBtn').setA
 
 (async()=>{
   document.getElementById('logoPath').setAttribute('d',LOGO_D);
-  loadDraft();await Promise.all([bootFonts(),loadIllus()]);drawKit();drawSteps();drawMain();drawLive();window.__studioReady=true;
+  loadDraft();await Promise.all([bootFonts(),loadIllus(),loadCampana()]);drawKit();drawSteps();drawMain();drawLive();window.__studioReady=true;
   $('#kbExport').onclick=()=>{const data={version:1,exportado:new Date().toISOString(),conocimiento:{ec:KB.data?.ec??null,co:KB.data?.co??null,updatedAt:KB.updatedAt},reglas:{overrides:RULES.overrides,custom:RULES.custom,updatedAt:RULES.updatedAt}};
     deliver(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'equipo.json',$('#kbExpSt'));};
   Team.init();

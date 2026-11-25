@@ -58,6 +58,19 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
 - **Emojis en la gráfica: permitidos con moderación** (decisión del equipo). La regla `n_emoji` pasó a recomendación y avisa con más de 2 emojis por pieza. Botón 😊 en la barra de formato (`EMOJIS`); las fuentes caen a la tipografía de emojis del sistema para esos caracteres, así que se ven distinto según el dispositivo que exporta. Los prompts de IA permiten hasta 2.
 - Sin gradientes, sombras ni fondos fotográficos completos. **Excepción pedida por el equipo:** la composición **Foto de fondo** (`L.foto`, plantillas `foto` 4:5 y `fotostory` 9:16 en Redes sociales), con foto a sangre y texto de marca abajo, centrado: antetítulo en Rethink Sans espaciado, titular en Noland con el resaltado recto de `*`, destacado, subtítulo y CTA. El logo va en una pestaña verde sólida, nunca sobre la foto (regla `n_logo_bg`). Sin sombras ni degradados para legibilidad: `photoLum` avisa si la foto es clara donde va el texto; encuadre arriba/centro/abajo (`fondoY`). No muestra código ni QR. La foto es por lámina en carrusel. Referencias en `docs/referencias/social/foto-*.webp`.
 
+## Campaña (componentes del editable de Black Friday)
+- Composición `L.campana`, plantillas `campana` (3:4, 1080×1440) y `campanastory` (9:16) en Redes sociales. Componentes tomados de `Post y Story - Black Friday.ai` (el archivo no está en el repo por su tamaño; referencias en `docs/referencias/campana/`):
+  - **Fondo con patrón difuminado:** `assets/campana/patron-3x4.png` y `patron-9x16.png` son máscaras alfa del patrón, extraídas del vector y teñidas en tiempo real (`tinted`), así sirven para las dos combinaciones.
+  - **Destellos** (`DESTELLO_D`) e **ícono de TikTok** (`TIKTOK_D`): trazados normalizados del archivo, dibujados con `normPath` (salen en PNG y SVG).
+  - **Título 3D:** `text()` con la opción `extrude`, girado −3,5°.
+  - **Recuadro de información:** destacado a la izquierda, divisor verde, CTA a la derecha y el ícono opcional.
+  - **Personas o productos recortados** (`p0`…`p3`, por defecto las del archivo: `assets/campana/persona-1.png` y `persona-2.png`).
+  - **Recuadro de mensaje:** el subtítulo, en dos líneas automáticas (`twoLines`).
+  - Medidas en `CAMP`.
+- **Excepción aprobada por el equipo:** estos recuadros llevan esquinas redondeadas con borde, como en la campaña original. El logo es opcional (`EL_LOGO_OPT`).
+- En Formato, el botón **"Abrir 'El verdadero Cyber Day' (editable)"** (`loadCyberDay`) carga la pieza adaptada: "Black Friday" pasa a "Cyber Day" y el mensaje a "Tendremos sorteos para aprovechar la temporada de ofertas".
+- Sección de conocimiento "Componentes de campaña" (`ec_campana`, `co_campana`).
+
 ## Conocimiento de marca por país
 - Panel "Conocimiento de marca" con dos pestañas: Ecuador y Colombia. Base inicial en `KB_DEFAULT` (`index.html`), tomada de upper.com.ec/ayudaecuador y upperlogistics.com/es/ayuda; copia de referencia en `docs/conocimiento/`.
 - El país elegido en Formato decide qué conocimiento y qué reglas aplica Claude: `knowledgeBlock()` se agrega a los prompts de validar mensaje, revisar tono e interpretar pedidos. Claude no debe afirmar datos que no estén ahí.
@@ -86,7 +99,7 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
 - El artifact publicado vive en https://claude.ai/artifact/PVXfvYdm6SMJGQyHL5gZqo. Capacidades: `sample`, `downloads`, `db`, `user` (perfil).
 - Vercel (`upperdesignstudio.vercel.app`): `npm run build` (`scripts/build.mjs`) genera `public/` con la página envuelta por `lib/pagina.js`; `server.js` queda como función solo para `/api`; `proxy.js` (Routing Middleware) pide usuario y contraseña con `STUDIO_USERS`. Sin almacenamiento externo, en Vercel los endpoints de reglas y conocimiento responden 404 y la app usa el navegador. No sirvas archivos estáticos desde `server.js` en Vercel: no se incluyen en la función.
 - `server.js`: Node 20+, SDK `@anthropic-ai/sdk`, modelo por defecto `claude-opus-5-5`. Usuarios en `STUDIO_USERS="nombre:clave,…"`. La API key nunca llega al navegador.
-- Plantillas: 3 composiciones adaptables (`L.hero`, `L.tab`, `L.cupon`) × 4 formatos = 12 piezas, más Foto de fondo (`L.foto`) en Redes sociales: 14 en total. Las medidas se calculan en proporción al lienzo.
+- Plantillas: 3 composiciones adaptables (`L.hero`, `L.tab`, `L.cupon`) × 4 formatos = 12 piezas, más Foto de fondo (`L.foto`) y Campaña (`L.campana`) en Redes sociales: 16 en total. Las medidas se calculan en proporción al lienzo.
 - Verificación visual: prueba solo la pieza afectada (no renderices las 12 plantillas salvo que se pida): el equipo pidió ahorrar tokens.
 
 ## Agente de Slack y generador por comando

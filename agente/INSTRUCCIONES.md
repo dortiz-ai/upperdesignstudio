@@ -58,6 +58,7 @@ Ejemplo:
 
 | En la referencia | En Upper |
 |---|---|
+| Pieza de campaña del equipo (fondo azul con patrón, título 3D, recuadros con borde, personas) | `social` / `campana` (3:4) o `campanastory`: titular con marcas, `destacado` y `cta` en el recuadro de información, `subtitulo` en el de mensaje, `productos` para personas |
 | Foto a sangre con texto encima | `social` / `foto` (4:5) o `fotostory` (9:16) |
 | Productos sueltos, girados o superpuestos | `visual: "recortes"` + `disposicion` (`p0`…`p3`) + silueta |
 | Cards de tienda con precio | `visual: "cards"` (o solo la foto si ya trae precios) |
