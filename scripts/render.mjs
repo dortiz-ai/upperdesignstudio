@@ -54,7 +54,10 @@ async function routeCdn(page) {
 async function openStudio() {
   const { chromium } = await loadPlaywright();
   const srv = await serve();
-  const browser = await chromium.launch();
+  // Usa el Chromium de Playwright; si no está descargado, usa el Google Chrome instalado en el equipo.
+  let browser;
+  try { browser = await chromium.launch(); }
+  catch (e1) { try { browser = await chromium.launch({ channel: "chrome" }); } catch { throw new Error("No hay navegador para generar: instala Google Chrome o ejecuta npx playwright install chromium. (" + String(e1.message || e1).split("\n")[0] + ")"); } }
   const page = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
   const errores = [];
   page.on("pageerror", (e) => errores.push(e.message));
