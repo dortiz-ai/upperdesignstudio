@@ -112,6 +112,15 @@ Salida: `salidas/<nombre>/` con PNG, SVG y `revision.json`.
   - `giro` en grados.
 - **`producto`:** foto única. **`fondo`:** ruta de la foto. **`encuadre`:** 0 arriba, 0,5 centro, 1 abajo.
 - **`qr`**, **`aliados`** (rutas), **`mensaje`** (WhatsApp o push).
+- **`textos`:** hasta 3 textos adicionales (vigencia, código, legal o una nota), como texto simple o como objeto con:
+  - `texto`;
+  - `tipografia`: `rethink` o `noland` (Noland va siempre en mayúsculas);
+  - `caso`: `normal`, `upper` o `lower`;
+  - `color`: `auto`, `cream`, `green` o `navy`;
+  - `bloque`: `none`, `navy`, `green` o `cream` (bloque recto);
+  - `borde` y `color_borde`.
+
+  Se mueven con `disposicion` usando los elementos `x0`, `x1` y `x2`. Úsalos en lugar de los campos `fecha`, `codigo`, `nota` y `legal` del `copy`.
 - **`disposicion`:** `{ "<elemento>": { "x", "y", "tamano", "ocultar", "borde", "color" } }`. Los elementos de cada composición están en `--catalogo`.
 - **`laminas`:** lista de piezas para un carrusel. Cada una lleva su `copy`, `visual`, `productos` y `fondo`; todas usan la misma plantilla.
 

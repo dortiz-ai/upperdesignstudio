@@ -157,6 +157,7 @@ img.out{max-width:100%;border-radius:4px;margin-top:8px}
 .kb-sec summary b{font-weight:700}
 .kb-edit{padding:0 12px 12px;display:grid;gap:10px}
 .kb-edit textarea{font-size:13px;line-height:1.5}
+.xt-row{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}.xt-row select{width:auto}
 .prod-row{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}.prod-row select{width:auto}.fmtbar{display:inline-flex;gap:4px;margin-left:8px;vertical-align:middle;position:relative;flex-wrap:wrap}.emo-pop{position:absolute;z-index:20;top:100%;right:0;display:grid;grid-template-columns:repeat(5,32px);gap:2px;padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.25)}.emo-pop button{border:0;background:none;font-size:20px;cursor:pointer;border-radius:6px}.emo-pop button:hover,.emo-pop button:focus{background:var(--chip)}.fmtbar .btn{padding:2px 8px;font-size:12px}.qedit summary{cursor:pointer}.prod-row img{width:40px;height:40px;object-fit:contain;background:var(--chip)}.prod-row input{flex:1;min-width:90px}
 .pill.pais{background:var(--info-bg);color:var(--fg)}
 .design{margin:4px 0 4px}
@@ -357,7 +358,7 @@ const DEFAULTS={
 const S={step:2,formato:'inapp',tpl:'hero',scheme:'oscuro',car:{on:false,n:3,idx:0,slides:[]},
   req:{...DEFAULTS.req},propuesta:DEFAULTS.propuesta,copy:{...DEFAULTS.copy},waMsg:DEFAULTS.waMsg,
   evalr:null,opciones:[],optSel:-1,casilla:'',extrasAI:null,
-  extras:{aliados:[],producto:null,productos:[],fondo:null,fondoY:.5,video:null,videoName:'',mute:false,visual:DEFAULTS.visual,qr:DEFAULTS.qr},
+  extras:{textos:[],aliados:[],producto:null,productos:[],fondo:null,fondoY:.5,video:null,videoName:'',mute:false,visual:DEFAULTS.visual,qr:DEFAULTS.qr},
   fonts:{display:false,text:false},manual:{},aiReview:null,msgAI:null};
 const curFormat=()=>FORMATS[S.formato];
 const curTpl=()=>curFormat().templates.find(t=>t.id===S.tpl)||curFormat().templates[0];
@@ -383,8 +384,12 @@ function slideChips(){if(!isCar())return'';
   return `<div class="slidebar" role="group" aria-label="Láminas del carrusel"><span class="hint">Lámina</span>${S.car.slides.map((_,i)=>{const v=withSlide(i,localVerdict);const st=v.empty?'empty':v.ok?'ok':'bad';
     return `<button class="fmt sl-${st} ${i===S.car.idx?'sel':''}" data-slide="${i}" aria-pressed="${i===S.car.idx}" title="${v.empty?'Sin copy':v.ok?'Cumple':'Por corregir'}">${i+1}</button>`;}).join('')}</div>`;}
 function bindSlideChips(){document.querySelectorAll('[data-slide]').forEach(b=>b.onclick=()=>{selectSlide(+b.dataset.slide);saveDraft();drawMain();drawLive();});}
-function saveDraft(){syncSlide();store.set('draft',{v:3,lay:S.extras.lay||null,req:S.req,car:S.car.on?{on:true,n:S.car.n,idx:S.car.idx,slides:S.car.slides.map(x=>({copy:x.copy,visual:x.visual}))}:null,copy:S.copy,waMsg:S.waMsg,formato:S.formato,tpl:S.tpl,scheme:S.scheme,visual:S.extras.visual,qr:S.extras.qr});}
+function saveDraft(){syncSlide();store.set('draft',{v:3,lay:S.extras.lay||null,textos:S.extras.textos,req:S.req,car:S.car.on?{on:true,n:S.car.n,idx:S.car.idx,slides:S.car.slides.map(x=>({copy:x.copy,visual:x.visual}))}:null,copy:S.copy,waMsg:S.waMsg,formato:S.formato,tpl:S.tpl,scheme:S.scheme,visual:S.extras.visual,qr:S.extras.qr});}
+/* Nota, fecha, código y legal ahora son textos adicionales: si llegan en el copy (borradores antiguos), se pasan a textos */
+function migrateExtras(){const ts=S.extras.textos;for(const k of['fecha','codigo','legal','nota']){const v=S.copy[k];if(v&&ts.length<XT_MAX)ts.push({texto:k==='codigo'?'Código: '+v:v,fuente:'t',caso:'normal',color:'auto',bloque:'none',borde:'none',bordeColor:'green'});S.copy[k]='';}}
 function loadDraft(){const d=store.get('draft');if(!d)return;if(!d.v){if(d.copy)['nota','codigo','fecha','legal'].forEach(k=>d.copy[k]='');d.waMsg='';}Object.assign(S.req,d.req||{});Object.assign(S.copy,d.copy||{});['waMsg','formato','tpl','scheme'].forEach(k=>{if(d[k]!=null)S[k]=d[k]});if(d.visual)S.extras.visual=d.visual;if(!VISUALS.some(v=>v[0]===S.extras.visual))S.extras.visual=DEFAULTS.visual;if(d.qr!=null)S.extras.qr=d.qr;if(!FORMATS[S.formato]){S.formato='inapp';S.tpl='hero';}if(!SCHEMES[S.scheme])S.scheme='oscuro';
+  if(Array.isArray(d.textos))S.extras.textos=d.textos.filter(t=>t&&typeof t==='object').slice(0,XT_MAX);
+  migrateExtras();
   if(d.lay&&typeof d.lay==='object')S.extras.lay={pos:d.lay.pos||{},sty:d.lay.sty||{},hide:d.lay.hide||{}};
   if(d.car?.on&&Array.isArray(d.car.slides)&&d.car.slides.length>=CAR_MIN&&S.formato==='social'){const keys=Object.keys(S.copy);
     S.car={on:true,n:Math.min(CAR_MAX,d.car.slides.length),idx:0,slides:d.car.slides.slice(0,CAR_MAX).map(x=>({copy:Object.fromEntries(keys.map(k=>[k,x.copy?.[k]||''])),visual:VISUALS.some(v=>v[0]===x.visual)?x.visual:DEFAULTS.visual,productos:[],producto:null}))};
@@ -747,12 +752,26 @@ L.foto=(ctx,W,H,d,sc,R,o)=>{
   if(d.codigo)R.checks.push({lvl:'warn',msg:'Foto de fondo no muestra el código: ponlo en el subtítulo o usa otra composición.'});
   if(S.extras.qr)R.checks.push({lvl:'warn',msg:'Foto de fondo no lleva QR: usa otra composición si lo necesitas.'});
 };
+/* TEXTOS ADICIONALES: hasta 3 por pieza, libres (tipografía, mayúsculas, color, bloque recto y borde); se mueven y redimensionan en la vista previa como elementos x0…x2 */
+const XT_MAX=3,XT_COLORS=[['auto','Automático'],['cream','Crema'],['green','Verde'],['navy','Azul']],XT_BLOCKS=[['none','Sin bloque'],['navy','Bloque azul'],['green','Bloque verde'],['cream','Bloque crema']],XT_CASE=[['normal','Como lo escribí'],['upper','MAYÚSCULAS'],['lower','minúsculas']];
+const XT_HEX={cream:C.cream,green:C.green,navy:C.navy};
+function drawExtras(ctx,W,H,sc,R){(S.extras.textos||[]).slice(0,XT_MAX).forEach((t,i)=>{if(!t||!String(t.texto||'').trim())return;const id='x'+i;
+  EL_DEF[elKey(id)]=t.borde&&t.borde!=='none'?{t:t.borde,c:t.bordeColor||'green'}:undefined;
+  const block=XT_HEX[t.bloque],bg=block||sc.bg,col=t.color&&t.color!=='auto'?XT_HEX[t.color]:(block?(block===C.navy?C.cream:C.navy):sc.fg);
+  let str=String(t.texto);if(t.caso==='lower')str=str.toLocaleLowerCase('es');
+  const disp=t.fuente==='d',up=disp||t.caso==='upper';const bh=H*.04,y=H*.97-bh,bx=W*(.05+i*.31),bw=W*.28,al=['left','center','right'][i];
+  const o={font:disp?'d':'t',weight:disp?400:600,upper:up,max:W*(disp?.036:.026),min:W*.014,color:col,bg,lh:1.15,maxLines:2,align:al,hi:col===C.green?C.cream:C.green,hiMode:'color'};
+  elBegin(ctx,id);
+  if(block)blockText(ctx,R,'Texto adicional '+(i+1),str,{x:bx,y,w:bw,h:bh},o,W*.012,block);
+  else text(ctx,R,'Texto adicional '+(i+1),str,{x:bx,y,w:bw,h:bh},o);
+  elEnd(ctx,R,id);});}
 /* ELEMENTOS LIBRES (Video y Foto de fondo): cada elemento se puede mover arrastrándolo en la vista previa, ocultar y llevar borde.
    Posiciones en fracciones del lienzo (sirven para 4:5 y 1:1). Bordes siempre rectos, en colores de la paleta. */
-const EL_NAMES={p0:'Producto 1',p1:'Producto 2',p2:'Producto 3',p3:'Producto 4',logo:'Logo de Upper',titular:'Titular',eyebrow:'Antetítulo',subtitulo:'Subtítulo',destacado:'Destacado',codigo:'Código',fecha:'Fecha',legal:'Legal',tarjeta:'Tarjeta del visual',producto:'Card de producto',cta:'CTA',mensaje:'Mensaje (subtítulo)',textos:'Textos',visual:'Visual',cinta:'Cinta verde',oferta:'Destacado y CTA'};
-const EL_SETS={video:['logo','titular','producto','cta','mensaje'],foto:['logo','eyebrow','titular','destacado','fecha','subtitulo','cta','legal'],
-  hero:['logo','fecha','eyebrow','titular','subtitulo','visual','tarjeta','cinta','destacado','cta','codigo','legal'],tab:['logo','eyebrow','titular','subtitulo','visual','tarjeta','cinta','destacado','cta','fecha','codigo','legal'],
-  cupon:['tarjeta','logo','fecha','cinta','titular','destacado','codigo','subtitulo','visual','cta','legal']};
+const EL_NAMES={x0:'Texto adicional 1',x1:'Texto adicional 2',x2:'Texto adicional 3',p0:'Producto 1',p1:'Producto 2',p2:'Producto 3',p3:'Producto 4',logo:'Logo de Upper',titular:'Titular',eyebrow:'Antetítulo',subtitulo:'Subtítulo',destacado:'Destacado',codigo:'Código',fecha:'Fecha',legal:'Legal',tarjeta:'Tarjeta del visual',producto:'Card de producto',cta:'CTA',mensaje:'Mensaje (subtítulo)',textos:'Textos',visual:'Visual',cinta:'Cinta verde',oferta:'Destacado y CTA'};
+const EL_X=['x0','x1','x2'];
+const EL_SETS={video:['logo','titular','producto','cta','mensaje',...EL_X],foto:['logo','eyebrow','titular','destacado','fecha','subtitulo','cta','legal',...EL_X],
+  hero:['logo','fecha','eyebrow','titular','subtitulo','visual','tarjeta','cinta','destacado','cta','codigo','legal',...EL_X],tab:['logo','eyebrow','titular','subtitulo','visual','tarjeta','cinta','destacado','cta','fecha','codigo','legal',...EL_X],
+  cupon:['tarjeta','logo','fecha','cinta','titular','destacado','codigo','subtitulo','visual','cta','legal',...EL_X]};
 const EL_LOGO_OPT=new Set(['video','foto']);
 const EL_DEF={'video.producto':{t:'fino',c:'green'}};
 const STROKES=[['none','Sin borde'],['fino','Fino'],['grueso','Grueso'],['doble','Doble'],['punteado','Punteado']];
@@ -766,7 +785,7 @@ const autoOn=(ctx,id)=>id&&AUTO_EL.has(EL_LAYOUT)&&!EL_ACTIVE.has(id)&&ctx!==mea
 function autoEl(ctx,R,id,fn){elBegin(ctx,id);try{return fn();}finally{elEnd(ctx,R,id);}}
 const elKey=id=>EL_LAYOUT+'.'+id;
 const elHidden=id=>!!LAY().hide[elKey(id)];
-const layHas=l=>{const L2=LAY(),pre=l+'.';return[L2.pos,L2.sty,L2.hide,EL_DEF].some(o=>Object.keys(o).some(k=>k.startsWith(pre)));};
+const layHas=l=>{if((S.extras.textos||[]).some(t=>t&&t.borde&&t.borde!=='none'))return true;const L2=LAY(),pre=l+'.';return[L2.pos,L2.sty,L2.hide,EL_DEF].some(o=>Object.keys(o).some(k=>k.startsWith(pre)));};
 /* Medición: un contexto de 1×1 que registra el contorno de todo lo que dibuja cada grupo */
 function trackCtx(){const c=document.createElement('canvas');c.width=c.height=1;const x=c.getContext('2d');const P=CanvasRenderingContext2D.prototype;let pts=[];
   const tp=(px,py)=>{const m=x.getTransform();return[m.a*px+m.c*py+m.e,m.b*px+m.d*py+m.f];};
@@ -784,7 +803,7 @@ function trackCtx(){const c=document.createElement('canvas');c.width=c.height=1;
   x.fill=function(p2){if(!EL_MEASURE?.stack.length)return;if(p2===LOGO_PATH){[[LB.x,LB.y],[LB.x+LB.w,LB.y],[LB.x,LB.y+LB.h],[LB.x+LB.w,LB.y+LB.h]].forEach(q=>add(tp(...q)));return;}pts.forEach(add);};x.stroke=function(){if(EL_MEASURE?.stack.length)pts.forEach(add);};x.clip=function(){};
   return x;}
 function measureEls(tpl,sc){EL_LAYOUT=tpl.layout;EL_W=tpl.w;EL_H=tpl.h;EL_BASE={};if(!EL_SETS[tpl.layout])return;
-  EL_MEASURE={stack:[],raw:{}};try{L[tpl.layout](trackCtx(),tpl.w,tpl.h,S.copy,sc,{checks:[],pairs:[],logo:false,visual:false,fmt:tpl.fmt,ctas:0},tpl.opt||{});}catch{}
+  EL_MEASURE={stack:[],raw:{}};try{{const mx=trackCtx(),R0={checks:[],pairs:[],logo:false,visual:false,fmt:tpl.fmt,ctas:0};L[tpl.layout](mx,tpl.w,tpl.h,S.copy,sc,R0,tpl.opt||{});drawExtras(mx,tpl.w,tpl.h,sc,R0);}}catch{}
   const raw=EL_MEASURE.raw;EL_MEASURE=null;for(const id in raw){const b=raw[id];if(isFinite(b.x0)&&b.x1>b.x0&&b.y1>b.y0)EL_BASE[id]={x:b.x0,y:b.y0,w:b.x1-b.x0,h:b.y1-b.y0};}}
 function elBegin(ctx,id,W,H){W=W||EL_W;H=H||EL_H;EL_ACTIVE.add(id);if(EL_MEASURE){EL_MEASURE.stack.push(id);return;}
   const b=EL_BASE[id],q=LAY().pos[elKey(id)]||{};ctx.save();const hd=elHidden(id)||EL_HID.some(Boolean);EL_HID.push(hd);if(hd)ctx.globalAlpha=0;
@@ -859,7 +878,7 @@ function render(canvas,tpl,schemeKey,k){
   const ctx=canvas.getContext('2d');ctx.setTransform(k,0,0,k,0,0);ctx.clearRect(0,0,W,H);
   const R={checks:[],pairs:[],logo:false,visual:false,fmt:tpl.fmt,ctas:0,W,H};
   if(canvas.id==='d_live'||layHas(tpl.layout))measureEls(tpl,sc);else{EL_LAYOUT=tpl.layout;EL_W=tpl.w;EL_H=tpl.h;EL_BASE={};}
-  L[tpl.layout](ctx,W,H,S.copy,sc,R,tpl.opt||{});canvas.__boxes=R.boxes||{};
+  L[tpl.layout](ctx,W,H,S.copy,sc,R,tpl.opt||{});drawExtras(ctx,W,H,sc,R);canvas.__boxes=R.boxes||{};
   return evaluate(R,tpl);
 }
 /* Revisa una pieza sin mostrarla (exportación y kit) */
@@ -1364,6 +1383,8 @@ function step3(){const t=curTpl();const filled=new Set(S.msgAI?.campos||[]);
   <div class="box"><h3>2. Copy de la ${isCar()?`lámina ${S.car.idx+1} de ${S.car.slides.length}`:'pieza'} <span class="hint">Fecha, código, legal y mensaje de WhatsApp se agregan en Diseño, si aplican</span></h3>
   <p class="hint" style="margin:0 0 8px">Jerarquiza dentro de un mismo texto: selecciona una palabra o frase y usa <b>Resaltar</b>, <b>A+</b> o <b>A−</b>; <b>Salto</b> corta la línea donde está el cursor. En el texto quedan como *resaltado*, ^grande^, ~pequeño~ y |.</p>
   ${slideChips()}<div class="fields">${FIELDS.map(([k,l,ph])=>`<label class="f ${k==='subtitulo'||k==='titular'?'full':''}${filled.has(k)?' ai-filled':''}">${l}${filled.has(k)?' <span class="aitag">Completado con IA</span>':''}${fmtBar(k,'c_'+k)}<input type="text" id="c_${k}" value="${esc(S.copy[k])}" placeholder="${ph}"><span class="counter" id="n_${k}"></span></label>`).join('')}</div></div>
+  <details class="box"${S.waMsg?' open':''}><summary><b>Mensaje que acompaña la pieza</b> <span class="hint">WhatsApp o push, opcional</span></summary>
+    <label class="f full" style="margin-top:8px"><textarea id="c_wa" rows="3" placeholder="Aquí sí van emojis y el CTA dentro del texto: Mira aquí…">${esc(S.waMsg)}</textarea></label></details>
   ${navHtml('Ver diseño')}`;}
 /* Validación interna: reglas de texto y de negocio del país, sin IA. Lo que pide criterio (tono) queda como "revísalo tú". */
 function localVerdict(){const rv=reviewOf(curTpl(),S.scheme).filter(r=>r.scope==='copy'&&r.enabled);
@@ -1451,7 +1472,7 @@ let ctl=null;
 function bind3(){$('#prop').oninput=e=>{S.propuesta=e.target.value;saveDraft();};
   const unmark=k=>{const c=S.msgAI?.campos;if(c&&c.includes(k)){S.msgAI.campos=c.filter(x=>x!==k);const l=$('#c_'+k)?.closest('label');l?.classList.remove('ai-filled');l?.querySelector('.aitag')?.remove();}};
   FIELDS.forEach(([k])=>$('#c_'+k).oninput=e=>{S.copy[k]=e.target.value;unmark(k);counters();drawLive();saveDraft();if(S.verdict)$('#verdict').innerHTML=verdictHtml();const ch=document.querySelector(`[data-slide="${S.car.idx}"]`);if(ch&&isCar()){const v=localVerdict();ch.className=`fmt sl-${v.empty?'empty':v.ok?'ok':'bad'} sel`;}});
-  counters();bindOpts();bindSlideChips();bindFmt();
+  counters();bindOpts();bindSlideChips();bindFmt();$('#c_wa')&&($('#c_wa').oninput=e=>{S.waMsg=e.target.value;saveDraft();});
   $('#val').onclick=()=>{S.verdict=true;$('#verdict').innerHTML=verdictHtml();};
   $('#rew').onclick=()=>{S.rewOpen=!S.rewOpen;$('#rewPanel').hidden=!S.rewOpen;$('#rew').setAttribute('aria-expanded',String(S.rewOpen));if(S.rewOpen){$('#rewPanel').innerHTML=rewHtml();bindRew();}};
   if(S.rewOpen)bindRew();}
@@ -1502,20 +1523,19 @@ function step4(){const x=S.extras,a=S.extrasAI,t=curTpl();const filled=new Set(a
     <div id="intPanel" ${S.intOpen?'':'hidden'}>${S.intOpen?intHtml():''}</div>
     ${a?`<div class="crit">${a.aceptados?.length?`<b>Se aplicó</b><ul class="plain">${a.aceptados.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}${a.rechazados?.length?`<b>No se aplicó</b><ul class="plain">${a.rechazados.map(r=>`<li><b>${esc(r.pedido)}</b>: ${esc(r.motivo)}${r.alternativa?` <span class="hint">→ ${esc(r.alternativa)}</span>`:''}</li>`).join('')}</ul>`:''}${a.faltan?.length?`<b>Falta que subas</b><ul class="plain">${a.faltan.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}</div>`:''}
   </div>
-  <div class="box"><h3>3. Elementos permitidos <span class="hint">Todos son opcionales. Vacíos, la pieza no los muestra.</span></h3>
-  <div class="fields">${EXTRA_FIELDS.map(([k,l,ph])=>`<label class="f ${k==='legal'?'full':''}${mark(k)}">${l}${filled.has(k)?' <span class="aitag">Completado con IA</span>':''}${fmtBar(k,'c_'+k)}<input type="text" id="c_${k}" value="${esc(S.copy[k])}" placeholder="${ph}"><span class="counter" id="n_${k}"></span></label>`).join('')}
-    <label class="f${mark('qr')}">QR (enlace)${filled.has('qr')?' <span class="aitag">Completado con IA</span>':''}<input type="url" id="e_qr" value="${esc(x.qr)}" placeholder="https://upper.com.ec/..."><span class="hint">Cuenta como CTA: con QR, quita el botón. Impreso, mínimo 2,5 cm.</span></label>
+  <div class="box"><h3>3. Elementos adicionales <span class="hint">Opcionales. Los textos se mueven y redimensionan en la vista previa.</span></h3>
+  <div id="xtexts">${xtextsHtml()}</div>
+  <div class="fields" style="margin-top:12px">
+    <label class="f${mark('qr')}">QR (enlace)${filled.has('qr')?' <span class="aitag">Completado con IA</span>':''}<input type="url" id="e_qr" value="${esc(x.qr)}" placeholder="https://upper.com.ec/..."><span class="hint">Cuenta como CTA: con QR, quita el CTA. Impreso, mínimo 2,5 cm.</span></label>
     <label class="f">Logos de aliados (máx. 3)<input type="file" id="ali" accept="image/png,image/svg+xml,image/webp,image/jpeg" multiple><span class="hint">Van junto al logo de Upper, separados por línea. PNG o SVG transparente.</span><div class="files">${x.aliados.map((al,i)=>`<span class="fileitem"><img src="${al.img.src}" alt=""> ${esc(al.name.slice(0,18))} <label style="display:flex;gap:3px;align-items:center"><input type="checkbox" data-w="${i}" ${al.white?'checked':''}>monocromo</label><button data-rm="${i}" aria-label="Quitar">×</button></span>`).join('')}</div></label>
-    <label class="f full${mark('mensaje')}">Mensaje que acompaña la pieza (WhatsApp o push)${filled.has('mensaje')?' <span class="aitag">Completado con IA</span>':''}<textarea id="c_wa" rows="3" placeholder="Aquí sí van emojis y el CTA dentro del texto: Mira aquí…">${esc(S.waMsg)}</textarea></label>
   </div></div>
   <div class="box review-box"><div id="d_review"></div></div>
   ${navHtml('Ir a descarga')}`;}
 const elPresent=id=>{const d=S.copy;const m={eyebrow:d.eyebrow,titular:d.titular,subtitulo:d.subtitulo,destacado:d.destacado,cta:d.cta,codigo:d.codigo,fecha:d.fecha,legal:d.legal,mensaje:d.subtitulo};return id in m?!!m[id]:true;};
 function elPanel(){const lay=curTpl().layout,set=EL_SETS[lay];if(!set)return'';const L2=LAY(),key=id=>lay+'.'+id;
-  return `<div class="f full" style="margin-top:14px"><b>Elementos</b><span class="hint">En la vista previa: arrastra un elemento para moverlo y su esquina para cambiar el tamaño. Aquí eliges tamaño, visibilidad y borde.</span>
-  <div class="els">${set.filter(elPresent).map(id=>{const nm=lay==='video'&&id==='titular'?'Antetítulo y titular':lay==='cupon'&&id==='tarjeta'?'Tarjeta del cupón':EL_NAMES[id];const k=key(id),st=L2.sty[k]||EL_DEF[k]||{},sz=Math.round((L2.pos[k]?.s||1)*100),canHide=id!=='logo'||EL_LOGO_OPT.has(lay);
+  return `<div class="f full" style="margin-top:14px"><b>Elementos</b><span class="hint">El tamaño y la posición se ajustan en la vista previa: arrastra un elemento para moverlo y su esquina para cambiar el tamaño. Aquí eliges si se muestra y su borde.</span>
+  <div class="els">${set.filter(id=>elPresent(id)&&!/^x\d$/.test(id)).map(id=>{const nm=lay==='video'&&id==='titular'?'Antetítulo y titular':lay==='cupon'&&id==='tarjeta'?'Tarjeta del cupón':EL_NAMES[id];const k=key(id),st=L2.sty[k]||EL_DEF[k]||{},sz=Math.round((L2.pos[k]?.s||1)*100),canHide=id!=='logo'||EL_LOGO_OPT.has(lay);
     return `<div class="el-row"><label style="display:flex;gap:6px;align-items:center;min-width:190px">${canHide?`<input type="checkbox" data-elv="${id}" ${L2.hide[k]?'':'checked'}>`:''}${nm}</label>
-    <label class="hint" style="display:flex;gap:6px;align-items:center">Tamaño<input type="range" min="40" max="220" step="5" value="${sz}" data-elz="${id}" aria-label="Tamaño de ${nm}"><span data-elzv="${id}">${sz}%</span></label>
     ${id==='logo'?(canHide?'<span class="hint">Opcional en este formato.</span>':'<span class="hint">Obligatorio en esta composición.</span>'):`<select data-els="${id}" aria-label="Borde de ${nm}">${STROKES.map(([v,l])=>`<option value="${v}" ${(st.t||'none')===v?'selected':''}>${l}</option>`).join('')}</select>
     <select data-elc="${id}" aria-label="Color del borde">${STROKE_COL.map(([v,l])=>`<option value="${v}" ${(st.c||'green')===v?'selected':''}>${l}</option>`).join('')}</select>`}</div>`;}).join('')}</div>
   <div class="row" style="margin-top:8px"><button class="btn sm" id="elReset" ${layHas(lay)?'':'disabled'}>Restablecer diseño</button></div></div>`;}
@@ -1532,8 +1552,24 @@ function recRow(p,i){const lay=curTpl().layout,k=lay+'.p'+i,sz=Math.round((LAY()
   <select data-psil="${i}" aria-label="Silueta">${SILS.map(([v,l])=>`<option value="${v}" ${(p.sil||'none')===v?'selected':''}>${l}</option>`).join('')}</select>
   <select data-psc="${i}" aria-label="Color de silueta">${STROKE_COL.map(([v,l])=>`<option value="${v}" ${(p.silc||'green')===v?'selected':''}>${l}</option>`).join('')}</select>
   <label class="hint" style="display:flex;gap:4px;align-items:center">Giro<input type="range" min="-45" max="45" step="1" value="${p.rot??''}" data-prot="${i}" style="width:80px"></label>
-  <label class="hint" style="display:flex;gap:4px;align-items:center">Tamaño<input type="range" min="40" max="220" step="5" value="${sz}" data-elz="p${i}" style="width:80px"></label>`;}
+`;}
 function fotoProdField(){const x=S.extras;return `<label class="f" style="margin-top:12px">Foto de producto<input type="file" id="prod" accept="image/png,image/webp,image/jpeg"><span class="hint">PNG recortado sin fondo. Va sobre la tarjeta, nunca como fondo completo.</span><div class="files">${x.producto?`<span class="fileitem"><img src="${x.producto.src}" alt=""> producto <button id="rmProd" aria-label="Quitar foto">×</button></span>`:''}</div></label>`;}
+function xtextsHtml(){const ts=S.extras.textos||[],filled=new Set(S.extrasAI?.campos||[]);const opt=(arr,v)=>arr.map(([k,l])=>`<option value="${k}" ${v===k?'selected':''}>${l}</option>`).join('');
+  return `${ts.map((t,i)=>`<div class="xt-row${filled.has('x'+i)?' ai-filled':''}"><label class="f full">Texto adicional ${i+1}${filled.has('x'+i)?' <span class="aitag">Completado con IA</span>':''}${fmtBar('titular','xt_'+i)}<input type="text" id="xt_${i}" data-xt="${i}" data-xk="texto" value="${esc(t.texto||'')}" maxlength="120" placeholder="Ej. Válido hasta el 30 de noviembre"></label>
+    <div class="row" style="gap:6px;flex-wrap:wrap">
+      <select data-xt="${i}" data-xk="fuente" aria-label="Tipografía"><option value="t" ${t.fuente!=='d'?'selected':''}>Rethink Sans</option><option value="d" ${t.fuente==='d'?'selected':''}>Noland (mayúsculas)</option></select>
+      <select data-xt="${i}" data-xk="caso" aria-label="Mayúsculas" ${t.fuente==='d'?'disabled':''}>${opt(XT_CASE,t.caso||'normal')}</select>
+      <select data-xt="${i}" data-xk="color" aria-label="Color del texto">${opt(XT_COLORS,t.color||'auto')}</select>
+      <select data-xt="${i}" data-xk="bloque" aria-label="Bloque">${opt(XT_BLOCKS,t.bloque||'none')}</select>
+      <select data-xt="${i}" data-xk="borde" aria-label="Borde">${opt(STROKES,t.borde||'none')}</select>
+      <select data-xt="${i}" data-xk="bordeColor" aria-label="Color del borde">${opt(STROKE_COL.map(c=>[c[0],c[1]]),t.bordeColor||'green')}</select>
+      <button class="btn sm" data-xtrm="${i}" aria-label="Quitar texto ${i+1}">Quitar</button></div></div>`).join('')}
+  ${ts.length<XT_MAX?`<button class="btn" id="xtAdd" style="margin-top:8px">+ Agregar texto${ts.length?'':' adicional'}</button>`:''}
+  <p class="hint" style="margin:6px 0 0">Para vigencia, código promocional, legal o una nota. El bloque es recto (sin bordes redondeados); hasta ${XT_MAX} textos por pieza.</p>`;}
+function bindXtexts(){const ts=S.extras.textos;
+  $('#xtAdd')&&($('#xtAdd').onclick=()=>{if(ts.length>=XT_MAX)return;ts.push({texto:'',fuente:'t',caso:'normal',color:'auto',bloque:'none',borde:'none',bordeColor:'green'});saveDraft();drawMain();drawLive();setTimeout(()=>$('#xt_'+(ts.length-1))?.focus(),0);});
+  document.querySelectorAll('[data-xtrm]').forEach(b=>b.onclick=()=>{ts.splice(+b.dataset.xtrm,1);saveDraft();drawMain();drawLive();});
+  document.querySelectorAll('[data-xt]').forEach(el=>{const h=()=>{const t=ts[+el.dataset.xt];t[el.dataset.xk]=el.value;const c=S.extrasAI?.campos;if(c)S.extrasAI.campos=c.filter(k=>k!=='x'+el.dataset.xt);saveDraft();drawLive();if(el.tagName==='SELECT'&&el.dataset.xk==='fuente')drawMain();};el.oninput=h;if(el.tagName==='SELECT')el.onchange=h;});}
 function prodEditor(force){const x=S.extras,cards=force||x.visual==='cards',filled=new Set(S.extrasAI?.campos||[]);
   return `<div class="f full${filled.has('productos')?' ai-filled':''}" style="margin-top:12px"><b>${cards?`Cards de producto (máx. ${CARDS_MAX})`:`Productos recortados (máx. ${PROD_MAX})`}</b>${filled.has('productos')?' <span class="aitag">Completado con IA</span>':''}
     <input type="file" id="prods" accept="image/png,image/webp" multiple ${x.productos.length>=PROD_MAX?'disabled':''}>
@@ -1552,7 +1588,8 @@ function playPreview(){const v=S.extras.video,cv=$('#d_live');if(!v||!cv)return;
   const step=()=>{if(!vidPlaying)return;ctx.setTransform(1,0,0,1,0,0);coverMedia(ctx,v,cv.width,cv.height);ctx.drawImage(ov,0,0);const sk=$('#vidSeek');if(sk)sk.value=v.currentTime;vidRaf=requestAnimationFrame(step);};step();}
 const showVisual=()=>{const L2=LAY(),lay=curTpl().layout;delete L2.hide[lay+'.visual'];delete L2.hide[lay+'.producto'];};
 function delSel(){const id=S.elSel;if(!id)return;const lay=curTpl().layout,L2=LAY();
-  if(/^p\d$/.test(id)){const i=+id.slice(1);S.extras.productos.splice(i,1);for(let j=i;j<4;j++){const a=lay+'.p'+j,b=lay+'.p'+(j+1);if(L2.pos[b])L2.pos[a]=L2.pos[b];else delete L2.pos[a];}}
+  if(/^x\d$/.test(id)){const i=+id.slice(1);S.extras.textos.splice(i,1);for(let j=i;j<XT_MAX;j++){const a=lay+'.x'+j,b=lay+'.x'+(j+1);if(L2.pos[b])L2.pos[a]=L2.pos[b];else delete L2.pos[a];}}
+  else if(/^p\d$/.test(id)){const i=+id.slice(1);S.extras.productos.splice(i,1);for(let j=i;j<4;j++){const a=lay+'.p'+j,b=lay+'.p'+(j+1);if(L2.pos[b])L2.pos[a]=L2.pos[b];else delete L2.pos[a];}}
   else if(id==='logo'&&!EL_LOGO_OPT.has(lay)){toast('El logo es obligatorio en esta composición: puedes moverlo o achicarlo, no quitarlo.');return;}
   else{L2.hide[lay+'.'+id]=true;toast(`${EL_NAMES[id]||'Elemento'} quitado. Vuelve a mostrarlo en el panel Elementos.`);}
   S.elSel=null;saveDraft();drawMain();drawLive();}
@@ -1594,8 +1631,8 @@ function bind4(){
   $('#vidMute')&&($('#vidMute').onchange=e=>{S.extras.mute=e.target.checked;});
   if(isCar()){drawSwipe(null);document.querySelectorAll('[data-sw]').forEach(b=>b.onclick=()=>{selectSlide(+b.dataset.sw);saveDraft();drawMain();drawLive();});document.querySelector('.sw-item.sel')?.scrollIntoView({block:'nearest',inline:'center'});}
   const unmark=k=>{const c=S.extrasAI?.campos;if(c&&c.includes(k)){S.extrasAI.campos=c.filter(x=>x!==k);const l=document.getElementById(k==='mensaje'?'c_wa':k==='qr'?'e_qr':'c_'+k)?.closest('label');l?.classList.remove('ai-filled');l?.querySelector('.aitag')?.remove();}};
-  EXTRA_FIELDS.forEach(([k])=>$('#c_'+k).oninput=e=>{S.copy[k]=e.target.value;unmark(k);counters();drawLive();saveDraft();});counters();
-  $('#c_wa').oninput=e=>{S.waMsg=e.target.value;unmark('mensaje');drawLive();saveDraft();};
+  EXTRA_FIELDS.forEach(([k])=>{const el=$('#c_'+k);if(el)el.oninput=e=>{S.copy[k]=e.target.value;unmark(k);counters();drawLive();saveDraft();};});counters();bindXtexts();
+
   $('#cas').oninput=e=>{S.casilla=e.target.value;const b=$('#intBox');if(b)b.value=interpPrompt();};
   $('#interp').onclick=()=>{if(!S.casilla.trim()){const st=$('#st4');st.className='status err';st.textContent='Escribe primero qué quieres agregar.';return;}
     S.intOpen=!S.intOpen;$('#intPanel').hidden=!S.intOpen;$('#interp').setAttribute('aria-expanded',String(S.intOpen));if(S.intOpen){$('#intPanel').innerHTML=intHtml();bindInt();}};
@@ -1635,7 +1672,7 @@ Archivos subidos: aliados ${S.extras.aliados.length}, foto de producto ${S.extra
 
 Marca (no negociable): solo azul oscuro #141D30, verde #CDF5A3 y crema #F0FFE8; Noland en mayúsculas y Rethink Sans; CTA como texto resaltado, nunca botón ni bloque redondeado; logo oficial sin cambios; solo ilustraciones oficiales; emojis con moderación (máximo 2), sin sombras, degradados ni fondos de foto completos; máximo 3 aliados.
 La plataforma puede agregar:
-- QR (una URL) · FECHA ≤ ${LIMITS.fecha} caracteres · CODIGO ≤ ${LIMITS.codigo} · NOTA ≤ ${LIMITS.nota} (complemento del destacado, ej. "de regalo") · LEGAL ≤ ${LIMITS.legal}
+- QR (una URL) · TEXTO: hasta ${XT_MAX} textos adicionales cortos (vigencia, código promocional, legal o una nota), uno por línea
 - MENSAJE: 1-2 líneas para WhatsApp o push, con emojis y un CTA tipo "Mira aquí"
 - VISUAL: ${ILUS.map(i=>i[0]).join(', ')}, producto, recortes (productos en PNG sin fondo), cards (cards de producto con precio) o none
 - PRODUCTO: datos de cards (nombre | precio | precio anterior), solo con los datos que da el pedido; nunca inventes precios
@@ -1644,12 +1681,9 @@ Todo lo demás se rechaza con motivo breve y una alternativa dentro de la marca.
 
 Pedido: «${S.casilla}»
 
-Responde EXACTAMENTE así, una cosa por línea, sin nada más. Omite las líneas que no apliquen; ACEPTADO, RECHAZADO, PRODUCTO y FALTA pueden repetirse:
+Responde EXACTAMENTE así, una cosa por línea, sin nada más. Omite las líneas que no apliquen; TEXTO, ACEPTADO, RECHAZADO, PRODUCTO y FALTA pueden repetirse:
 QR:
-FECHA:
-CODIGO:
-NOTA:
-LEGAL:
+TEXTO:
 MENSAJE:
 VISUAL:
 PRODUCTO: nombre | precio | precio anterior
@@ -1671,18 +1705,19 @@ function bindInt(){const cp=()=>copyText2(interpPrompt(),$('#intBox')).then(ok=>
     if(!r){st.className='status err';st.textContent='No encontré elementos en la respuesta. Pega la respuesta completa (líneas FECHA:, CODIGO:, ACEPTADO:…).';return;}
     S.intOpen=false;applyInterp(r);};}
 function parseInterp(txt){const r={aceptados:[],rechazados:[],faltan:[],productos:[]};let n=0;
-  const KEY={QR:'qr',FECHA:'fecha',CODIGO:'codigo',NOTA:'nota',LEGAL:'legal',MENSAJE:'mensaje',VISUAL:'visual',PRODUCTO:'producto',ACEPTADO:'aceptado',RECHAZADO:'rechazado',FALTA:'falta'};
+  const KEY={QR:'qr',TEXTO:'texto',FECHA:'fecha',CODIGO:'codigo',NOTA:'nota',LEGAL:'legal',MENSAJE:'mensaje',VISUAL:'visual',PRODUCTO:'producto',ACEPTADO:'aceptado',RECHAZADO:'rechazado',FALTA:'falta'};
   for(const line of String(txt).replace(/\r/g,'').split('\n')){const m=line.match(/^[\s>*_-]*([A-Za-zÁÉÍÓÚáéíóú]+)[\s*_]*:[\s*_]*(.*)$/);if(!m)continue;
     const k=KEY[m[1].toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'')];if(!k)continue;
     const v=m[2].replace(/\*\*+/g,'').replace(/^["“”']|["“”']$/g,'').trim();if(!v||/^\(?(vac[ií]o|ninguno|no aplica|n\/a|—|-)\)?$/i.test(v))continue;n++;
-    if(k==='aceptado')r.aceptados.push(v);else if(k==='falta')r.faltan.push(v);
+    if(k==='texto')(r.textos??=[]).push(v);else if(k==='aceptado')r.aceptados.push(v);else if(k==='falta')r.faltan.push(v);
     else if(k==='rechazado'){const [pedido,motivo,alternativa]=v.split('|').map(x=>x.trim());r.rechazados.push({pedido,motivo:motivo||'',alternativa:alternativa||''});}
     else if(k==='producto'){const [nombre,precio,antes]=v.split('|').map(x=>(x||'').trim());r.productos.push({nombre,precio,antes});}
     else r[k]=k==='visual'?v.toLowerCase().replace(/[^a-z-]/g,''):v;}
   return n?r:null;}
 function applyInterp(r){const campos=[];
   if(r.qr&&/^https?:\/\//.test(r.qr)){S.extras.qr=String(r.qr);campos.push('qr');}
-  ['fecha','codigo','nota','legal'].forEach(k=>{if(r[k]){S.copy[k]=String(r[k]).slice(0,LIMITS[k]);campos.push(k);}});
+  const nuevos=[...(r.textos||[]),...['fecha','codigo','legal','nota'].filter(k=>r[k]).map(k=>k==='codigo'?'Código: '+r[k]:r[k])];
+  nuevos.forEach(v=>{if(S.extras.textos.length>=XT_MAX)return;S.extras.textos.push({texto:String(v).slice(0,120),fuente:'t',caso:'normal',color:'auto',bloque:'none',borde:'none',bordeColor:'green'});campos.push('x'+(S.extras.textos.length-1));});
   if(r.mensaje){S.waMsg=String(r.mensaje).slice(0,400);campos.push('mensaje');}
   if(r.visual&&VISUALS.some(v=>v[0]===r.visual)&&(r.visual!=='producto'||S.extras.producto))S.extras.visual=r.visual;
   if(r.productos?.length){r.productos.slice(0,CARDS_MAX).forEach((q,i)=>{const p=S.extras.productos[i]||(S.extras.productos[i]={img:null,name:'',nombre:'',precio:'',antes:''});['nombre','precio','antes'].forEach(k=>{if(q[k])p[k]=String(q[k]).slice(0,k==='nombre'?60:14);});});campos.push('productos');}
@@ -2115,7 +2150,7 @@ class SvgCtx{
   toString(title){this.flush();return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${this.W}" height="${this.H}" viewBox="0 0 ${this.W} ${this.H}">\n<title>${xmlEsc(title||'Upper')}</title>\n<!-- Generado por Upper Studio. Tipografías: Noland Bold (titulares) y Rethink Sans (textos); instálalas para editar los textos. -->\n${this.out.join('\n')}\n</svg>\n`;}
 }
 function renderSvg(tpl,schemeKey){const ctx=new SvgCtx(tpl.w,tpl.h);const R={checks:[],pairs:[],logo:false,visual:false,fmt:tpl.fmt,ctas:0};
-  if(layHas(tpl.layout))measureEls(tpl,SCHEMES[schemeKey]);else{EL_LAYOUT=tpl.layout;EL_W=tpl.w;EL_H=tpl.h;EL_BASE={};}L[tpl.layout](ctx,tpl.w,tpl.h,S.copy,SCHEMES[schemeKey],R,tpl.opt||{});
+  if(layHas(tpl.layout))measureEls(tpl,SCHEMES[schemeKey]);else{EL_LAYOUT=tpl.layout;EL_W=tpl.w;EL_H=tpl.h;EL_BASE={};}L[tpl.layout](ctx,tpl.w,tpl.h,S.copy,SCHEMES[schemeKey],R,tpl.opt||{});drawExtras(ctx,tpl.w,tpl.h,SCHEMES[schemeKey],R);
   return ctx.toString(`Upper · ${FORMATS[tpl.fmt].label} · ${tpl.name}`);}
 async function exportSvg(t,k,st){const g=await gate([t],k);if(!g.go){st.className='status';st.textContent='Descarga detenida. Corrige la pieza en el panel de revisión.';return;}
   await logIfNeeded(g,[t],k);await deliver(new Blob([renderSvg(t,k)],{type:'image/svg+xml'}),fileName(t,k,'svg'),st);}

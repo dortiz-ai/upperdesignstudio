@@ -133,6 +133,9 @@ async function pageRender(brief) {
     if (v.borde) L2.sty[k] = { t: v.borde, c: v.color || "green" };
   }
   S.extras.qr = brief.qr || ""; S.waMsg = brief.mensaje || "";
+  S.extras.textos = (brief.textos || []).slice(0, 3).map((t) => (typeof t === "string" ? { texto: t } : t)).map((t) => ({
+    texto: t.texto || "", fuente: t.tipografia === "noland" ? "d" : "t", caso: t.caso || "normal", color: t.color || "auto",
+    bloque: t.bloque || "none", borde: t.borde || "none", bordeColor: t.color_borde || "green" }));
   S.extras.aliados = await Promise.all((brief.aliados || []).slice(0, 3).map(async (a) => ({ img: await img(a.img), name: a.nombre || "aliado", white: a.monocromo !== false })));
   const setPiece = async (b) => {
     const c = emptyCopy(); Object.assign(c, Object.fromEntries(Object.entries(b.copy || {}).filter(([k]) => k in c)));
