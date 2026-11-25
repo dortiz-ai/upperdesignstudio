@@ -1236,9 +1236,10 @@ function bind2(){document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>
 /* Mockup de ejemplo: la composición con un mensaje de muestra, puesta en su contexto real (app, feed, chat, mostrador) */
 const SAMPLE={copy:{eyebrow:'Compra desde USA',titular:'Tus compras, *sin fronteras*',subtitulo:'Compra en tus tiendas favoritas y tráelo con Upper.',destacado:'10 USD',cta:'Compra ya',nota:'de regalo',codigo:'',fecha:'',legal:''},visual:'celular-bolsa'};
 const MOCK_KIND={video:{vfeed:'feed',vsq:'feed'},inapp:{hero:'app',tab:'app',cupon:'app'},social:{feed:'feed',story:'story',sq:'feed',foto:'feed',fotostory:'story'},wa:{wsq:'chat',estado:'story',wv:'chat'},hablador:{a5:'stand',a6:'stand',colg:'hang'}};
-function renderSample(t,k){const keep={copy:S.copy,visual:S.extras.visual,qr:S.extras.qr,aliados:S.extras.aliados,producto:S.extras.producto,fondo:S.extras.fondo};S.extras.fondo=null;
-  S.copy={...SAMPLE.copy};S.extras.visual=SAMPLE.visual;S.extras.qr='';S.extras.aliados=[];S.extras.producto=null;
-  const c=document.createElement('canvas');try{render(c,t,S.scheme,k);}finally{S.copy=keep.copy;S.extras.visual=keep.visual;S.extras.qr=keep.qr;S.extras.aliados=keep.aliados;S.extras.producto=keep.producto;S.extras.fondo=keep.fondo;}return c;}
+/* El mockup de ejemplo usa siempre la composición original: sin la disposición, los textos adicionales ni los archivos del ejecutor */
+function renderSample(t,k){const X=S.extras,keep={copy:S.copy,visual:X.visual,qr:X.qr,aliados:X.aliados,producto:X.producto,productos:X.productos,fondo:X.fondo,textos:X.textos,lay:X.lay};
+  S.copy={...SAMPLE.copy};Object.assign(X,{visual:SAMPLE.visual,qr:'',aliados:[],producto:null,productos:[],fondo:null,textos:[],lay:{pos:{},sty:{},hide:{}}});
+  const c=document.createElement('canvas');try{render(c,t,S.scheme,k);}finally{S.copy=keep.copy;const{copy,...rest}=keep;Object.assign(X,rest);}return c;}
 function mkPhone(x,cx,cy,h){const w=h*.49,px=cx-w/2,py=cy-h/2;x.save();x.shadowColor='rgba(0,0,0,.28)';x.shadowBlur=h*.05;x.shadowOffsetY=h*.02;rr(x,px,py,w,h,w*.14);x.fillStyle='#16181D';x.fill();x.restore();
   const b=w*.04;const s={x:px+b,y:py+b,w:w-2*b,h:h-2*b,r:w*.11};return s;}
 function phoneNotch(x,s){rr(x,s.x+s.w*.35,s.y+s.h*.012,s.w*.3,s.h*.028,s.h*.014);x.fillStyle='#16181D';x.fill();}
