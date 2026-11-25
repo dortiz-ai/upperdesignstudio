@@ -10,6 +10,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const A = (f) => readFile(path.join(ROOT, "agente", f), "utf8");
 const prompt = await A("PROMPT_SISTEMA.md");
 const entries = [
+  { slug: "upper-marca", body: await A("conocimiento/marca.md") },
   { slug: "upper-ecuador", body: await A("conocimiento/ecuador.md") },
   { slug: "upper-colombia", body: await A("conocimiento/colombia.md") },
   { slug: "upper-catalogo", body: "Catálogo de Upper Studio (formatos, plantillas, visuales, elementos, bordes, siluetas, campos de copy con límites y marcas de texto):\n\n```json\n" + (await A("conocimiento/catalogo.json")).trim() + "\n```" },

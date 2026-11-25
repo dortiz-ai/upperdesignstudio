@@ -15,4 +15,4 @@ await writeFile(path.join(OUT, "ecuador.md"), `# Upper Ecuador: tono, conocimien
 await writeFile(path.join(OUT, "colombia.md"), `# Upper Colombia: tono, conocimiento y reglas\n\n${run("--conocimiento", "co")}`);
 await writeFile(path.join(OUT, "catalogo.json"), run("--catalogo"));
 await copyFile(path.join(ROOT, "agente", "pedido-ejemplo.json"), path.join(OUT, "pedido-ejemplo.json"));
-console.log("Listo: agente/conocimiento/ (ecuador.md, colombia.md, catalogo.json, pedido-ejemplo.json)");
+console.log("Listo: agente/conocimiento/ (ecuador.md, colombia.md, catalogo.json, pedido-ejemplo.json; marca.md se edita a mano)");
