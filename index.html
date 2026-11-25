@@ -500,7 +500,7 @@ function drawCards(ctx,R,b,bg,items){let ps=(items||S.extras.productos).filter(p
   if(!ps.length){R.checks.push({lvl:'warn',msg:'Cards de producto: lo que ves son marcadores. Sube tus productos y sus precios debajo de los visuales.'});ps=PH_PRODUCTS();}
   const n=ps.length,gap=b.w*.04;const cw=Math.min((b.w-gap*(n-1))/n,b.h*.74),ch=Math.min(b.h,cw*1.36);
   let x=b.x+(b.w-(cw*n+gap*(n-1)))/2;const y=b.y+(b.h-ch)/2;const fill=bg===C.cream?C.green:C.cream,fg=C.navy,pad=cw*.08;
-  for(const p of ps){ctx.fillStyle=fill;ctx.fillRect(x,y,cw,ch);
+  for(const p of ps){if(p.img&&!p.nombre&&!p.precio&&!p.antes){contain(ctx,p.img,x,y,cw,ch);x+=cw+gap;continue;}ctx.fillStyle=fill;ctx.fillRect(x,y,cw,ch);
     const ih=ch*.5;if(p.img)contain(ctx,p.img,x+pad,y+pad,cw-pad*2,ih-pad);
     let ty=y+ih+ch*.03;ctx.textAlign='left';ctx.textBaseline='top';ctx.fillStyle=fg;
     if(p.precio){const fs=cw*.15;ctx.font=fd(fs);let w=ctx.measureText(p.precio.toLocaleUpperCase('es')).width;const f2=w>cw-pad*2?fs*(cw-pad*2)/w:fs;ctx.font=fd(f2);ctx.fillText(p.precio.toLocaleUpperCase('es'),x+pad,ty);ty+=f2*1.05;}
@@ -717,7 +717,11 @@ L.video=(ctx,W,H,d,sc,R,o)=>{
   if(d.subtitulo){const r=blockText(ctx,R,'Subtítulo',d.subtitulo,{x:p,y:yb-H*.12,w:iw,h:H*.12},{font:'t',weight:500,max:W*.034,min:W*.024,color:C.cream,bg:C.navy,lh:1.3,maxLines:2,align:'center',valign:'bottom',hi:C.green,hiMode:'color'},W*.03,C.navy);yb-=r.h+H*.015;}
   if(d.cta){const h=W*.065;ctaText(ctx,R,d.cta,W/2,yb-h,h,C.navy,C.green,{align:'center',maxW:iw});yb-=h+H*.015;}
   const pr=S.extras.productos[0];
-  if(pr&&(pr.img||pr.nombre||pr.precio)){const ch=Math.min(H*.17,W*.24),cw=Math.min(iw,ch*3.1);vidCard(ctx,R,{...pr,destacado:d.destacado},(W-cw)/2,yb-ch,cw,ch);}
+  const prTxt=pr&&(pr.nombre||pr.precio||pr.antes);
+  if(pr&&pr.img&&!prTxt){const ar=pr.img.width/pr.img.height;let h=Math.min(H*.28,(yb-H*.3)),w=h*ar;if(w>iw*.9){w=iw*.9;h=w/ar;}const x=(W-w)/2,y=yb-h;
+    ctx.drawImage(pr.img,x,y,w,h);ctx.strokeStyle=C.green;ctx.lineWidth=Math.max(3,W*.006);ctx.strokeRect(x,y,w,h);R.visual=true;yb=y-H*.012;
+    if(d.destacado)text(ctx,R,'Destacado',d.destacado,{x:p,y:yb-H*.08,w:iw,h:H*.08},{font:'d',upper:true,max:W*.09,min:W*.05,color:C.green,bg:C.navy,lh:1,maxLines:1,align:'center',valign:'bottom'});}
+  else if(pr&&(pr.img||pr.nombre||pr.precio)){const ch=Math.min(H*.17,W*.24),cw=Math.min(iw,ch*3.1);vidCard(ctx,R,{...pr,destacado:d.destacado},(W-cw)/2,yb-ch,cw,ch);}
   else if(d.destacado){text(ctx,R,'Destacado',d.destacado,{x:p,y:yb-H*.09,w:iw,h:H*.09},{font:'d',upper:true,max:W*.1,min:W*.05,color:C.green,bg:C.navy,lh:1,maxLines:1,align:'center',valign:'bottom'});}
   if(d.codigo||S.extras.qr||d.fecha)R.checks.push({lvl:'warn',msg:'El video no muestra fecha, código ni QR: ponlos en el mensaje o en el subtítulo.'});
 };
@@ -1379,7 +1383,7 @@ function fotoEditor(){const x=S.extras,y=x.fondoY??.5;
 function prodEditor(force){const x=S.extras,cards=force||x.visual==='cards',filled=new Set(S.extrasAI?.campos||[]);
   return `<div class="f full${filled.has('productos')?' ai-filled':''}" style="margin-top:12px"><b>${cards?`Cards de producto (máx. ${CARDS_MAX})`:`Productos recortados (máx. ${PROD_MAX})`}</b>${filled.has('productos')?' <span class="aitag">Completado con IA</span>':''}
     <input type="file" id="prods" accept="image/png,image/webp" multiple ${x.productos.length>=PROD_MAX?'disabled':''}>
-    <span class="hint">${cards?'Cada card lleva foto, precio, precio anterior y nombre: todo opcional; lo vacío no se muestra. Se usan las 3 primeras.':'PNG o WebP sin fondo. Se ubican grandes y algo girados; con 3, el último va al centro.'}</span>
+    <span class="hint">${cards?`Foto, precio, precio anterior y nombre son opcionales. Si solo subes la foto (por ejemplo, una card ya diseñada), se muestra completa, sin recuadro de texto. ${force?'En video se usa el primer producto.':'Se usan las 3 primeras.'}`:'PNG o WebP sin fondo. Se ubican grandes y algo girados; con 3, el último va al centro.'}</span>
     ${x.productos.map((p,i)=>`<div class="prod-row">${p.img?`<img src="${p.img.src}" alt="">`:'<span class="hint">Sin foto</span>'}
       ${cards?`<input type="text" data-pf="precio" data-pi="${i}" value="${esc(p.precio||'')}" placeholder="Precio (USD 34,99)" maxlength="14"><input type="text" data-pf="antes" data-pi="${i}" value="${esc(p.antes||'')}" placeholder="Antes (USD 69,99)" maxlength="14"><input type="text" data-pf="nombre" data-pi="${i}" value="${esc(p.nombre||'')}" placeholder="Nombre del producto" maxlength="60">`:`<span>${esc(p.name||'producto')}</span>`}
       <button class="btn sm" data-prm="${i}" aria-label="Quitar producto">×</button></div>`).join('')}</div>`;}
