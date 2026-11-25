@@ -16,6 +16,22 @@ Este paquete convierte Upper Studio en un agente: recibe pedidos por chat, pregu
 
 El motor está en la raíz del repo: `index.html` (plataforma completa, con tipografías incrustadas), `assets/`, `lib/pagina.js` y `scripts/render.mjs`.
 
+## Buzz: importar el agente
+
+1. En Buzz, abre **Import an agent → Import snapshot → Choose file** y elige `agente/upper-disenador.agent.json`. Es el formato `buzz-agent-snapshot` v1, con:
+   - las instrucciones de `PROMPT_SISTEMA.md`;
+   - el conocimiento de Ecuador y Colombia, el catálogo y un pedido de ejemplo, como entradas de memoria.
+2. Para que además **genere imágenes**, agrega el servidor MCP (nivel 2, abajo).
+3. Cuando cambie el conocimiento, regenera el archivo y vuelve a importarlo:
+
+```bash
+node scripts/exportar-agente.mjs
+```
+
+```bash
+node scripts/exportar-buzz.mjs
+```
+
 ## Cómo conectarlo a tu plataforma (por ejemplo, Buzz)
 
 Depende de lo que permita la plataforma.
