@@ -889,8 +889,8 @@ const DESTELLO_D="M0.9228 0.7406C0.9222 0.7400 0.9216 0.7394 0.9211 0.7388C0.884
 const TIKTOK_D="M0.7306 0.3316L0.7306 0.6733C0.7306 0.8553 0.5624 1.0000 0.3587 0.9921C0.1565 0.9843 0.0000 0.8285 0.0188 0.6491C0.0372 0.4739 0.2197 0.3421 0.4221 0.3676L0.4219 0.5413C0.3294 0.5171 0.2350 0.5662 0.2147 0.6482C0.1950 0.7275 0.2552 0.8066 0.3484 0.8199C0.4380 0.8327 0.5348 0.7731 0.5350 0.6865L0.5367 0.0000L0.7303 0.0000C0.7312 0.1308 0.8486 0.2357 0.9994 0.2373L1.0000 0.4078C0.9037 0.4078 0.8133 0.3833 0.7306 0.3316Z",TIKTOK_AR=0.8811;
 const CAMP={'3x4':{info:[.2565,.4235,.487,.1226,25],msg:[.1318,.8831,.7364,.0775,20],div:.5018,tit:[.18,.07,.64,.33],dest:[[.1317,.1498],[.8502,.4722],[.0878,.5704]],ds:.0302,
     per:[[.0948,.5724,.4817,.4441],[.4,.568,.5036,.761],[.62,.62,.35,.4],[.02,.62,.35,.4]]},
-  '9x16':{info:[.1945,.3518,.6109,.1012,25],msg:[.0749,.8353,.8502,.1385,20],div:.5329,tit:[.16,.06,.68,.28],dest:[[.1056,.0915],[.8499,.1876],[.1112,.3371]],ds:.0302,
-    per:[[.1367,.6448,.4143,.2865],[.3992,.6424,.4328,.4906],[.62,.66,.35,.3],[.02,.66,.35,.3]]}};
+  '9x16':{info:[.1945,.3518,.6109,.1012,25],msg:[.0749,.8353,.8502,.1385,20],div:.5329,tit:[.13,.055,.74,.28],dest:[[.045,.045],[.93,.17],[.07,.37]],ds:.0302,
+    per:[[.06,.55,.52,.36],[.38,.535,.54,.62],[.62,.66,.35,.3],[.02,.66,.35,.3]]}};
 const CAMP_IMG={};
 async function loadCampPeople(){const ims=await Promise.all(['persona-1','persona-2'].map(n=>new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=`assets/campana/${n}.png`;})));
   S.extras.productos=ims.filter(Boolean).map((img,i)=>({img,name:'persona-'+(i+1),nombre:'',precio:'',antes:''}));}
@@ -902,6 +902,7 @@ function loadCampana(){return Promise.all(['patron-3x4','patron-9x16'].map(n=>ne
 /* Trazado normalizado (0..1) dibujado con moveTo/lineTo/bezierCurveTo: funciona igual en canvas y en el SVG */
 function normPath(ctx,d,x,y,w,h){const t=d.match(/[MLCZ]|-?[\d.]+/g);let i=0,c='';const P=()=>[x+parseFloat(t[i++])*w,y+parseFloat(t[i++])*h];ctx.beginPath();
   while(i<t.length){if(/[MLCZ]/.test(t[i]))c=t[i++];if(c==='M')ctx.moveTo(...P());else if(c==='L')ctx.lineTo(...P());else if(c==='C'){const a=P(),b=P(),e=P();ctx.bezierCurveTo(...a,...b,...e);}else if(c==='Z'){ctx.closePath();}}}
+function balanceLines(t,n){t=String(t).replace(/\s*\|\s*/g,'|');if(t.includes('|')||n<2)return t;const w=t.split(/\s+/),tot=t.length,out=[];let cur='';for(const x of w){const tgt=tot/n*(out.length+1);if(cur&&(out.join(' ').length+cur.length+x.length+1)>tgt&&out.length<n-1){out.push(cur);cur=x;}else cur=cur?cur+' '+x:x;}out.push(cur);return out.join('|');}
 function twoLines(t){t=String(t).replace(/\s*\|\s*/g,'|');if(t.includes('|')||t.length<28)return t;const mid=t.length/2;let best=-1;for(let i=0;i<t.length;i++)if(t[i]===' '&&(best<0||Math.abs(i-mid)<Math.abs(best-mid)))best=i;return best<0?t:t.slice(0,best)+'|'+t.slice(best+1);}
 function campBox(ctx,x,y,w,h,r,fill,stroke,lw){rr(ctx,x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();ctx.lineWidth=lw;ctx.strokeStyle=stroke;ctx.stroke();}
 /* Texto espaciado en mayúsculas por líneas (|), ajustado al ancho */
@@ -929,7 +930,7 @@ L.campana=(ctx,W,H,d,sc,R,o)=>{
     if(d.cta){const rw=two?X+BW-dv:BW,icon=S.extras.icono==='tiktok',cyT=icon?Y+BH*.34:Y+BH/2;campLines(ctx,d.cta,rx+rw/2,cyT,rw*.8,icon?BH*.3:BH*.72,W*.055,fg,600,.08);
       if(icon){const ih=BH*.3,iw=ih*TIKTOK_AR;normPath(ctx,TIKTOK_D,rx+rw/2-iw/2,Y+BH*.55,iw,ih);ctx.fillStyle=fg;ctx.fill();}}
     R.pairs.push({fg,bg:boxFill,large:true,label:'Recuadro de información'});elEnd(ctx,R,'info');}
-  if(d.subtitulo){elBegin(ctx,'mensaje');const[x,y,w,h,r]=G.msg;campBox(ctx,x*W,y*H,w*W,h*H,r*u,boxFill,line,Math.max(1.5,1.6*u));campLines(ctx,twoLines(d.subtitulo),(x+w/2)*W,(y+h/2)*H,w*W*.86,h*H*.78,W*.036,fg,500,.08);
+  if(d.subtitulo){elBegin(ctx,'mensaje');const[x,y,w,h,r]=G.msg;campBox(ctx,x*W,y*H,w*W,h*H,r*u,boxFill,line,Math.max(1.5,1.6*u));campLines(ctx,h/w*H/W>.13?balanceLines(d.subtitulo,d.subtitulo.length>34?3:2):twoLines(d.subtitulo),(x+w/2)*W,(y+h/2)*H,w*W*.86,h*H*.78,W*.036,fg,500,.08);
     R.pairs.push({fg,bg:boxFill,large:false,label:'Mensaje'});elEnd(ctx,R,'mensaje');}
 };
 const curFormatFor=R=>FORMATS[R.fmt];
