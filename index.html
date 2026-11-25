@@ -115,7 +115,7 @@ ul.plain li{margin:2px 0}
 .card .stage{padding:10px;min-height:0}
 .card canvas{max-height:520px}
 img.out{max-width:100%;border-radius:4px;margin-top:8px}
-.els{display:grid;gap:6px;margin-top:8px}.el-sel{position:absolute;border:2px dashed var(--sel);pointer-events:none;box-sizing:border-box}.el-sel .el-h{position:absolute;right:-9px;bottom:-9px;width:16px;height:16px;background:var(--sel);border:2px solid var(--bg);pointer-events:auto;cursor:nwse-resize;touch-action:none}.el-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.el-row select{width:auto;min-width:120px}
+.els{display:grid;gap:6px;margin-top:8px}.el-sel{position:absolute;border:2px dashed var(--sel);pointer-events:none;box-sizing:border-box}.el-sel .el-x{position:absolute;right:-12px;top:-12px;width:24px;height:24px;border-radius:50%;border:2px solid var(--bg);background:var(--sel);color:var(--bg);font-weight:700;line-height:1;padding:0;pointer-events:auto;cursor:pointer}.el-sel .el-h{position:absolute;right:-9px;bottom:-9px;width:16px;height:16px;background:var(--sel);border:2px solid var(--bg);pointer-events:auto;cursor:nwse-resize;touch-action:none}.el-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.el-row select{width:auto;min-width:120px}
 #d_live{touch-action:none}
 .slidebar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 10px}.slidebar .fmt{min-width:36px;padding:5px 10px;position:relative}
 .slidebar .sl-ok::after,.slidebar .sl-bad::after{content:"";position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:var(--ok)}.slidebar .sl-bad::after{background:var(--bad)}
@@ -1472,7 +1472,7 @@ function step4(){const x=S.extras,a=S.extrasAI,t=curTpl();const filled=new Set(a
   <div class="box"><h3>1. Visual de la pieza</h3>
     ${isVid()?videoEditor():isFoto()?fotoEditor():`
     <div class="visuals">${VISUALS.map(([k,l])=>`<button class="vis ${x.visual===k?'sel':''}" data-v="${k}" aria-pressed="${x.visual===k}"><canvas width="240" height="160" data-vis="${k}"></canvas>${l}</button>`).join('')}</div>
-    <label class="f" style="margin-top:12px">Foto de producto<input type="file" id="prod" accept="image/png,image/webp,image/jpeg"><span class="hint">PNG recortado sin fondo. Va sobre la tarjeta, nunca como fondo completo.</span><div class="files">${x.producto?`<span class="fileitem"><img src="${x.producto.src}" alt=""> producto <button id="rmProd" aria-label="Quitar foto">×</button></span>`:''}</div></label>
+    ${x.visual==='producto'?fotoProdField():''}
     ${x.visual==='recortes'||x.visual==='cards'?prodEditor():''}
     `}
     ${elPanel()}
@@ -1515,6 +1515,7 @@ function recRow(p,i){const lay=curTpl().layout,k=lay+'.p'+i,sz=Math.round((LAY()
   <select data-psc="${i}" aria-label="Color de silueta">${STROKE_COL.map(([v,l])=>`<option value="${v}" ${(p.silc||'green')===v?'selected':''}>${l}</option>`).join('')}</select>
   <label class="hint" style="display:flex;gap:4px;align-items:center">Giro<input type="range" min="-45" max="45" step="1" value="${p.rot??''}" data-prot="${i}" style="width:80px"></label>
   <label class="hint" style="display:flex;gap:4px;align-items:center">Tamaño<input type="range" min="40" max="220" step="5" value="${sz}" data-elz="p${i}" style="width:80px"></label>`;}
+function fotoProdField(){const x=S.extras;return `<label class="f" style="margin-top:12px">Foto de producto<input type="file" id="prod" accept="image/png,image/webp,image/jpeg"><span class="hint">PNG recortado sin fondo. Va sobre la tarjeta, nunca como fondo completo.</span><div class="files">${x.producto?`<span class="fileitem"><img src="${x.producto.src}" alt=""> producto <button id="rmProd" aria-label="Quitar foto">×</button></span>`:''}</div></label>`;}
 function prodEditor(force){const x=S.extras,cards=force||x.visual==='cards',filled=new Set(S.extrasAI?.campos||[]);
   return `<div class="f full${filled.has('productos')?' ai-filled':''}" style="margin-top:12px"><b>${cards?`Cards de producto (máx. ${CARDS_MAX})`:`Productos recortados (máx. ${PROD_MAX})`}</b>${filled.has('productos')?' <span class="aitag">Completado con IA</span>':''}
     <input type="file" id="prods" accept="image/png,image/webp" multiple ${x.productos.length>=PROD_MAX?'disabled':''}>
@@ -1531,6 +1532,12 @@ function playPreview(){const v=S.extras.video,cv=$('#d_live');if(!v||!cv)return;
   const ov=document.createElement('canvas');const k=cv.width/t.w;render(ov,{...t,opt:{...(t.opt||{}),__overlay:true}},S.scheme,k);
   vidPlaying=true;v.loop=true;v.play();const ctx=cv.getContext('2d');
   const step=()=>{if(!vidPlaying)return;ctx.setTransform(1,0,0,1,0,0);coverMedia(ctx,v,cv.width,cv.height);ctx.drawImage(ov,0,0);const sk=$('#vidSeek');if(sk)sk.value=v.currentTime;vidRaf=requestAnimationFrame(step);};step();}
+function delSel(){const id=S.elSel;if(!id)return;const lay=curTpl().layout,L2=LAY();
+  if(/^p\d$/.test(id)){const i=+id.slice(1);S.extras.productos.splice(i,1);for(let j=i;j<4;j++){const a=lay+'.p'+j,b=lay+'.p'+(j+1);if(L2.pos[b])L2.pos[a]=L2.pos[b];else delete L2.pos[a];}}
+  else if(id==='logo'&&!EL_LOGO_OPT.has(lay)){toast('El logo es obligatorio en esta composición: puedes moverlo o achicarlo, no quitarlo.');return;}
+  else{L2.hide[lay+'.'+id]=true;toast(`${EL_NAMES[id]||'Elemento'} quitado. Vuelve a mostrarlo en el panel Elementos.`);}
+  S.elSel=null;saveDraft();drawMain();drawLive();}
+document.addEventListener('keydown',e=>{if(S.step!==4||!S.elSel||!['Delete','Backspace'].includes(e.key))return;const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable))return;e.preventDefault();delSel();});
 function bindEls(){const L2=LAY(),lay=curTpl().layout,key=id=>lay+'.'+id;
   document.querySelectorAll('[data-elv]').forEach(c=>c.onchange=()=>{L2.hide[key(c.dataset.elv)]=!c.checked;saveDraft();drawLive();});
   document.querySelectorAll('[data-els]').forEach(c=>c.onchange=()=>{const k=key(c.dataset.els);L2.sty[k]={c:'green',...(L2.sty[k]||EL_DEF[k]||{}),t:c.value};saveDraft();drawLive();});
@@ -1539,7 +1546,7 @@ function bindEls(){const L2=LAY(),lay=curTpl().layout,key=id=>lay+'.'+id;
   document.querySelectorAll('[data-elz]').forEach(c=>c.onchange=()=>saveDraft());
   $('#elReset')&&($('#elReset').onclick=()=>{for(const o of[L2.pos,L2.sty,L2.hide])for(const k of Object.keys(o))if(k.startsWith(lay+'.'))delete o[k];S.elSel=null;saveDraft();drawMain();drawLive();});
   const cv=$('#d_live');if(!cv||!EL_SETS[lay])return;const stage=cv.parentElement;stage.style.position='relative';
-  let sel=stage.querySelector('.el-sel');if(!sel){sel=document.createElement('div');sel.className='el-sel';sel.innerHTML='<span class="el-h" title="Arrastra para cambiar el tamaño"></span>';stage.appendChild(sel);}
+  let sel=stage.querySelector('.el-sel');if(!sel){sel=document.createElement('div');sel.className='el-sel';sel.innerHTML='<button type="button" class="el-x" title="Quitar este elemento (Supr)" aria-label="Quitar elemento">×</button><span class="el-h" title="Arrastra para cambiar el tamaño"></span>';stage.appendChild(sel);}
   const t=()=>curTpl();
   const pt=e=>{const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*t().w,y:(e.clientY-r.top)/r.height*t().h};};
   const hit=q=>{const bx=cv.__boxes||{};return Object.keys(bx).filter(id=>{const b=bx[id];return q.x>=b.x&&q.x<=b.x+b.w&&q.y>=b.y&&q.y<=b.y+b.h;}).sort((a,c)=>bx[a].w*bx[a].h-bx[c].w*bx[c].h)[0];};
@@ -1557,6 +1564,7 @@ function bindEls(){const L2=LAY(),lay=curTpl().layout,key=id=>lay+'.'+id;
     const b=cv.__boxes[id];drag={id,mode,q,o:{...(L2.pos[key(id)]||{})},c:{x:b.x+b.w/2,y:b.y+b.h/2}};(e.target).setPointerCapture?.(e.pointerId);showSel();return true;};
   cv.onpointerdown=e=>{if(!start(e,'move')){S.elSel=null;showSel();}};
   sel.querySelector('.el-h').onpointerdown=e=>{e.stopPropagation();start(e,'size');};
+  sel.querySelector('.el-x').onpointerdown=e=>e.stopPropagation();sel.querySelector('.el-x').onclick=()=>delSel();
   for(const el of[cv,sel.querySelector('.el-h')]){el.onpointermove=e=>{if(drag)move(e);else if(el===cv)cv.style.cursor=hit(pt(e))?'move':'default';};el.onpointerup=el.onpointercancel=up;}}
 
 function bind4(){
