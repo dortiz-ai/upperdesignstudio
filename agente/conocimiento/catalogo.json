@@ -1,0 +1,344 @@
+{
+  "paises": {
+    "ec": "Ecuador",
+    "co": "Colombia"
+  },
+  "formatos": {
+    "video": {
+      "nombre": "Video",
+      "canal": "Reels / TikTok / feed",
+      "plantillas": [
+        {
+          "id": "vfeed",
+          "nombre": "Video feed 4:5",
+          "tamano": "1080x1350",
+          "composicion": "video",
+          "descripcion": "Video madre con título, card de producto y mensaje de marca encima."
+        },
+        {
+          "id": "vsq",
+          "nombre": "Video cuadrado",
+          "tamano": "1080x1080",
+          "composicion": "video",
+          "descripcion": "Mismo diseño para feed cuadrado y anuncios."
+        }
+      ]
+    },
+    "inapp": {
+      "nombre": "Banner in-app",
+      "canal": "App Upper",
+      "plantillas": [
+        {
+          "id": "hero",
+          "nombre": "Hero + ilustración",
+          "tamano": "1059x465",
+          "composicion": "hero",
+          "descripcion": "Titular grande a la izquierda y visual con la cinta Upper."
+        },
+        {
+          "id": "tab",
+          "nombre": "Pestaña de logo",
+          "tamano": "1080x540",
+          "composicion": "tab",
+          "descripcion": "Logo en pestaña, titular y tarjeta de producto."
+        },
+        {
+          "id": "cupon",
+          "nombre": "Cupón",
+          "tamano": "1080x400",
+          "composicion": "cupon",
+          "descripcion": "Tarjeta tipo gift card con monto y código."
+        }
+      ]
+    },
+    "social": {
+      "nombre": "Redes sociales",
+      "canal": "Instagram / Facebook",
+      "plantillas": [
+        {
+          "id": "feed",
+          "nombre": "Feed 4:5",
+          "tamano": "1080x1350",
+          "composicion": "tab",
+          "descripcion": "Pestaña de logo y producto. El formato del brandbook."
+        },
+        {
+          "id": "story",
+          "nombre": "Historia 9:16",
+          "tamano": "1080x1920",
+          "composicion": "hero",
+          "descripcion": "Con zonas seguras para la interfaz."
+        },
+        {
+          "id": "sq",
+          "nombre": "Cuadrado",
+          "tamano": "1080x1080",
+          "composicion": "cupon",
+          "descripcion": "Cupón para anuncios y carrusel."
+        },
+        {
+          "id": "foto",
+          "nombre": "Foto de fondo 4:5",
+          "tamano": "1080x1350",
+          "composicion": "foto",
+          "descripcion": "Foto a sangre con el texto de marca abajo. Para UGC y portadas de carrusel."
+        },
+        {
+          "id": "campana",
+          "nombre": "Campaña 3:4",
+          "tamano": "1080x1440",
+          "composicion": "campana",
+          "descripcion": "Fondo azul con patrón difuminado, título 3D, recuadro de información y personas recortadas (Black Friday 2025)."
+        },
+        {
+          "id": "campanastory",
+          "nombre": "Campaña 9:16",
+          "tamano": "1080x1920",
+          "composicion": "campana",
+          "descripcion": "La misma campaña para historias."
+        },
+        {
+          "id": "fotostory",
+          "nombre": "Foto de fondo 9:16",
+          "tamano": "1080x1920",
+          "composicion": "foto",
+          "descripcion": "Foto a sangre para historias, con zonas seguras."
+        }
+      ]
+    },
+    "wa": {
+      "nombre": "Imagen WhatsApp",
+      "canal": "WhatsApp",
+      "plantillas": [
+        {
+          "id": "wsq",
+          "nombre": "Post cuadrado",
+          "tamano": "1080x1080",
+          "composicion": "tab",
+          "descripcion": "Se entiende en miniatura dentro del chat."
+        },
+        {
+          "id": "estado",
+          "nombre": "Estado 9:16",
+          "tamano": "1080x1920",
+          "composicion": "hero",
+          "descripcion": "Textos fuera de las zonas que tapa la app."
+        },
+        {
+          "id": "wv",
+          "nombre": "Vertical 4:5",
+          "tamano": "1080x1350",
+          "composicion": "cupon",
+          "descripcion": "Cupón vertical con QR o código."
+        }
+      ]
+    },
+    "hablador": {
+      "nombre": "Hablador impreso",
+      "canal": "Punto de venta",
+      "plantillas": [
+        {
+          "id": "a5",
+          "nombre": "A5 vertical",
+          "tamano": "1819x2551",
+          "composicion": "hero",
+          "descripcion": "148×210 mm a 300 dpi con 3 mm de sangrado."
+        },
+        {
+          "id": "a6",
+          "nombre": "A6 horizontal",
+          "tamano": "1819x1311",
+          "composicion": "cupon",
+          "descripcion": "148×105 mm, tent card con QR."
+        },
+        {
+          "id": "colg",
+          "nombre": "Colgante 15 cm",
+          "tamano": "1843x1843",
+          "composicion": "tab",
+          "descripcion": "150×150 mm para vitrina."
+        }
+      ]
+    }
+  },
+  "combinaciones": {
+    "oscuro": "Verde + azul oscuro",
+    "claro": "Azul oscuro + claro Upper"
+  },
+  "visuales": {
+    "giftcard": "Gift card",
+    "caja-manos": "Caja en manos",
+    "celular-bolsa": "Compra en la app",
+    "celular-mano": "Celular en mano",
+    "caja-sorpresa": "Caja sorpresa",
+    "avion-letrero": "Avión y letrero",
+    "producto": "Foto de producto",
+    "recortes": "Productos recortados",
+    "cards": "Cards de producto",
+    "none": "Solo cinta Upper"
+  },
+  "elementos_por_composicion": {
+    "campana": [
+      "logo",
+      "patron",
+      "destellos",
+      "eyebrow",
+      "titular",
+      "info",
+      "visual",
+      "mensaje",
+      "x0",
+      "x1",
+      "x2"
+    ],
+    "video": [
+      "logo",
+      "titular",
+      "producto",
+      "cta",
+      "mensaje",
+      "x0",
+      "x1",
+      "x2"
+    ],
+    "foto": [
+      "logo",
+      "eyebrow",
+      "titular",
+      "destacado",
+      "fecha",
+      "subtitulo",
+      "cta",
+      "legal",
+      "x0",
+      "x1",
+      "x2"
+    ],
+    "hero": [
+      "logo",
+      "fecha",
+      "eyebrow",
+      "titular",
+      "subtitulo",
+      "visual",
+      "tarjeta",
+      "cinta",
+      "destacado",
+      "cta",
+      "codigo",
+      "legal",
+      "x0",
+      "x1",
+      "x2"
+    ],
+    "tab": [
+      "logo",
+      "eyebrow",
+      "titular",
+      "subtitulo",
+      "visual",
+      "tarjeta",
+      "cinta",
+      "destacado",
+      "cta",
+      "fecha",
+      "codigo",
+      "legal",
+      "x0",
+      "x1",
+      "x2"
+    ],
+    "cupon": [
+      "tarjeta",
+      "logo",
+      "fecha",
+      "cinta",
+      "titular",
+      "destacado",
+      "codigo",
+      "subtitulo",
+      "visual",
+      "cta",
+      "legal",
+      "x0",
+      "x1",
+      "x2"
+    ]
+  },
+  "bordes": [
+    "none",
+    "fino",
+    "grueso",
+    "doble",
+    "punteado"
+  ],
+  "colores_borde": [
+    "green",
+    "cream",
+    "navy"
+  ],
+  "siluetas": [
+    "none",
+    "contorno",
+    "linea",
+    "sombra"
+  ],
+  "campos_copy": [
+    {
+      "campo": "eyebrow",
+      "nombre": "Antetítulo",
+      "limite": 28
+    },
+    {
+      "campo": "titular",
+      "nombre": "Titular (Noland, mayúsculas)",
+      "limite": 40
+    },
+    {
+      "campo": "subtitulo",
+      "nombre": "Subtítulo",
+      "limite": 100
+    },
+    {
+      "campo": "destacado",
+      "nombre": "Destacado",
+      "limite": 12
+    },
+    {
+      "campo": "cta",
+      "nombre": "Llamado a la acción",
+      "limite": 20
+    },
+    {
+      "campo": "nota",
+      "nombre": "Nota del destacado",
+      "limite": 18
+    },
+    {
+      "campo": "fecha",
+      "nombre": "Fecha / vigencia",
+      "limite": 24
+    },
+    {
+      "campo": "codigo",
+      "nombre": "Código promocional",
+      "limite": 14
+    },
+    {
+      "campo": "legal",
+      "nombre": "Texto legal",
+      "limite": 140
+    }
+  ],
+  "marcas_de_texto": {
+    "*texto*": "resaltado",
+    "^texto^": "más grande",
+    "~texto~": "más pequeño",
+    "|": "salto de línea"
+  },
+  "carrusel": {
+    "min": 2,
+    "max": 10,
+    "solo_formato": "social"
+  }
+}

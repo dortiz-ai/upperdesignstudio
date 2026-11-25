@@ -100,6 +100,11 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
 - `datos/equipo.json`: conocimiento y reglas editados en la plataforma (botón "Exportar para el agente" en Conocimiento de marca). Súbelo al repo para que el agente use lo mismo que el equipo.
 - `window.__studioReady` indica que la página terminó de cargar (tipografías e ilustraciones); el generador lo espera.
 - `salidas/` y `agente/entradas/` están en `.gitignore`.
+- **Paquete de agente para otras plataformas** (`agente/README.md`):
+  - `PROMPT_SISTEMA.md`: instrucciones autosuficientes del agente.
+  - `conocimiento/`: `ecuador.md`, `colombia.md`, `catalogo.json` y un pedido de ejemplo, generados con `node scripts/exportar-agente.mjs`. Hay que regenerarlos al cambiar el conocimiento o las reglas.
+  - `mcp-server.mjs`: servidor MCP con las herramientas `catalogo`, `conocimiento` y `generar_pieza`, por stdio o con `--http PUERTO`. En HTTP, el token va en `AGENTE_TOKEN`.
+  - `Dockerfile`: para publicar el servidor MCP en modo HTTP.
 
 ## Pendientes conocidos
 - ¿Suavizar una regla del brandbook debe requerir aprobación de un rol de marca?
