@@ -46,7 +46,7 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
   - El **mensaje de WhatsApp o push** se escribe en el paso Mensaje (desplegable al final).
   - Nunca se llenan solos; solo el ejecutor o la IA a pedido explícito, marcando "Completado con IA".
 - El pedido abierto del paso 4 no toca los campos del Mensaje.
-- **Jerarquía dentro de un texto** (titular, subtítulo y todo lo que pasa por `text()`): `*resaltado*`, `^más grande^` (×1,6), `~más pequeño~` (×0,62) y `|` para salto de línea. Barra de botones (Resaltar, A+, A−, Salto) en Mensaje y en Diseño ("Editar textos aquí"), `fmtBar`/`bindFmt`. Las líneas toman la altura de su palabra más grande y las palabras se alinean por la base. Contadores, reglas y nombres de archivo ignoran las marcas.
+- **Jerarquía dentro de un texto** (titular, subtítulo y todo lo que pasa por `text()`): `*resaltado*`, `^más grande^` (×1,6), `~más pequeño~` (×0,62) y `|` para salto de línea. Los botones cambian solo las letras seleccionadas: `richApply` lee las marcas como atributos por letra y vuelve a escribirlas limpias. Barra de botones (Resaltar, A+, A−, Salto) en Mensaje y en Diseño ("Editar textos aquí"), `fmtBar`/`bindFmt`. Las líneas toman la altura de su palabra más grande y las palabras se alinean por la base. Contadores, reglas y nombres de archivo ignoran las marcas.
 - Tono: skill Upper UX Writer, embebido en la constante `VOICE` de `index.html`. La app no depende del skill instalado.
 
 ## Marca
@@ -59,17 +59,9 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
 - Sin gradientes, sombras ni fondos fotográficos completos. **Excepción pedida por el equipo:** la composición **Foto de fondo** (`L.foto`, plantillas `foto` 4:5 y `fotostory` 9:16 en Redes sociales), con foto a sangre y texto de marca abajo, centrado: antetítulo en Rethink Sans espaciado, titular en Noland con el resaltado recto de `*`, destacado, subtítulo y CTA. El logo va en una pestaña verde sólida, nunca sobre la foto (regla `n_logo_bg`). Sin sombras ni degradados para legibilidad: `photoLum` avisa si la foto es clara donde va el texto; encuadre arriba/centro/abajo (`fondoY`). No muestra código ni QR. La foto es por lámina en carrusel. Referencias en `docs/referencias/social/foto-*.webp`.
 
 ## Campaña (componentes del editable de Black Friday)
-- Composición `L.campana`, plantillas `campana` (3:4, 1080×1440) y `campanastory` (9:16) en Redes sociales. Componentes tomados de `Post y Story - Black Friday.ai` (el archivo no está en el repo por su tamaño; referencias en `docs/referencias/campana/`):
-  - **Fondo con patrón difuminado:** `assets/campana/patron-3x4.png` y `patron-9x16.png` son máscaras alfa del patrón, extraídas del vector y teñidas en tiempo real (`tinted`), así sirven para las dos combinaciones.
-  - **Destellos** (`DESTELLO_D`) e **ícono de TikTok** (`TIKTOK_D`): trazados normalizados del archivo, dibujados con `normPath` (salen en PNG y SVG).
-  - **Título 3D:** `text()` con la opción `extrude`, girado −3,5°.
-  - **Recuadro de información:** destacado a la izquierda, divisor verde, CTA a la derecha y el ícono opcional.
-  - **Personas o productos recortados** (`p0`…`p3`, por defecto las del archivo: `assets/campana/persona-1.png` y `persona-2.png`).
-  - **Recuadro de mensaje:** el subtítulo, en dos líneas automáticas (`twoLines`).
-  - Medidas en `CAMP`.
-- **Excepción aprobada por el equipo:** estos recuadros llevan esquinas redondeadas con borde, como en la campaña original. El logo es opcional (`EL_LOGO_OPT`).
-- En Formato, el botón **"Abrir 'El verdadero Cyber Day' (editable)"** (`loadCyberDay`) carga la pieza adaptada: "Black Friday" pasa a "Cyber Day" y el mensaje a "Tendremos sorteos para aprovechar la temporada de ofertas".
-- Sección de conocimiento "Componentes de campaña" (`ec_campana`, `co_campana`).
+- **No es una plantilla fija** (pedido del equipo): las plantillas `campana` y `campanastory` tienen `hidden: true`, no aparecen en Formato ni en el kit, y la pieza "El verdadero Cyber Day" se abre sola en Diseño (`loadCyberDay`, una vez por navegador con la marca `upper_cyberday_v2`). Si la pieza activa es una plantilla oculta, la plataforma abre en Diseño y recarga las personas del ejemplo.
+- Composición `L.campana` con los componentes de `Post y Story - Black Friday.ai` (no está en el repo por su tamaño; referencias en `docs/referencias/campana/`): patrón difuminado como máscara alfa teñida (`assets/campana/patron-*.png`), destellos e ícono de TikTok como trazados (`normPath`), título 3D (`extrude`, −3,5°) con **líneas del mismo ancho** (`fitLines` en `text()`), recuadro de información (destacado | CTA + ícono), personas recortadas y recuadro de mensaje (`twoLines`). Recuadros redondeados con borde: excepción aprobada para esta campaña. En esta composición el destacado y el CTA admiten hasta 24 caracteres.
+- Copy de la pieza: titular `El verdadero|*Cyber Day*|está en 🇺🇸`, destacado `27/11|9:00 PM`, CTA `Live en` con ícono de TikTok y subtítulo "Tendremos sorteos para aprovechar la temporada de ofertas". Todo se edita en Diseño ("Editar textos aquí").
 
 ## Conocimiento de marca por país
 - Panel "Conocimiento de marca" con dos pestañas: Ecuador y Colombia. Base inicial en `KB_DEFAULT` (`index.html`), tomada de upper.com.ec/ayudaecuador y upperlogistics.com/es/ayuda; copia de referencia en `docs/conocimiento/`.
@@ -99,7 +91,7 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
 - El artifact publicado vive en https://claude.ai/artifact/PVXfvYdm6SMJGQyHL5gZqo. Capacidades: `sample`, `downloads`, `db`, `user` (perfil).
 - Vercel (`upperdesignstudio.vercel.app`): `npm run build` (`scripts/build.mjs`) genera `public/` con la página envuelta por `lib/pagina.js`; `server.js` queda como función solo para `/api`; `proxy.js` (Routing Middleware) pide usuario y contraseña con `STUDIO_USERS`. Sin almacenamiento externo, en Vercel los endpoints de reglas y conocimiento responden 404 y la app usa el navegador. No sirvas archivos estáticos desde `server.js` en Vercel: no se incluyen en la función.
 - `server.js`: Node 20+, SDK `@anthropic-ai/sdk`, modelo por defecto `claude-opus-5-5`. Usuarios en `STUDIO_USERS="nombre:clave,…"`. La API key nunca llega al navegador.
-- Plantillas: 3 composiciones adaptables (`L.hero`, `L.tab`, `L.cupon`) × 4 formatos = 12 piezas, más Foto de fondo (`L.foto`) y Campaña (`L.campana`) en Redes sociales: 16 en total. Las medidas se calculan en proporción al lienzo.
+- Plantillas: 3 composiciones adaptables (`L.hero`, `L.tab`, `L.cupon`) × 4 formatos = 12 piezas, más Foto de fondo (`L.foto`) en Redes sociales: 14 en el kit (Campaña está oculta). Las medidas se calculan en proporción al lienzo.
 - Verificación visual: prueba solo la pieza afectada (no renderices las 12 plantillas salvo que se pida): el equipo pidió ahorrar tokens.
 
 ## Agente de Slack y generador por comando
