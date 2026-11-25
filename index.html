@@ -319,6 +319,9 @@ const ft=(w,s)=>`${w} ${s}px ${FT}`;
 
 /* Formatos: 3 plantillas por formato. Las 3 composiciones (hero, pestaña, cupón) se adaptan a cualquier proporción. */
 const FORMATS={
+  video:{label:'Video',canal:'Reels / TikTok / feed',templates:[
+    {id:'vfeed',name:'Video feed 4:5',w:1080,h:1350,layout:'video',desc:'Video madre con título, card de producto y mensaje de marca encima.'},
+    {id:'vsq',name:'Video cuadrado',w:1080,h:1080,layout:'video',desc:'Mismo diseño para feed cuadrado y anuncios.'}]},
   inapp:{label:'Banner in-app',canal:'App Upper',templates:[
     {id:'hero',name:'Hero + ilustración',w:1059,h:465,layout:'hero',desc:'Titular grande a la izquierda y visual con la cinta Upper.'},
     {id:'tab',name:'Pestaña de logo',w:1080,h:540,layout:'tab',desc:'Logo en pestaña, titular y tarjeta de producto.'},
@@ -352,7 +355,7 @@ const DEFAULTS={
 const S={step:2,formato:'inapp',tpl:'hero',scheme:'oscuro',car:{on:false,n:3,idx:0,slides:[]},
   req:{...DEFAULTS.req},propuesta:DEFAULTS.propuesta,copy:{...DEFAULTS.copy},waMsg:DEFAULTS.waMsg,
   evalr:null,opciones:[],optSel:-1,casilla:'',extrasAI:null,
-  extras:{aliados:[],producto:null,productos:[],fondo:null,fondoY:.5,visual:DEFAULTS.visual,qr:DEFAULTS.qr},
+  extras:{aliados:[],producto:null,productos:[],fondo:null,fondoY:.5,video:null,videoName:'',mute:false,visual:DEFAULTS.visual,qr:DEFAULTS.qr},
   fonts:{display:false,text:false},manual:{},aiReview:null,msgAI:null};
 const curFormat=()=>FORMATS[S.formato];
 const curTpl=()=>curFormat().templates.find(t=>t.id===S.tpl)||curFormat().templates[0];
@@ -681,6 +684,43 @@ L.foto=(ctx,W,H,d,sc,R,o)=>{
   if(d.codigo)R.checks.push({lvl:'warn',msg:'Foto de fondo no muestra el código: ponlo en el subtítulo o usa otra composición.'});
   if(S.extras.qr)R.checks.push({lvl:'warn',msg:'Foto de fondo no lleva QR: usa otra composición si lo necesitas.'});
 };
+/* VIDEO: video madre a sangre + capa gráfica de marca (título, card de producto, mensaje y CTA). La capa es estática y se dibuja sobre cada cuadro. */
+const isVid=()=>curTpl().layout==='video';
+const kitTpls=()=>Object.values(FORMATS).flatMap(f=>f.templates).filter(t=>t.layout!=='video');
+function coverMedia(ctx,m,W,H,fy=.5){const iw=m.videoWidth||m.width,ih=m.videoHeight||m.height;if(!iw||!ih)return;const k=Math.max(W/iw,H/ih);ctx.drawImage(m,(W-iw*k)/2,(H-ih*k)*fy,iw*k,ih*k);}
+/* Texto sobre bloque recto (sin bordes redondeados): mide en un lienzo aparte y dibuja el bloque detrás */
+const measureCtx=document.createElement('canvas').getContext('2d');
+function blockText(ctx,R,label,str,b,o,pad,fill){const m=text(measureCtx,{checks:[],pairs:[]},label,str,b,o);if(!m.h)return{h:0};
+  const bw=m.w+pad*2,bh=m.h+pad*1.4,bx=o.align==='center'?b.x+(b.w-bw)/2:b.x,by=o.valign==='bottom'?b.y+b.h-bh:b.y;
+  ctx.fillStyle=fill;ctx.fillRect(bx,by,bw,bh);const r=text(ctx,R,label,str,{x:bx+pad,y:by+pad*.7,w:m.w+1,h:m.h+1},{...o,valign:'top',align:'center'});return{h:bh,y:by,w:bw};}
+function vidCard(ctx,R,p,x,y,w,h){const pad=h*.1;ctx.fillStyle=C.cream;ctx.fillRect(x,y,w,h);ctx.strokeStyle=C.green;ctx.lineWidth=Math.max(3,h*.035);ctx.strokeRect(x,y,w,h);
+  const iw=h-pad*2;if(p.img)contain(ctx,p.img,x+pad,y+pad,iw,iw);const tx=x+pad*2+iw,tw=w-(tx-x)-pad;let ty=y+pad;
+  ctx.textAlign='left';ctx.textBaseline='top';ctx.fillStyle=C.navy;
+  if(p.nombre){const fs=h*.13;ctx.font=ft(600,fs);fitLines(ctx,p.nombre,tw,2).forEach(l=>{ctx.fillText(l,tx,ty);ty+=fs*1.2;});ty+=h*.03;}
+  if(p.destacado){const fs=h*.13;ctx.font=fd(fs);const s2=p.destacado.toLocaleUpperCase('es');const ww=Math.min(tw,ctx.measureText(s2).width+fs*.16);ctx.fillStyle=C.green;ctx.fillRect(tx,ty,ww,fs*1.05);ctx.fillStyle=C.navy;ctx.fillText(s2,tx+fs*.08,ty+fs*.08);ty+=fs*1.3;}
+  if(p.precio){const fs=h*.17;ctx.font=fd(fs);const s2=p.precio.toLocaleUpperCase('es');ctx.fillText(s2,tx,ty);const pw=ctx.measureText(s2).width;
+    if(p.antes){const f2=h*.1;ctx.font=ft(500,f2);const ax=tx+pw+f2*.6;if(ax+ctx.measureText(p.antes).width<tx+tw){ctx.fillText(p.antes,ax,ty+fs-f2*1.05);ctx.fillRect(ax,ty+fs-f2*.5,ctx.measureText(p.antes).width,Math.max(1,f2*.08));}}}
+  R.pairs.push({fg:C.navy,bg:C.cream,large:false,label:'Card de producto'});}
+L.video=(ctx,W,H,d,sc,R,o)=>{
+  const v=S.extras.video;const overlayOnly=o.__overlay||typeof SvgCtx!=='undefined'&&ctx instanceof SvgCtx;
+  if(!overlayOnly){if(v&&v.readyState>=2){coverMedia(ctx,v,W,H);R.visual=true;}
+    else{ctx.fillStyle=C.navy;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(240,255,232,.12)';ctx.fillRect(W*.08,H*.22,W*.84,H*.36);ctx.fillStyle=C.cream;ctx.font=fd(W*.07);ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('TU VIDEO AQUÍ',W/2,H*.4);}}
+  if(!v)R.checks.push({lvl:'warn',msg:'Video: lo que ves es un marcador. Sube el video madre en Diseño.'});
+  const tabH=Math.max(W*.09,minLogo(R)/.42),tabW=tabH*2.6,tx=(W-tabW)/2;
+  rr(ctx,tx,-tabH*.5,tabW,tabH*1.5,tabH*.32);ctx.fillStyle=sc.tabBg;ctx.fill();
+  const lgh=Math.max(tabH*.42,minLogo(R));drawLogo(ctx,tx+(tabW-lgh*LB.w/LB.h)/2,(tabH-lgh)/2,lgh,sc.tabLogo);R.logo=true;R.logoH=lgh;R.pairs.push({fg:sc.tabLogo,bg:sc.tabBg,large:true,label:'Logo'});
+  const p=W*.07,iw=W-p*2;let yt=tabH*1.25;
+  if(d.eyebrow){const r=blockText(ctx,R,'Antetítulo',d.eyebrow,{x:p,y:yt,w:iw,h:H*.05},{font:'t',weight:700,upper:true,max:W*.032,min:W*.022,color:C.navy,bg:C.green,lh:1.1,maxLines:1,align:'center'},W*.015,C.green);yt+=r.h+H*.008;}
+  if(d.titular){blockText(ctx,R,'Titular',d.titular,{x:p,y:yt,w:iw,h:H*.2},{font:'d',upper:true,max:W*.075,min:W*.045,color:C.cream,bg:C.navy,lh:1.1,maxLines:2,align:'center',hi:C.green,hiMode:'color'},W*.025,C.navy);}
+  let yb=H-p*.9;
+  if(d.legal){const r=text(ctx,R,'Legal',d.legal,{x:p,y:yb-H*.04,w:iw,h:H*.04},{font:'t',max:W*.02,min:W*.015,color:C.cream,bg:C.navy,lh:1.2,maxLines:2,align:'center',valign:'bottom'});yb-=r.h+H*.01;}
+  if(d.subtitulo){const r=blockText(ctx,R,'Subtítulo',d.subtitulo,{x:p,y:yb-H*.12,w:iw,h:H*.12},{font:'t',weight:500,max:W*.034,min:W*.024,color:C.cream,bg:C.navy,lh:1.3,maxLines:2,align:'center',valign:'bottom',hi:C.green,hiMode:'color'},W*.03,C.navy);yb-=r.h+H*.015;}
+  if(d.cta){const h=W*.065;ctaText(ctx,R,d.cta,W/2,yb-h,h,C.navy,C.green,{align:'center',maxW:iw});yb-=h+H*.015;}
+  const pr=S.extras.productos[0];
+  if(pr&&(pr.img||pr.nombre||pr.precio)){const ch=Math.min(H*.17,W*.24),cw=Math.min(iw,ch*3.1);vidCard(ctx,R,{...pr,destacado:d.destacado},(W-cw)/2,yb-ch,cw,ch);}
+  else if(d.destacado){text(ctx,R,'Destacado',d.destacado,{x:p,y:yb-H*.09,w:iw,h:H*.09},{font:'d',upper:true,max:W*.1,min:W*.05,color:C.green,bg:C.navy,lh:1,maxLines:1,align:'center',valign:'bottom'});}
+  if(d.codigo||S.extras.qr||d.fecha)R.checks.push({lvl:'warn',msg:'El video no muestra fecha, código ni QR: ponlos en el mensaje o en el subtítulo.'});
+};
 const curFormatFor=R=>FORMATS[R.fmt];
 const minLogo=R=>curFormatFor(R).print?64:40;
 
@@ -1003,7 +1043,7 @@ const STEPS=[[2,'Formato'],[3,'Mensaje'],[4,'Diseño'],[5,'Descarga']];
 let downloads=null;const inArtifact=!!window.claude?.use;
 function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600);}
 function drawSteps(){$('#steps').innerHTML=STEPS.map(([id,n],i)=>`<button class="step ${id===S.step?'on':id<S.step?'done':''}" data-s="${id}" ${id===S.step?'aria-current="step"':''}><span>Paso ${i+1}</span><b>${n}</b></button>`).join('');$('#steps').querySelectorAll('.step').forEach(b=>b.onclick=()=>go(+b.dataset.s));}
-function go(n){S.step=Math.max(2,Math.min(5,n));drawSteps();drawMain();drawLive();saveDraft();window.scrollTo({top:0,behavior:'smooth'});}
+function go(n){stopVid();S.step=Math.max(2,Math.min(5,n));drawSteps();drawMain();drawLive();saveDraft();window.scrollTo({top:0,behavior:'smooth'});}
 function navHtml(next){return `<div class="nav">${S.step>2?'<button class="btn" id="prev">Atrás</button>':'<span></span>'}${S.step<5?`<button class="btn primary" id="next">${next||'Siguiente'}</button>`:'<button class="btn" id="restart">Nueva pieza</button>'}</div>`;}
 function bindNav(){$('#prev')&&($('#prev').onclick=()=>go(S.step-1));$('#next')&&($('#next').onclick=()=>go(S.step+1));$('#restart')&&($('#restart').onclick=()=>{S.optSel=-1;S.opciones=[];S.evalr=null;S.extrasAI=null;S.msgAI=null;S.manual={};S.aiReview=null;Object.keys(S.copy).forEach(k=>S.copy[k]='');S.waMsg='';S.propuesta='';S.extras.qr='';go(2);});}
 function schemeBtns(id){return Object.entries(SCHEMES).map(([k,v])=>`<button class="fmt ${k===S.scheme?'sel':''}" data-sc="${k}" aria-pressed="${k===S.scheme}">${v.name}</button>`).join('');}
@@ -1049,7 +1089,7 @@ function bind2(){document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>
 
 /* Mockup de ejemplo: la composición con un mensaje de muestra, puesta en su contexto real (app, feed, chat, mostrador) */
 const SAMPLE={copy:{eyebrow:'Compra desde USA',titular:'Tus compras, *sin fronteras*',subtitulo:'Compra en tus tiendas favoritas y tráelo con Upper.',destacado:'10 USD',cta:'Compra ya',nota:'de regalo',codigo:'',fecha:'',legal:''},visual:'celular-bolsa'};
-const MOCK_KIND={inapp:{hero:'app',tab:'app',cupon:'app'},social:{feed:'feed',story:'story',sq:'feed',foto:'feed',fotostory:'story'},wa:{wsq:'chat',estado:'story',wv:'chat'},hablador:{a5:'stand',a6:'stand',colg:'hang'}};
+const MOCK_KIND={video:{vfeed:'feed',vsq:'feed'},inapp:{hero:'app',tab:'app',cupon:'app'},social:{feed:'feed',story:'story',sq:'feed',foto:'feed',fotostory:'story'},wa:{wsq:'chat',estado:'story',wv:'chat'},hablador:{a5:'stand',a6:'stand',colg:'hang'}};
 function renderSample(t,k){const keep={copy:S.copy,visual:S.extras.visual,qr:S.extras.qr,aliados:S.extras.aliados,producto:S.extras.producto,fondo:S.extras.fondo};S.extras.fondo=null;
   S.copy={...SAMPLE.copy};S.extras.visual=SAMPLE.visual;S.extras.qr='';S.extras.aliados=[];S.extras.producto=null;
   const c=document.createElement('canvas');try{render(c,t,S.scheme,k);}finally{S.copy=keep.copy;S.extras.visual=keep.visual;S.extras.qr=keep.qr;S.extras.aliados=keep.aliados;S.extras.producto=keep.producto;S.extras.fondo=keep.fondo;}return c;}
@@ -1163,6 +1203,7 @@ function drawWire(c,t){const k=Math.min(.4,340/Math.max(t.w,t.h));const W=t.w,H=
     else{const p=W*.08;box(p,top+p,W*.28,W*.06,ln);bars(p,top+A*.14,W*.8,2,A*.05,A*.02);bars(p,top+A*.3,W*.75,2,A*.015,A*.012);box(p,top+A*.38,W-p*2,A*.4);box(p,top+A*.84,W*.3,A*.06,ac,A*.03);}}
   else if(t.layout==='tab'){if(wide){box(W*.06,-H*.05,H*.36,H*.19,ln);bars(W*.06,H*.28,W*.42,2,H*.1,H*.04);bars(W*.06,H*.56,W*.4,2,H*.035,H*.025);box(W*.06,H*.76,W*.13,H*.11,ac,H*.055);box(W*.56,H*.14,W*.4,H*.76);}
     else{const p=W*.08;box(W/2-W*.13,top-W*.05,W*.26,W*.15,ln);bars(W*.18,top+A*.12,W*.64,2,A*.05,A*.02);bars(W*.22,top+A*.27,W*.56,1,A*.015,A*.01);box(p,top+A*.33,W-p*2,A*.45);box(W/2-W*.16,top+A*.83,W*.32,A*.06,ac,A*.03);}}
+  else if(t.layout==='video'){x.fillStyle=dark?'#3A4A6B':'#C9D6BE';x.fillRect(0,0,W,H);const p=W*.07;box(W/2-W*.12,-W*.04,W*.24,W*.13,ac);box(W*.15,H*.1,W*.7,H*.08,ac,0);box(W*.25,H*.62,W*.5,H*.15,'#FFFFFF',0);box(W*.38,H*.79,W*.24,H*.04,ac,0);box(p,H*.85,W-p*2,H*.08,ac,0);}
   else if(t.layout==='foto'){x.fillStyle=dark?'#3A4A6B':'#C9D6BE';x.fillRect(0,0,W,H);const p=W*.08;box(W/2-W*.13,top-W*.05,W*.26,W*.15,ac);bars(W*.3,top+A*.62,W*.4,1,A*.02,0);box(p,top+A*.67,W-p*2,A*.05,ac,0);bars(W*.18,top+A*.74,W*.64,1,A*.05,0);bars(W*.25,top+A*.82,W*.5,2,A*.015,A*.012);box(W/2-W*.14,top+A*.89,W*.28,A*.05,ac,0);}
   else{const cw=wide?W*.86:W*.84,ch=wide?H*.72:A*.7,cx=(W-cw)/2,cy=wide?H*.1:top+A*.1;box(cx,cy,cw,ch,dark?'#1B2740':'#F7FBF3');const p=Math.min(cw,ch)*.09;
     box(cx+p,cy+p,cw*.22,ch*.08,ln);bars(cx+p,cy+ch*.3,cw*.4,1,ch*.07,0);bars(cx+p,cy+ch*.42,cw*.45,1,ch*.18,0);bars(cx+p,cy+ch*.68,cw*.5,2,ch*.03,ch*.02);box(cx+cw-p-cw*.22,cy+ch-p-ch*.12,cw*.22,ch*.12,ac,ch*.06);}
@@ -1305,7 +1346,7 @@ function step4(){const x=S.extras,a=S.extrasAI,t=curTpl();const filled=new Set(a
     <div class="meta"><span><span class="pill">${esc(curFormat().label)}</span> ${esc(t.name)}${isCar()?` · <b>Lámina ${S.car.idx+1} de ${S.car.slides.length}</b>`:''}</span><span>${t.w}×${t.h} px</span></div>
   </section>
   <div class="box"><h3>1. Visual de la pieza</h3>
-    ${isFoto()?fotoEditor():`
+    ${isVid()?videoEditor():isFoto()?fotoEditor():`
     <div class="visuals">${VISUALS.map(([k,l])=>`<button class="vis ${x.visual===k?'sel':''}" data-v="${k}" aria-pressed="${x.visual===k}"><canvas width="240" height="160" data-vis="${k}"></canvas>${l}</button>`).join('')}</div>
     <label class="f" style="margin-top:12px">Foto de producto<input type="file" id="prod" accept="image/png,image/webp,image/jpeg"><span class="hint">PNG recortado sin fondo. Va sobre la tarjeta, nunca como fondo completo.</span><div class="files">${x.producto?`<span class="fileitem"><img src="${x.producto.src}" alt=""> producto <button id="rmProd" aria-label="Quitar foto">×</button></span>`:''}</div></label>
     ${x.visual==='recortes'||x.visual==='cards'?prodEditor():''}
@@ -1327,10 +1368,15 @@ function step4(){const x=S.extras,a=S.extrasAI,t=curTpl();const filled=new Set(a
   </div></div>
   <div class="box review-box"><div id="d_review"></div></div>
   ${navHtml('Ir a descarga')}`;}
+function videoEditor(){const x=S.extras,v=x.video;
+  return `<label class="f">Video madre<input type="file" id="vidIn" accept="video/mp4,video/quicktime,video/webm,.mov,.mp4"><span class="hint">MP4 o MOV, idealmente vertical 4:5 o cuadrado y de hasta 60 segundos. Se recorta a sangre al formato elegido.</span><div class="files">${v?`<span class="fileitem">🎬 ${esc(x.videoName.slice(0,28))} · ${v.duration?Math.round(v.duration)+' s':''} <button id="rmVid" aria-label="Quitar video">×</button></span>`:''}</div></label>
+  ${v?`<div class="row" style="margin-top:10px;gap:8px;align-items:center"><button class="btn sm" id="vidPlay">${vidPlaying?'Pausar':'Reproducir vista previa'}</button><input type="range" id="vidSeek" min="0" max="${(v.duration||0).toFixed(2)}" step="0.05" value="${(v.currentTime||0).toFixed(2)}" style="flex:1" aria-label="Momento del video"><label class="hint" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="vidMute" ${x.mute?'checked':''}>Exportar sin audio</label></div>`:''}
+  <p class="hint" style="margin:10px 0 0">Encima del video van: el <b>titular</b> arriba sobre bloque azul, la <b>card de producto</b> (abajo, opcional), el <b>CTA</b> y el <b>subtítulo</b> como mensaje en la barra inferior. Usa *asteriscos* para resaltar en verde.</p>
+  ${prodEditor(true)}`;}
 function fotoEditor(){const x=S.extras,y=x.fondoY??.5;
   return `<label class="f">Foto de fondo<input type="file" id="fondo" accept="image/png,image/webp,image/jpeg"><span class="hint">Va a sangre en toda la pieza. Elige una foto con la parte de abajo más oscura o despejada: ahí va el texto.</span><div class="files">${x.fondo?`<span class="fileitem"><img src="${x.fondo.src}" alt=""> foto <button id="rmFondo" aria-label="Quitar foto">×</button></span>`:''}</div></label>
   <div class="row" style="margin-top:10px;gap:10px"><b style="font-size:13px">Encuadre</b><div class="fmts" role="group" aria-label="Encuadre de la foto" style="margin:0">${[['Arriba',0],['Centro',.5],['Abajo',1]].map(([l,v])=>`<button class="fmt ${y===v?'sel':''}" data-fy="${v}" aria-pressed="${y===v}">${l}</button>`).join('')}</div></div>`;}
-function prodEditor(){const x=S.extras,cards=x.visual==='cards',filled=new Set(S.extrasAI?.campos||[]);
+function prodEditor(force){const x=S.extras,cards=force||x.visual==='cards',filled=new Set(S.extrasAI?.campos||[]);
   return `<div class="f full${filled.has('productos')?' ai-filled':''}" style="margin-top:12px"><b>${cards?`Cards de producto (máx. ${CARDS_MAX})`:`Productos recortados (máx. ${PROD_MAX})`}</b>${filled.has('productos')?' <span class="aitag">Completado con IA</span>':''}
     <input type="file" id="prods" accept="image/png,image/webp" multiple ${x.productos.length>=PROD_MAX?'disabled':''}>
     <span class="hint">${cards?'Cada card lleva foto, precio, precio anterior y nombre: todo opcional; lo vacío no se muestra. Se usan las 3 primeras.':'PNG o WebP sin fondo. Se ubican grandes y algo girados; con 3, el último va al centro.'}</span>
@@ -1338,7 +1384,20 @@ function prodEditor(){const x=S.extras,cards=x.visual==='cards',filled=new Set(S
       ${cards?`<input type="text" data-pf="precio" data-pi="${i}" value="${esc(p.precio||'')}" placeholder="Precio (USD 34,99)" maxlength="14"><input type="text" data-pf="antes" data-pi="${i}" value="${esc(p.antes||'')}" placeholder="Antes (USD 69,99)" maxlength="14"><input type="text" data-pf="nombre" data-pi="${i}" value="${esc(p.nombre||'')}" placeholder="Nombre del producto" maxlength="60">`:`<span>${esc(p.name||'producto')}</span>`}
       <button class="btn sm" data-prm="${i}" aria-label="Quitar producto">×</button></div>`).join('')}</div>`;}
 function readImg(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=fr.result;};fr.onerror=rej;fr.readAsDataURL(file);});}
+let vidPlaying=false,vidRaf=0;
+function readVideo(file){return new Promise((res,rej)=>{const v=document.createElement('video');v.muted=true;v.playsInline=true;v.preload='auto';v.crossOrigin='anonymous';
+  v.onloadeddata=()=>{v.currentTime=Math.min(.5,(v.duration||1)/4);};v.onseeked=()=>{v.onseeked=null;res(v);};v.onerror=()=>rej(new Error('video'));v.src=URL.createObjectURL(file);});}
+function stopVid(){vidPlaying=false;cancelAnimationFrame(vidRaf);S.extras.video?.pause();}
+function playPreview(){const v=S.extras.video,cv=$('#d_live');if(!v||!cv)return;const t=curTpl();
+  const ov=document.createElement('canvas');const k=cv.width/t.w;render(ov,{...t,opt:{...(t.opt||{}),__overlay:true}},S.scheme,k);
+  vidPlaying=true;v.loop=true;v.play();const ctx=cv.getContext('2d');
+  const step=()=>{if(!vidPlaying)return;ctx.setTransform(1,0,0,1,0,0);coverMedia(ctx,v,cv.width,cv.height);ctx.drawImage(ov,0,0);const sk=$('#vidSeek');if(sk)sk.value=v.currentTime;vidRaf=requestAnimationFrame(step);};step();}
 function bind4(){
+  $('#vidIn')&&($('#vidIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;stopVid();$('#st4')&&($('#st4').textContent='Cargando video…');try{S.extras.video=await readVideo(f);S.extras.videoName=f.name;}catch{toast('No se pudo leer el video. Usa MP4 (H.264) o MOV.');}drawMain();drawLive();});
+  $('#rmVid')&&($('#rmVid').onclick=()=>{stopVid();S.extras.video=null;drawMain();drawLive();});
+  $('#vidPlay')&&($('#vidPlay').onclick=()=>{if(vidPlaying){stopVid();drawLive();$('#vidPlay').textContent='Reproducir vista previa';}else{playPreview();$('#vidPlay').textContent='Pausar';}});
+  $('#vidSeek')&&($('#vidSeek').oninput=e=>{const v=S.extras.video;stopVid();$('#vidPlay').textContent='Reproducir vista previa';v.currentTime=+e.target.value;v.onseeked=()=>{v.onseeked=null;drawLive();};});
+  $('#vidMute')&&($('#vidMute').onchange=e=>{S.extras.mute=e.target.checked;});
   if(isCar()){drawSwipe(null);document.querySelectorAll('[data-sw]').forEach(b=>b.onclick=()=>{selectSlide(+b.dataset.sw);saveDraft();drawMain();drawLive();});document.querySelector('.sw-item.sel')?.scrollIntoView({block:'nearest',inline:'center'});}
   const unmark=k=>{const c=S.extrasAI?.campos;if(c&&c.includes(k)){S.extrasAI.campos=c.filter(x=>x!==k);const l=document.getElementById(k==='mensaje'?'c_wa':k==='qr'?'e_qr':'c_'+k)?.closest('label');l?.classList.remove('ai-filled');l?.querySelector('.aitag')?.remove();}};
   EXTRA_FIELDS.forEach(([k])=>$('#c_'+k).oninput=e=>{S.copy[k]=e.target.value;unmark(k);counters();drawLive();saveDraft();});counters();
@@ -1432,15 +1491,57 @@ function applyInterp(r){const campos=[];
   S.extrasAI={aceptados:r.aceptados||[],rechazados:r.rechazados||[],faltan:r.faltan||[],campos};saveDraft();drawMain();drawLive();}
 
 /* ---------- Paso 5 ---------- */
-function step5(){const t=curTpl();if(isCar())return step5Car();
+function step5(){const t=curTpl();if(isCar())return step5Car();if(isVid())return step5Vid();
   return `<h2>Descarga</h2><p class="lead">La pieza en las dos combinaciones aprobadas. Elige una y descárgala, o baja el kit completo adaptado a todos los formatos.</p>
   <div class="final">${Object.entries(SCHEMES).map(([k,v])=>`<div class="card"><h3>${esc(v.name)} ${k===S.scheme?'<span class="pill">Elegida</span>':`<button class="btn sm" data-pick="${k}">Elegir</button>`}</h3><div class="stage"><canvas id="f_${k}"></canvas></div><div class="review rv-card" id="fc_${k}"></div><div class="row"><button class="btn primary" data-ex="${k}">Descargar PNG ${t.w}×${t.h}</button><button class="btn" data-svg="${k}">SVG editable</button></div><div class="status" id="fs_${k}"></div></div>`).join('')}</div>
   ${S.waMsg?`<div class="box"><h3>Mensaje para enviar con la imagen <button class="btn sm" id="cpwa">Copiar</button></h3><div class="wa" id="watext">${esc(S.waMsg)}</div></div>`:''}
   <div class="box"><h3>Adaptaciones multiformato <span style="display:flex;gap:8px;align-items:center"><span class="hint">${esc(SCHEMES[S.scheme].name)}</span><button class="btn primary sm" id="zip">Descargar kit .zip</button></span></h3>
-  <p class="hint" style="margin:0">Las ${Object.values(FORMATS).flatMap(f=>f.templates).length} plantillas con el mismo mensaje, en PNG y en SVG editable. Al descargar, la plataforma te avisa de las reglas que no se cumplen y el kit incluye <code>revision.txt</code>.</p>
+  <p class="hint" style="margin:0">Las ${kitTpls().length} plantillas con el mismo mensaje, en PNG y en SVG editable. Al descargar, la plataforma te avisa de las reglas que no se cumplen y el kit incluye <code>revision.txt</code>.</p>
   <div class="status" id="zst"></div>
   <div class="adapt" id="adapt"></div></div>
   ${navHtml()}`;}
+function step5Vid(){const t=curTpl(),v=S.extras.video;
+  return `<h2>Descarga del video</h2><p class="lead">${esc(t.name)} (${t.w}×${t.h} px${v?`, ${Math.round(v.duration)} s`:''}). El video se procesa en tu navegador en tiempo real: mantén esta pestaña visible mientras se exporta.</p>
+  ${v?'':'<div class="status err">Primero sube el video madre en el paso Diseño.</div>'}
+  <div class="final">${Object.entries(SCHEMES).map(([k,sv])=>`<div class="card"><h3>${esc(sv.name)} ${k===S.scheme?'<span class="pill">Elegida</span>':`<button class="btn sm" data-pick="${k}">Elegir</button>`}</h3><div class="stage"><canvas id="f_${k}"></canvas></div><div class="review rv-card" id="fc_${k}"></div>
+    <div class="row" style="flex-wrap:wrap"><button class="btn primary" data-vid="${k}:mp4" ${v?'':'disabled'}>Exportar MP4</button><button class="btn" data-vid="${k}:mov" ${v?'':'disabled'}>Exportar MOV</button><button class="btn" data-ovl="${k}">Capa gráfica PNG</button></div><div class="status" id="fs_${k}"></div></div>`).join('')}</div>
+  <p class="hint">MP4 y MOV salen en H.264 (Chrome, Edge o Safari actualizados). La <b>capa gráfica PNG</b> es transparente: sirve para montarla en Premiere, CapCut o After Effects sobre el mismo video.</p>
+  ${S.waMsg?`<div class="box"><h3>Mensaje para enviar con el video <button class="btn sm" id="cpwa">Copiar</button></h3><div class="wa" id="watext">${esc(S.waMsg)}</div></div>`:''}
+  ${navHtml()}`;}
+function bind5Vid(){const t=curTpl();
+  Object.keys(SCHEMES).forEach(k=>{const rv=render($('#f_'+k),t,k,Math.min(.6,700/Math.max(t.w,t.h)));$('#fc_'+k).innerHTML=reviewHtml(rv,{compact:true});});
+  document.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{S.scheme=b.dataset.pick;saveDraft();drawMain();});
+  document.querySelectorAll('[data-vid]').forEach(b=>b.onclick=()=>{const[k,ext]=b.dataset.vid.split(':');exportVideo(k,ext,$('#fs_'+k),b);});
+  document.querySelectorAll('[data-ovl]').forEach(b=>b.onclick=async()=>{const k=b.dataset.ovl,st=$('#fs_'+k);const g=await gate([t],k);if(!g.go)return;await logIfNeeded(g,[t],k);
+    const c=document.createElement('canvas');render(c,{...t,opt:{...(t.opt||{}),__overlay:true}},k,1);await deliver(await toBlob(c),`upper_${paisActual()}_${pieceSlug()}_${t.id}_${k}_capa.png`,st);});
+  $('#cpwa')&&($('#cpwa').onclick=async()=>{try{await navigator.clipboard.writeText(S.waMsg);toast('Mensaje copiado');}catch{toast('Selecciona el texto y cópialo');}});}
+function pickVideoMime(){const c=['video/mp4;codecs=avc1.640028,mp4a.40.2','video/mp4;codecs=avc1.42E01F,mp4a.40.2','video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9,opus','video/webm'];
+  return typeof MediaRecorder!=='undefined'?c.find(m=>MediaRecorder.isTypeSupported(m))||'':'';}
+let vidAudio=null;
+async function exportVideo(k,ext,st,btn){const v=S.extras.video,t=curTpl();if(!v)return;
+  const mime=pickVideoMime();if(!mime){st.className='status err';st.textContent='Este navegador no puede exportar video. Usa Chrome, Edge o Safari actualizados.';return;}
+  const g=await gate([t],k);if(!g.go){st.className='status';st.textContent='Exportación detenida. Corrige la pieza en el panel de revisión.';return;}
+  await logIfNeeded(g,[t],k);stopVid();document.querySelectorAll('[data-vid]').forEach(b=>b.disabled=true);
+  try{const c=document.createElement('canvas');c.width=t.w;c.height=t.h;const ctx=c.getContext('2d');
+    const ov=document.createElement('canvas');render(ov,{...t,opt:{...(t.opt||{}),__overlay:true}},k,1);
+    const stream=c.captureStream(30);
+    const noAac=ext==='mov'&&!/mp4a/.test(mime);if(!S.extras.mute&&!noAac){try{if(!vidAudio||vidAudio.el!==v){const ac=new AudioContext();const src=ac.createMediaElementSource(v);const dest=ac.createMediaStreamDestination();src.connect(dest);vidAudio={el:v,ac,dest};}
+      await vidAudio.ac.resume();const tr=vidAudio.dest.stream.getAudioTracks()[0];if(tr)stream.addTrack(tr);}catch{}}
+    const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:10e6});const chunks=[];rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};
+    const done=new Promise(r=>rec.onstop=r);
+    v.loop=false;v.muted=!!S.extras.mute;v.currentTime=0;await new Promise(r=>{v.onseeked=()=>{v.onseeked=null;r();};});
+    const draw=()=>{coverMedia(ctx,v,t.w,t.h);ctx.drawImage(ov,0,0);};draw();
+    rec.start(250);await v.play();
+    await new Promise(res=>{let fin=false;const end=()=>{if(!fin){fin=true;res();}};v.onended=end;const tick=()=>{if(fin)return;draw();st.className='status';st.textContent=`Exportando… ${Math.min(100,Math.round(v.currentTime/v.duration*100))}%`;
+      if(v.ended||v.currentTime>=v.duration-0.02){end();return;}v.requestVideoFrameCallback?v.requestVideoFrameCallback(tick):requestAnimationFrame(tick);};tick();});
+    draw();rec.stop();await done;v.muted=true;
+    const isMp4=mime.startsWith('video/mp4');const outExt=isMp4?ext:'webm';
+    const blob=new Blob(chunks,{type:isMp4?(ext==='mov'?'video/quicktime':'video/mp4'):'video/webm'});
+    await deliver(blob,`upper_${paisActual()}_${pieceSlug()}_${t.id}_${k}.${outExt}`,st);
+    if(!isMp4)st.textContent+=' · Este navegador solo exporta WebM: para MP4 o MOV usa Chrome, Edge o Safari actualizados.';
+    if(noAac&&!S.extras.mute&&isMp4)st.textContent+=' · El MOV salió sin audio: este navegador no graba AAC. Usa MP4 si necesitas el audio.';}
+  catch(e){st.className='status err';st.textContent='No se pudo exportar el video. Vuelve a intentarlo con la pestaña visible.';}
+  finally{document.querySelectorAll('[data-vid]').forEach(b=>b.disabled=!S.extras.video);}}
 function step5Car(){const t=curTpl(),n=S.car.slides.length;
   return `<h2>Descarga del carrusel</h2><p class="lead">${n} láminas de ${esc(t.name)} (${t.w}×${t.h} px). Desliza para revisarlas y descarga el carrusel completo: un .zip con una carpeta <code>png</code> y otra <code>svg</code>, numeradas en orden.</p>
   <div class="final">${Object.entries(SCHEMES).map(([k,v])=>`<div class="card"><h3>${esc(v.name)} ${k===S.scheme?'<span class="pill">Elegida</span>':`<button class="btn sm" data-pick="${k}">Elegir</button>`}</h3>
@@ -1466,13 +1567,13 @@ async function exportCarousel(k,st,btn){if(typeof JSZip==='undefined'){st.classN
     await deliver(await zip.generateAsync({type:'blob'}),`${base}_${k}.zip`,st);}
   catch{st.className='status err';st.textContent='No se pudo generar el carrusel. Vuelve a intentarlo.';}
   finally{btn.disabled=false;}}
-function bind5(){if(isCar())return bind5Car();const t=curTpl();
+function bind5(){if(isCar())return bind5Car();if(isVid())return bind5Vid();const t=curTpl();
   Object.keys(SCHEMES).forEach(k=>{const rv=render($('#f_'+k),t,k,Math.min(1,1100/Math.max(t.w,t.h)));$('#fc_'+k).innerHTML=reviewHtml(rv,{compact:true});});
   document.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>exportPng(t,b.dataset.ex,$('#fs_'+b.dataset.ex)));
   document.querySelectorAll('[data-svg]').forEach(b=>b.onclick=()=>exportSvg(t,b.dataset.svg,$('#fs_'+b.dataset.svg)));
   document.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{S.scheme=b.dataset.pick;saveDraft();drawMain();});
   $('#cpwa')&&($('#cpwa').onclick=async()=>{try{await navigator.clipboard.writeText(S.waMsg);toast('Mensaje copiado');}catch{const r=document.createRange();r.selectNodeContents($('#watext'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Texto seleccionado: cópialo');}});
-  const all=Object.values(FORMATS).flatMap(f=>f.templates);
+  const all=kitTpls();
   $('#adapt').innerHTML=all.map(tp=>`<div class="ad"><div class="thumb"><canvas data-ad="${tp.fmt}:${tp.id}"></canvas></div><b>${esc(FORMATS[tp.fmt].label)} · ${esc(tp.name)}</b><span class="dim">${tp.w}×${tp.h} px</span><span class="flag" data-fl="${tp.fmt}:${tp.id}"></span><div class="row"><button class="btn sm" data-dl="${tp.fmt}:${tp.id}">PNG</button><button class="btn sm" data-dls="${tp.fmt}:${tp.id}">SVG editable</button></div><div class="status" data-ds="${tp.fmt}:${tp.id}"></div></div>`).join('');
   all.forEach(tp=>{const key=tp.fmt+':'+tp.id;const rv=render(document.querySelector(`[data-ad="${key}"]`),tp,S.scheme,Math.min(.35,300/Math.max(tp.w,tp.h)));const sm=reviewSummary(rv);const fl=document.querySelector(`[data-fl="${key}"]`);fl.className='flag '+(sm.b?'bad':sm.w?'warn':'ok');fl.textContent=sm.b?`${sm.b} bloqueante${sm.b>1?'s':''}${sm.w?` · ${sm.w} alerta${sm.w>1?'s':''}`:''}`:sm.w?`${sm.w} alerta${sm.w>1?'s':''}`:'Cumple las reglas';fl.title=issuesOf(rv).map(r=>`${SEV[r.sev].label}: ${r.text}`).join('\n');});
   document.querySelectorAll('[data-dl]').forEach(b=>b.onclick=()=>{const[f,id]=b.dataset.dl.split(':');exportPng(FORMATS[f].templates.find(x=>x.id===id),S.scheme,document.querySelector(`[data-ds="${b.dataset.dl}"]`));});
@@ -1493,7 +1594,7 @@ async function deliver(blob,name,st){
 async function exportPng(t,k,st){const g=await gate([t],k);if(!g.go){st.className='status';st.textContent='Descarga detenida. Corrige la pieza en el panel de revisión.';return;}
   await logIfNeeded(g,[t],k);const c=document.createElement('canvas');render(c,t,k,1);await deliver(await toBlob(c),fileName(t,k),st);}
 async function exportZip(){const st=$('#zst');if(typeof JSZip==='undefined'){st.className='status err';st.textContent='No cargó el compresor. Recarga la página.';return;}
-  const all=Object.values(FORMATS).flatMap(f=>f.templates);const g=await gate(all,S.scheme);
+  const all=kitTpls();const g=await gate(all,S.scheme);
   if(!g.go){st.className='status';st.textContent='Descarga detenida. Corrige las piezas con alertas y vuelve a intentar.';return;}
   st.className='status';st.textContent=`Generando ${all.length} piezas…`;$('#zip').disabled=true;
   try{await logIfNeeded(g,all,S.scheme);const zip=new JSZip();for(const t of all){const c=document.createElement('canvas');render(c,t,S.scheme,1);zip.file(`${t.fmt}/`+fileName(t,S.scheme),await toBlob(c));zip.file(`${t.fmt}/`+fileName(t,S.scheme,'svg'),renderSvg(t,S.scheme));}

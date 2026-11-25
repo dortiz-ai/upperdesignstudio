@@ -19,6 +19,11 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
 - Diseño: tira swipe de miniaturas livianas (`drawSwipe`, ~200 px; solo se redibuja la activa al editar) sobre la vista previa grande.
 - Descarga: tira swipe por combinación y "Descargar carrusel .zip" (`exportCarousel`): carpetas `png/` y `svg/` numeradas 01…n, `revision.txt` y `mensaje.txt`. No hay kit multiformato en carrusel.
 
+## Video (formato "Video": `vfeed` 4:5 y `vsq` 1:1)
+- El ejecutor sube un video madre (MP4/MOV) en Diseño; `L.video` lo dibuja a sangre (`coverMedia`) y encima una capa gráfica estática: pestaña con logo, titular en Noland sobre bloque azul recto (`blockText`, `*` en verde), card de producto con borde verde (`vidCard`, usa `S.extras.productos[0]` y el destacado como resaltado), CTA y subtítulo como barra de mensaje. Bloques siempre rectos; sin sombras. No muestra fecha, código ni QR (avisa).
+- Vista previa: cuadro elegido con el deslizador y "Reproducir vista previa" (sin sonido). La capa se renderiza una vez (`opt.__overlay`) y se compone sobre cada cuadro.
+- Exportación en el navegador (`exportVideo`): canvas + `MediaRecorder` en tiempo real, con el audio del video por Web Audio (opción "Exportar sin audio"). MP4 y MOV en H.264 donde el navegador lo soporte (Chrome, Edge, Safari); si no, WebM con aviso. El MOV es el mismo H.264 con extensión .mov; sin AAC sale sin audio. También "Capa gráfica PNG" transparente para editores de video. Los videos no entran al kit multiformato (`kitTpls`) ni a carruseles; no hay SVG de video.
+
 ## Copy
 - Campos del Mensaje: antetítulo, titular, subtítulo, destacado y llamado a la acción. **Empiezan vacíos.** La propuesta escrita no se guarda en el borrador del navegador.
 - Elementos permitidos (paso 4), todos **opcionales y vacíos por defecto**: nota del destacado, fecha, código, legal, QR, logos de aliados (máx. 3) y mensaje de WhatsApp/push. Nunca se llenan solos; solo el ejecutor o Claude a pedido explícito, marcando "Completado con IA".
