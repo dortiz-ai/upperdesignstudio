@@ -84,6 +84,13 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
 - Plantillas: 3 composiciones adaptables (`L.hero`, `L.tab`, `L.cupon`) × 4 formatos = 12 piezas, más Foto de fondo (`L.foto`) en Redes sociales: 14 en total. Las medidas se calculan en proporción al lienzo.
 - Verificación visual: prueba solo la pieza afectada (no renderices las 12 plantillas salvo que se pida): el equipo pidió ahorrar tokens.
 
+## Agente de Slack y generador por comando
+- **Si la sesión viene de Slack o te piden una pieza por chat, sigue `agente/INSTRUCCIONES.md`**: preguntar una sola vez lo que falte (con opciones por defecto), adaptar referencias a Upper, generar, revisar y entregar.
+- `scripts/render.mjs`: genera PNG + SVG + `revision.json` desde un `pedido.json` (ejemplo en `agente/pedido-ejemplo.json`) abriendo la misma `index.html` en Chromium sin pantalla (Playwright). `--catalogo` lista formatos, plantillas, visuales y elementos; `--conocimiento ec|co` imprime tono, conocimiento y reglas. Admite disposición libre, jerarquía de texto, productos con silueta, foto de fondo y carruseles. No exporta video.
+- `datos/equipo.json`: conocimiento y reglas editados en la plataforma (botón "Exportar para el agente" en Conocimiento de marca). Súbelo al repo para que el agente use lo mismo que el equipo.
+- `window.__studioReady` indica que la página terminó de cargar (tipografías e ilustraciones); el generador lo espera.
+- `salidas/` y `agente/entradas/` están en `.gitignore`.
+
 ## Pendientes conocidos
 - ¿Suavizar una regla del brandbook debe requerir aprobación de un rol de marca?
 - Severidades por defecto y el límite de 30 palabras están por validar con el equipo.

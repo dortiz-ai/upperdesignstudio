@@ -275,7 +275,7 @@ dialog#gate::backdrop{background:rgba(20,29,48,.55)}
 
   <section class="panel kit" id="kb" hidden>
     <div class="rules-top"><div><h2>Conocimiento de marca</h2><p class="lead" style="margin-bottom:6px">Servicios, tarifas, tiempos, impuestos y condiciones de cada país. Claude solo afirma datos que estén aquí, así que las propuestas de mensaje salen con información correcta.</p>
-      <span class="pill" id="kbScope"></span></div>
+      <span class="pill" id="kbScope"></span> <button class="btn sm" id="kbExport" title="Descarga el conocimiento y las reglas del equipo para el agente de Slack">Exportar para el agente</button> <span class="status" id="kbExpSt"></span></div>
       <div class="fmts" role="group" aria-label="País"><button class="fmt" data-ktab="ec">Ecuador</button><button class="fmt" data-ktab="co">Colombia</button></div></div>
     <div id="kbBody"></div>
   </section>
@@ -2144,7 +2144,9 @@ $('#kitBtn').onclick=()=>{const k=$('#kit');k.hidden=!k.hidden;$('#kitBtn').setA
 
 (async()=>{
   document.getElementById('logoPath').setAttribute('d',LOGO_D);
-  loadDraft();await Promise.all([bootFonts(),loadIllus()]);drawKit();drawSteps();drawMain();drawLive();
+  loadDraft();await Promise.all([bootFonts(),loadIllus()]);drawKit();drawSteps();drawMain();drawLive();window.__studioReady=true;
+  $('#kbExport').onclick=()=>{const data={version:1,exportado:new Date().toISOString(),conocimiento:{ec:KB.data?.ec??null,co:KB.data?.co??null,updatedAt:KB.updatedAt},reglas:{overrides:RULES.overrides,custom:RULES.custom,updatedAt:RULES.updatedAt}};
+    deliver(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'equipo.json',$('#kbExpSt'));};
   Team.init();
   if(inArtifact){setAiMode('none');
     claude.use('sample').then(s=>{if(s){AI.sample=s;setAiMode('artifact');}}).catch(()=>{});

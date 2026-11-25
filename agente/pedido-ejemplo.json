@@ -1,0 +1,37 @@
+{
+  "nombre": "black-friday-feed",
+  "pais": "ec",
+  "formato": "social",
+  "plantilla": "feed",
+  "combinacion": "ambas",
+  "copy": {
+    "eyebrow": "Black Friday",
+    "titular": "Lo mismo pero |^*más barato*^",
+    "subtitulo": "Tus marcas favoritas de USA, en tu puerta.",
+    "destacado": "30% OFF",
+    "cta": "Compra ya"
+  },
+  "visual": "recortes",
+  "productos": [
+    {
+      "archivo": "ejemplo/producto-1.png",
+      "silueta": "contorno",
+      "color_silueta": "green"
+    },
+    {
+      "archivo": "ejemplo/producto-2.png",
+      "silueta": "sombra",
+      "color_silueta": "cream",
+      "giro": 8
+    }
+  ],
+  "disposicion": {
+    "cinta": {
+      "ocultar": true
+    },
+    "tarjeta": {
+      "ocultar": true
+    }
+  },
+  "mensaje": "🔥 Black Friday en Upper: tráelo de USA. Mira aquí 👉"
+}
