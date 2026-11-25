@@ -24,6 +24,12 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
 - Vista previa: cuadro elegido con el deslizador y "Reproducir vista previa" (sin sonido). La capa se renderiza una vez (`opt.__overlay`) y se compone sobre cada cuadro.
 - Exportación en el navegador (`exportVideo`): canvas + `MediaRecorder` en tiempo real, con el audio del video por Web Audio (opción "Exportar sin audio"). MP4 y MOV en H.264 donde el navegador lo soporte (Chrome, Edge, Safari); si no, WebM con aviso. El MOV es el mismo H.264 con extensión .mov; sin AAC sale sin audio. También "Capa gráfica PNG" transparente para editores de video. Los videos no entran al kit multiformato (`kitTpls`) ni a carruseles; no hay SVG de video.
 
+## Elementos libres (Video y Foto de fondo)
+- Cada elemento se arrastra en la vista previa de Diseño para moverlo (`bindEls`, cajas en `canvas.__boxes`); posiciones en fracciones del lienzo en `S.extras.lay.pos` (sirven para 4:5 y 1:1; "Restablecer posiciones").
+- Panel "Elementos": mostrar u ocultar cada uno (`lay.hide`) y su borde (`lay.sty`: sin borde, fino, grueso, doble o punteado; verde, crema o azul; siempre recto, `elStroke`). Video: logo, antetítulo y titular, card de producto, CTA y mensaje. Foto de fondo: logo y bloque de textos.
+- **El logo es opcional en estos dos formatos** (decisión del equipo): si se oculta a propósito, la regla de logo pasa con la nota "Logo oculto a propósito". En las demás composiciones sigue siendo obligatorio.
+- `SvgCtx` soporta `setLineDash` (punteado en el SVG). La disposición se guarda en el borrador del navegador.
+
 ## Copy
 - Campos del Mensaje: antetítulo, titular, subtítulo, destacado y llamado a la acción. **Empiezan vacíos.** La propuesta escrita no se guarda en el borrador del navegador.
 - Elementos permitidos (paso 4), todos **opcionales y vacíos por defecto**: nota del destacado, fecha, código, legal, QR, logos de aliados (máx. 3) y mensaje de WhatsApp/push. Nunca se llenan solos; solo el ejecutor o Claude a pedido explícito, marcando "Completado con IA".
