@@ -890,8 +890,8 @@ const TIKTOK_D="M0.7306 0.3316L0.7306 0.6733C0.7306 0.8553 0.5624 1.0000 0.3587 
 const CAMP={'3x4':{info:[.2565,.4235,.487,.1226,25],msg:[.1318,.8831,.7364,.0775,20],div:.5018,tit:[.18,.07,.64,.33],dest:[[.1317,.1498],[.8502,.4722],[.0878,.5704]],ds:.0302,
     per:[[.0948,.5724,.4817,.4441],[.4,.568,.5036,.761],[.62,.62,.35,.4],[.02,.62,.35,.4]]},
   /* Story: todo dentro de las zonas seguras (11 % arriba, 14 % abajo). Entre el recuadro de información (termina en .446) y las personas (empiezan en .58) queda libre un hueco de ~.13 para el sticker de recordatorio o cuenta regresiva de la app. */
-  '9x16':{info:[.1945,.345,.6109,.1012,25],msg:[.0749,.75,.8502,.105,20],div:.5329,tit:[.13,.115,.74,.215],dest:[[.045,.125],[.93,.2],[.07,.4]],ds:.0302,
-    per:[[.06,.595,.54,.26],[.38,.58,.56,.275],[.62,.66,.35,.2],[.02,.66,.35,.2]]}};
+  '9x16':{info:[.1945,.318,.6109,.0975,25],msg:[.0749,.75,.8502,.105,20],div:.5329,tit:[.12,.112,.76,.2],dest:[[.045,.125],[.93,.19],[.07,.37]],ds:.0302,
+    per:[[.02,.555,.6,.3],[.36,.545,.62,.31],[.62,.66,.35,.2],[.02,.66,.35,.2]]}};
 const CAMP_IMG={};
 async function loadCampPeople(){const ims=await Promise.all(['persona-1','persona-2'].map(n=>new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=`assets/campana/${n}.png`;})));
   S.extras.productos=ims.filter(Boolean).map((img,i)=>({img,name:'persona-'+(i+1),nombre:'',precio:'',antes:''}));}
@@ -914,7 +914,7 @@ function campLines(ctx,str,cx,cy,maxW,maxH,size,color,weight=600,track=.08){cons
 L.campana=(ctx,W,H,d,sc,R,o)=>{
   const G=CAMP[H/W>1.5?'9x16':'3x4'],dark=sc.bg===C.navy,fg=dark?C.cream:C.navy,line=dark?C.cream:C.navy,boxFill=dark?C.navy:C.cream,u=W/1080;R.logoOptional=true;
   ctx.fillStyle=dark?C.navy:C.cream;ctx.fillRect(0,0,W,H);
-  elBegin(ctx,'patron');const pim=CAMP_IMG[H/W>1.5?'patron-9x16':'patron-3x4'];if(pim){ctx.save();if(!dark)ctx.globalAlpha=.45;coverMedia(ctx,tinted(pim,dark?'#384D66':'#9FB3A0'),W,H);ctx.restore();}elEnd(ctx,R,'patron');
+  elBegin(ctx,'patron');const pim=CAMP_IMG[H/W>1.5?'patron-9x16':'patron-3x4'];if(pim){ctx.save();if(!dark)ctx.globalAlpha=.45;coverMedia(ctx,tinted(pim,dark?(H/W>1.5?'#4A6283':'#384D66'):'#9FB3A0'),W,H);ctx.restore();}elEnd(ctx,R,'patron');
   elBegin(ctx,'destellos');G.dest.forEach(([x,y])=>{const w=G.ds*W;normPath(ctx,DESTELLO_D,x*W,y*H,w,w/DESTELLO_AR);ctx.fillStyle=line;ctx.fill();});elEnd(ctx,R,'destellos');
   elBegin(ctx,'visual');S.extras.productos.filter(p=>p.img).slice(0,4).forEach((pr,i)=>{const[x,y,w,h]=G.per[i];elBegin(ctx,'p'+i);const im=silImg(pr),k=Math.min(w*W/im.width,h*H/im.height),iw=im.width*k,ih=im.height*k;
     ctx.save();if(pr.rot){ctx.translate(x*W+w*W/2,y*H+h*H/2);ctx.rotate(pr.rot*Math.PI/180);ctx.translate(-(x*W+w*W/2),-(y*H+h*H/2));}ctx.drawImage(im,x*W+(w*W-iw)/2,y*H,iw,ih);ctx.restore();elEnd(ctx,R,'p'+i);});R.visual=true;elEnd(ctx,R,'visual');
