@@ -157,7 +157,7 @@ img.out{max-width:100%;border-radius:4px;margin-top:8px}
 .kb-sec summary b{font-weight:700}
 .kb-edit{padding:0 12px 12px;display:grid;gap:10px}
 .kb-edit textarea{font-size:13px;line-height:1.5}
-.prod-row{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}.prod-row select{width:auto}.fmtbar{display:inline-flex;gap:4px;margin-left:8px;vertical-align:middle}.fmtbar .btn{padding:2px 8px;font-size:12px}.qedit summary{cursor:pointer}.prod-row img{width:40px;height:40px;object-fit:contain;background:var(--chip)}.prod-row input{flex:1;min-width:90px}
+.prod-row{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}.prod-row select{width:auto}.fmtbar{display:inline-flex;gap:4px;margin-left:8px;vertical-align:middle;position:relative;flex-wrap:wrap}.emo-pop{position:absolute;z-index:20;top:100%;right:0;display:grid;grid-template-columns:repeat(5,32px);gap:2px;padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.25)}.emo-pop button{border:0;background:none;font-size:20px;cursor:pointer;border-radius:6px}.emo-pop button:hover,.emo-pop button:focus{background:var(--chip)}.fmtbar .btn{padding:2px 8px;font-size:12px}.qedit summary{cursor:pointer}.prod-row img{width:40px;height:40px;object-fit:contain;background:var(--chip)}.prod-row input{flex:1;min-width:90px}
 .pill.pais{background:var(--info-bg);color:var(--fg)}
 .design{margin:4px 0 4px}
 .design .stage canvas{max-height:70vh}
@@ -314,8 +314,8 @@ const SCHEMES={
   oscuro:{name:'Verde + azul oscuro',bg:C.navy,fg:C.cream,hi:C.green,hiMode:'color',line:C.cream,logo:C.green,ctaBg:C.green,ctaFg:C.navy,offerBg:C.green,offerFg:C.navy,tabBg:C.green,tabLogo:C.navy,card:C.green,cuponBg:C.navy,cuponCard:C.cream,cuponFg:C.navy},
   claro:{name:'Azul oscuro + claro Upper',bg:C.cream,fg:C.navy,hi:C.navy,hiMode:'marker',line:C.navy,logo:C.navy,ctaBg:C.navy,ctaFg:C.green,offerBg:C.navy,offerFg:C.green,tabBg:C.navy,tabLogo:C.green,card:C.green,cuponBg:C.green,cuponCard:C.cream,cuponFg:C.navy}
 };
-const FD='"UpperDisplay", sans-serif';
-const FT='"UpperText", sans-serif';
+const FD='"UpperDisplay", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+const FT='"UpperText", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
 const fd=s=>`400 ${s}px ${FD}`;
 const ft=(w,s)=>`${w} ${s}px ${FT}`;
 
@@ -886,7 +886,7 @@ const BRAND_RULES=[
   {id:'n_cta1',kind:'dont',check:'auto',sev:'warn',text:'Más de un CTA por pieza.'},
   {id:'n_stroke',kind:'dont',check:'auto',sev:'warn',scope:'design',text:'Botones o bloques redondeados con texto. El CTA va como texto en Noland con resaltado recto, como las palabras con *. Sin textos con contorno.'},
   {id:'n_overinfo',kind:'dont',check:'auto',sev:'warn',text:'Sobreinformar: más de 30 palabras de mensaje (sin contar fecha, código ni legal) o demasiados elementos a la vez.'},
-  {id:'n_emoji',kind:'dont',check:'auto',sev:'block',text:'Emojis en la gráfica (van en el mensaje que la acompaña).'},
+  {id:'n_emoji',kind:'dont',check:'auto',sev:'info',text:'Más de 2 emojis en la gráfica: úsalos con moderación (se ven distinto según el dispositivo).'},
   {id:'n_phrases',kind:'dont',check:'auto',sev:'warn',text:'Frases prohibidas: "Te invitamos a", "Puedes", "Recuerda que puedes".'},
   {id:'n_jargon',kind:'dont',check:'auto',sev:'warn',text:'Jerga logística en piezas de marketing (guía aérea, consolidado, tracking, manifiesto).'},
   {id:'n_invent',kind:'dont',check:'ai',sev:'warn',text:'Inventar montos, descuentos o fechas que no están en el requerimiento.'},
@@ -951,7 +951,7 @@ A domicilio con Servientrega a todo el país (ver Tarifas).`},
 - La cinta o arco verde grueso como base o fondo de la foto (horizonte curvo, arco detrás de la persona o la caja).
 - Fondo liso de la paleta con el patrón de ilustraciones de línea muy tenue; acentos sueltos de ilustración oficial (destello, mano que señala).
 - Tarjetas de producto tipo captura de tienda (precio, precio anterior, ahorro) en fila, cortadas por los bordes, para carruseles de ofertas.
-Lo que NO se replica de estas referencias (manda la revisión de marca): emojis en la gráfica, botones o cápsulas redondeadas como "Desliza para ver más" (si se necesita, va como texto o como CTA con resaltado recto), degradados y efectos de vidrio.`},
+Lo que NO se replica de estas referencias (manda la revisión de marca): botones o cápsulas redondeadas como "Desliza para ver más" (si se necesita, va como texto o como CTA con resaltado recto), degradados y efectos de vidrio.`},
 ],
 co:[
  {id:'co_que',titulo:'Qué es Upper Colombia',texto:`Tu compra de EE. UU., hasta tu puerta en Colombia. Upper (Upper Express Colombia) se encarga de la bodega en Miami, el vuelo, la aduana y la entrega.
@@ -1005,7 +1005,7 @@ No: baterías sueltas, drones, vapes, cannabis, armas, dinero, falsificaciones, 
 - La cinta o arco verde grueso como base o fondo de la foto (horizonte curvo, arco detrás de la persona o la caja).
 - Fondo liso de la paleta con el patrón de ilustraciones de línea muy tenue; acentos sueltos de ilustración oficial (destello, mano que señala).
 - Tarjetas de producto tipo captura de tienda (precio, precio anterior, ahorro) en fila, cortadas por los bordes, para carruseles de ofertas.
-Lo que NO se replica de estas referencias (manda la revisión de marca): emojis en la gráfica, botones o cápsulas redondeadas como "Desliza para ver más" (si se necesita, va como texto o como CTA con resaltado recto), degradados y efectos de vidrio.`},
+Lo que NO se replica de estas referencias (manda la revisión de marca): botones o cápsulas redondeadas como "Desliza para ver más" (si se necesita, va como texto o como CTA con resaltado recto), degradados y efectos de vidrio.`},
 ],
 };
 /* Reglas de negocio por país (complementan a BRAND_RULES; las revisa Claude con el conocimiento del país) */
@@ -1072,7 +1072,7 @@ function evaluate(R,tpl){
     n_overinfo:()=>{const n=['eyebrow','titular','subtitulo','destacado','nota','cta'].reduce((a,f)=>a+words(d[f]).length,0);const els=[d.eyebrow,d.destacado,d.codigo,d.fecha,d.cta,S.extras.qr,S.extras.aliados.length].filter(Boolean).length;
       if(n>30)return fail(`La pieza tiene ${n} palabras sin contar fecha, código ni legal (máximo 30). Quita lo que no ayuda a decidir.`);if(els>=7)return fail('La pieza combina demasiados elementos a la vez (antetítulo, destacado, código, fecha, CTA, QR y aliados).');return ok(`${n} palabras.`);},
     n_stroke:()=>(R.blocks||0)>0?fail(`La pieza tiene ${R.blocks} bloque(s) redondeado(s) con texto. Pasa el texto a tipografía, sin contenedor.`):ok(),
-    n_emoji:()=>/\p{Extended_Pictographic}/u.test(Object.values(d).join(' '))?fail('Hay emojis en la gráfica. Pásalos al mensaje que la acompaña.'):ok(),
+    n_emoji:()=>{const n=(PIECE_FIELDS.map(f=>d[f]||'').join(' ').match(/\p{Extended_Pictographic}/gu)||[]).length;return n>2?fail(`La pieza tiene ${n} emojis. Deja uno o dos que sumen al mensaje.`):ok(n?`${n} emoji${n>1?'s':''}.`:'');},
     n_jargon:()=>{const m=copyText().match(/\b(gu[ií]as? a[ée]reas?|consolidad[oa]s?|tracking|manifiestos?|AWB|desaduaniz\w*)\b/i);return m?fail(`Aparece "${m[0]}": es jerga logística. Dilo como lo diría el cliente.`):ok();},
     b_ec_tarifa:()=>{const t=copyText();return/(libra|\blb\b)/i.test(t)&&/(\$|usd)\s*\d|\d\s*(usd|d[oó]lares)/i.test(t)&&!/iva/i.test(t)?fail('La tarifa por libra va con "+ IVA" (ej. "USD 5 + IVA por libra").'):ok();},
     b_ec_domicilio:()=>{const t=copyText();return/domicilio|a tu puerta|a tu casa/i.test(t)&&/gratis|sin costo|free|\b0\s*usd/i.test(t)?fail('La entrega a domicilio no es gratis en Ecuador (USD 3,50 + IVA). Gratis es el retiro en agencia.'):ok();},
@@ -1326,9 +1326,15 @@ function drawWire(c,t){const k=Math.min(.4,340/Math.max(t.w,t.h));const W=t.w,H=
 }
 
 /* ---------- Paso 3 ---------- */
+const EMOJIS=['🔥','✨','🎁','🛍️','📦','✈️','💚','😍','🤩','😉','👀','🙌','⚡','💸','🚀','🎉','⏰','👟','👜','📱'];
 const FMT_BTNS=[['*','Resaltar','Resalta la selección'],['^','A+','Agranda la selección'],['~','A−','Achica la selección'],['|','Salto','Salto de línea donde está el cursor']];
-const fmtBar=(k,inp)=>['titular','subtitulo'].includes(k)?`<span class="fmtbar" role="group" aria-label="Formato de ${k}">${FMT_BTNS.map(([m,l,t])=>`<button type="button" class="btn sm" data-mk="${m}" data-in="${inp}" title="${t}">${l}</button>`).join('')}</span>`:'';
-function bindFmt(){document.querySelectorAll('[data-mk]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>{const el=document.getElementById(b.dataset.in);if(!el)return;const m=b.dataset.mk,v=el.value;let a=el.selectionStart??v.length,z=el.selectionEnd??a;
+const fmtBar=(k,inp)=>['titular','subtitulo'].includes(k)?`<span class="fmtbar" role="group" aria-label="Formato de ${k}">${FMT_BTNS.map(([m,l,t])=>`<button type="button" class="btn sm" data-mk="${m}" data-in="${inp}" title="${t}">${l}</button>`).join('')}<button type="button" class="btn sm" data-emo="${inp}" title="Insertar emoji" aria-label="Insertar emoji">😊</button></span>`:'';
+document.addEventListener('pointerdown',e=>{if(!e.target.closest?.('.emo-pop,[data-emo]'))document.querySelectorAll('.emo-pop').forEach(x=>x.remove());});
+function bindFmt(){document.querySelectorAll('[data-emo]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>{document.querySelectorAll('.emo-pop').forEach(x=>x.remove());const pop=document.createElement('span');pop.className='emo-pop';pop.setAttribute('role','listbox');
+  pop.innerHTML=EMOJIS.map(e=>`<button type="button" data-e="${e}" aria-label="${e}">${e}</button>`).join('');b.parentElement.appendChild(pop);
+  pop.querySelectorAll('[data-e]').forEach(x=>{x.onmousedown=e=>e.preventDefault();x.onclick=()=>{const el=document.getElementById(b.dataset.emo);const v=el.value,a=el.selectionStart??v.length,z=el.selectionEnd??a,em=x.dataset.e;
+    const pre=a&&!/\s$/.test(v.slice(0,a))?' ':'',post=/^\S/.test(v.slice(z))?' ':'';const ins=pre+em+post;el.value=v.slice(0,a)+ins+v.slice(z);el.focus();el.setSelectionRange(a+ins.length,a+ins.length);el.dispatchEvent(new Event('input',{bubbles:true}));pop.remove();};});};});
+document.querySelectorAll('[data-mk]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>{const el=document.getElementById(b.dataset.in);if(!el)return;const m=b.dataset.mk,v=el.value;let a=el.selectionStart??v.length,z=el.selectionEnd??a;
   if(m==='|'){el.value=v.slice(0,a)+'|'+v.slice(z);a=z=a+1;}else{if(a===z){toast('Selecciona primero la palabra o frase.');return;}el.value=v.slice(0,a)+m+v.slice(a,z)+m+v.slice(z);a=a+1;z=z+1;}
   el.focus();el.setSelectionRange(a,z);el.dispatchEvent(new Event('input',{bubbles:true}));};});}
 const FIELDS=[['eyebrow','Antetítulo','Ej. Compra desde USA'],['titular','Titular (Noland, mayúsculas)','Máximo 7 palabras. Usa *asteriscos* para resaltar'],['subtitulo','Subtítulo','Máximo 15 palabras'],['destacado','Destacado','Ej. $5, 10 USD, 1 LIBRA'],['cta','Llamado a la acción','Un solo verbo + acción']];
@@ -1375,7 +1381,7 @@ Campos y límites ESTRICTOS de caracteres (con espacios, sin contar asteriscos):
 - SUBTÍTULO ≤ ${LIMITS.subtitulo} y máximo 15 palabras.
 - DESTACADO ≤ ${LIMITS.destacado}: la cifra u oferta (ej. "10 USD"); vacío si no hay oferta.
 - CTA ≤ ${LIMITS.cta}: un solo verbo + acción.
-Sin emojis. No inventes montos, descuentos, fechas ni datos que no estén en la propuesta o en el conocimiento. No escribas fecha, código, legal ni mensaje de WhatsApp.
+Puedes usar hasta 2 emojis si suman al mensaje (nunca en lugar de palabras clave). No inventes montos, descuentos, fechas ni datos que no estén en la propuesta o en el conocimiento. No escribas fecha, código, legal ni mensaje de WhatsApp.
 Reglas de marca y de negocio:
 ${activeRules().filter(r=>r.enabled&&r.check!=='fixed'&&r.scope==='copy').map(r=>`- ${r.kind==='do'?'HACER':'NO HACER'}: ${r.text}`).join('\n')}
 
@@ -1615,7 +1621,7 @@ Si el pedido trae un dato de negocio que contradice ese conocimiento, recházalo
 Pieza: ${curFormat().label}, "${t.name}" (${t.w}×${t.h}px). Titular: "${S.copy.titular||''}". Destacado: "${S.copy.destacado||''}".
 Archivos subidos: aliados ${S.extras.aliados.length}, foto de producto ${S.extras.producto?'sí':'no'}, productos (recortes o cards) ${S.extras.productos.length}.
 
-Marca (no negociable): solo azul oscuro #141D30, verde #CDF5A3 y crema #F0FFE8; Noland en mayúsculas y Rethink Sans; CTA como texto resaltado, nunca botón ni bloque redondeado; logo oficial sin cambios; solo ilustraciones oficiales; sin emojis, sombras, degradados ni fondos de foto completos; máximo 3 aliados.
+Marca (no negociable): solo azul oscuro #141D30, verde #CDF5A3 y crema #F0FFE8; Noland en mayúsculas y Rethink Sans; CTA como texto resaltado, nunca botón ni bloque redondeado; logo oficial sin cambios; solo ilustraciones oficiales; emojis con moderación (máximo 2), sin sombras, degradados ni fondos de foto completos; máximo 3 aliados.
 La plataforma puede agregar:
 - QR (una URL) · FECHA ≤ ${LIMITS.fecha} caracteres · CODIGO ≤ ${LIMITS.codigo} · NOTA ≤ ${LIMITS.nota} (complemento del destacado, ej. "de regalo") · LEGAL ≤ ${LIMITS.legal}
 - MENSAJE: 1-2 líneas para WhatsApp o push, con emojis y un CTA tipo "Mira aquí"
