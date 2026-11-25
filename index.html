@@ -554,7 +554,7 @@ L.hero=(ctx,W,H,d,sc,R,o)=>{
   if(W/H>1.3){
     const p=H*.1,cw=W*.53;
     elBegin(ctx,'visual',W,H);
-    const vx=W*.64,vw=W*.29;if(!isIllus(S.extras.visual))ribbon(ctx,[[vx,H*1.2],[vx,H*.26],[vx+vw,H*.26],[vx+vw,H*1.2]],H*.12,vw*.4,C.green);
+    const vx=W*.64,vw=W*.29;if(!isIllus(S.extras.visual)){elBegin(ctx,'cinta');ribbon(ctx,[[vx,H*1.2],[vx,H*.26],[vx+vw,H*.26],[vx+vw,H*1.2]],H*.12,vw*.4,C.green);elEnd(ctx,R,'cinta');}
     visual(ctx,R,{x:W*.58,y:H*.22,w:W*.4,h:H*.72},sc);
     elEnd(ctx,R,'visual');
     elBegin(ctx,'logo',W,H);const lh=Math.max(H*.075,minLogo(R));logoRow(ctx,R,p,p,lh,cw*.7,'left',sc.logo);
@@ -590,7 +590,7 @@ L.hero=(ctx,W,H,d,sc,R,o)=>{
     const owT=d.destacado?offerWidth(ctx,d,rowH*1.1):0,cwT=d.cta?ctaWidth(ctx,d.cta,rowH*.8):0;ctx.font=ft(700,rowH*.8*.42);const kwT=d.codigo?ctx.measureText(d.codigo).width+rowH*.88:0;
     const codeInline=d.codigo&&owT+cwT+kwT+W*.06<=iw;const codeH=d.codigo&&!codeInline?rowH*.6+A*.02:0;const vh=yb-y-A*.03-codeH;
     elBegin(ctx,'visual',W,H);
-    if(vh>A*.08){const qrOn=!!S.extras.qr;const vw=qrOn?iw*.62:iw;if(!isIllus(S.extras.visual))ribbon(ctx,[[p+vw*.12,y],[p+vw*.12,y+vh*.88],[p+vw*.88,y+vh*.88],[p+vw*.88,y]],W*.07,vw*.18,C.green);visual(ctx,R,{x:p,y,w:vw,h:isIllus(S.extras.visual)?vh:vh*.9},sc);if(qrOn)qr(ctx,R,p+iw-iw*.32,y+vh*.88-iw*.32*1.18,iw*.32,curFormatFor(R).print);}
+    if(vh>A*.08){const qrOn=!!S.extras.qr;const vw=qrOn?iw*.62:iw;if(!isIllus(S.extras.visual)){elBegin(ctx,'cinta');ribbon(ctx,[[p+vw*.12,y],[p+vw*.12,y+vh*.88],[p+vw*.88,y+vh*.88],[p+vw*.88,y]],W*.07,vw*.18,C.green);elEnd(ctx,R,'cinta');}visual(ctx,R,{x:p,y,w:vw,h:isIllus(S.extras.visual)?vh:vh*.9},sc);if(qrOn)qr(ctx,R,p+iw-iw*.32,y+vh*.88-iw*.32*1.18,iw*.32,curFormatFor(R).print);}
     else{R.checks.push({lvl:'warn',msg:'No queda espacio para el visual: acorta titular o subtítulo.'});if(S.extras.qr)R.checks.push({lvl:'warn',msg:'Tampoco hay espacio para el QR.'});}
     elEnd(ctx,R,'visual');
     elBegin(ctx,'oferta',W,H);
@@ -628,7 +628,7 @@ L.tab=(ctx,W,H,d,sc,R,o)=>{
     if(d.cta)ctaText(ctx,R,d.cta,x,yb+rowH*.12,rowH*.76,sc.hi,sc.bg,{maxW:Math.max(60,cw-(x-p))});
     elEnd(ctx,R,'oferta');
     elBegin(ctx,'visual',W,H);
-    const card={x:W*.56,y:H*.14,w:W*.4,h:H*.76};const cf=cardFill(sc),cp=cardPills(cf);tabCard(ctx,card,sc,cf,card.h*.12);
+    const card={x:W*.56,y:H*.14,w:W*.4,h:H*.76};const cf=cardFill(sc),cp=cardPills(cf);tabCard(ctx,card,sc,cf,card.h*.12,R);
     drawCardVisual(ctx,R,card,sc);
     if(d.fecha)tag(ctx,R,d.fecha,card.x+card.w*.06,card.y+card.h-card.h*.05-H*.075,H*.075,cp.t,{maxW:card.w*.6,label:'Fecha',bg:cf});
     if(d.codigo)tag(ctx,R,'Código: '+d.codigo,card.x+card.w*.94,card.y+card.h*.04,H*.075,cp.t,{align:'right',maxW:card.w*.6,label:'Código',bg:cf});
@@ -645,7 +645,7 @@ L.tab=(ctx,W,H,d,sc,R,o)=>{
     const legalH=d.legal?A*.055:0;const rowH=W*.11;const yb=top+A-W*.05-legalH-rowH-A*.02;
     const ch=yb-y-A*.035;
     elBegin(ctx,'visual',W,H);
-    if(ch>A*.14){const card={x:p,y,w:iw,h:ch};const cf=cardFill(sc),cp=cardPills(cf);tabCard(ctx,card,sc,cf,Math.min(card.w,card.h)*.1);drawCardVisual(ctx,R,card,sc);
+    if(ch>A*.14){const card={x:p,y,w:iw,h:ch};const cf=cardFill(sc),cp=cardPills(cf);tabCard(ctx,card,sc,cf,Math.min(card.w,card.h)*.1,R);drawCardVisual(ctx,R,card,sc);
       if(d.fecha)tag(ctx,R,d.fecha,card.x+card.w*.05,card.y+card.w*.03,W*.06,cp.t,{maxW:card.w*.5,label:'Fecha',bg:cf});
       if(d.codigo)tag(ctx,R,'Código: '+d.codigo,card.x+card.w*.95,card.y+card.w*.03,W*.06,cp.t,{align:'right',maxW:card.w*.45,label:'Código',bg:cf});
       if(S.extras.qr)qr(ctx,R,card.x+card.w-card.w*.3-card.w*.04,card.y+card.h-card.w*.3*1.18-card.w*.04,card.w*.3,curFormatFor(R).print);}
@@ -664,7 +664,7 @@ function logoRowAliados(ctx,R,rightX,y,h,color){let x=rightX;[...S.extras.aliado
 /* Tarjeta de la composición pestaña: verde para producto o cinta; con ilustración, contraste inverso al fondo */
 /* Recortes y cards van sueltos sobre el fondo, con la cinta verde como base (referencias de redes); el resto, sobre la tarjeta */
 const freeVisual=()=>S.extras.visual==='recortes'||S.extras.visual==='cards';
-function tabCard(ctx,card,sc,cf,r){if(freeVisual()){const t=Math.min(card.w,card.h)*.12;ribbon(ctx,[[card.x+card.w*.06,card.y+card.h*1.02],[card.x+card.w*.06,card.y+card.h*.5],[card.x+card.w*2,card.y+card.h*.5]],t,Math.min(card.w*.35,card.h*.45),C.green);return;}
+function tabCard(ctx,card,sc,cf,r,R){if(freeVisual()){const t=Math.min(card.w,card.h)*.12;elBegin(ctx,'cinta');ribbon(ctx,[[card.x+card.w*.06,card.y+card.h*1.02],[card.x+card.w*.06,card.y+card.h*.5],[card.x+card.w*2,card.y+card.h*.5]],t,Math.min(card.w*.35,card.h*.45),C.green);elEnd(ctx,R||{},'cinta');return;}
   rr(ctx,card.x,card.y,card.w,card.h,r);ctx.fillStyle=cf;ctx.fill();}
 function cardFill(sc){return isIllus(S.extras.visual)?(sc.bg===C.navy?C.cream:C.navy):C.green;}
 function cardPills(fill){return{t:fill===C.navy?C.cream:C.navy};}
@@ -682,7 +682,7 @@ L.cupon=(ctx,W,H,d,sc,R,o)=>{
   ctx.fillStyle=sc.cuponBg;ctx.fillRect(0,0,W,H);
   const wide=W/H>1.3;const top=H*(o.safeTop||0),bot=H*(o.safeBot||0);const A=H-top-bot;
   const outerFg=sc.cuponBg===C.navy?C.cream:C.navy;
-  ribbon(ctx,[[W*1.1,H*.16],[W*.84,H*.16],[W*.84,H*.58],[-W*.1,H*.58]],Math.min(W,H)*.1,Math.min(W,H)*.14,sc.cuponBg===C.navy?C.green:C.cream);
+  elBegin(ctx,'cinta');ribbon(ctx,[[W*1.1,H*.16],[W*.84,H*.16],[W*.84,H*.58],[-W*.1,H*.58]],Math.min(W,H)*.1,Math.min(W,H)*.14,sc.cuponBg===C.navy?C.green:C.cream);elEnd(ctx,R,'cinta');
   const legalH=d.legal?(wide?H*.08:A*.06):0;
   const card=wide?{x:W*.07,y:H*.1,w:W*.86,h:H-H*.1-H*.06-legalH-H*.03}:{x:W*.08,y:top+A*.08,w:W*.84,h:A*.78-legalH};
   ctx.save();ctx.shadowColor='transparent';rr(ctx,card.x,card.y,card.w,card.h,Math.min(card.w,card.h)*.07);ctx.fillStyle=sc.cuponCard;ctx.fill();ctx.restore();
@@ -745,8 +745,8 @@ L.foto=(ctx,W,H,d,sc,R,o)=>{
 };
 /* ELEMENTOS LIBRES (Video y Foto de fondo): cada elemento se puede mover arrastrándolo en la vista previa, ocultar y llevar borde.
    Posiciones en fracciones del lienzo (sirven para 4:5 y 1:1). Bordes siempre rectos, en colores de la paleta. */
-const EL_NAMES={p0:'Producto 1',p1:'Producto 2',p2:'Producto 3',p3:'Producto 4',logo:'Logo de Upper',titular:'Antetítulo y titular',producto:'Card de producto',cta:'CTA',mensaje:'Mensaje (subtítulo)',textos:'Textos',visual:'Visual',oferta:'Destacado y CTA'};
-const EL_SETS={video:['logo','titular','producto','cta','mensaje'],foto:['logo','textos'],hero:['logo','textos','visual','oferta'],tab:['logo','textos','visual','oferta'],cupon:['logo','textos','visual']};
+const EL_NAMES={p0:'Producto 1',p1:'Producto 2',p2:'Producto 3',p3:'Producto 4',logo:'Logo de Upper',titular:'Antetítulo y titular',producto:'Card de producto',cta:'CTA',mensaje:'Mensaje (subtítulo)',textos:'Textos',visual:'Visual',cinta:'Cinta verde',oferta:'Destacado y CTA'};
+const EL_SETS={video:['logo','titular','producto','cta','mensaje'],foto:['logo','textos'],hero:['logo','textos','visual','cinta','oferta'],tab:['logo','textos','visual','cinta','oferta'],cupon:['logo','cinta','textos','visual']};
 const EL_LOGO_OPT=new Set(['video','foto']);
 const EL_DEF={'video.producto':{t:'fino',c:'green'}};
 const STROKES=[['none','Sin borde'],['fino','Fino'],['grueso','Grueso'],['doble','Doble'],['punteado','Punteado']];
@@ -780,7 +780,7 @@ function elBegin(ctx,id,W,H){W=W||EL_W;H=H||EL_H;if(EL_MEASURE){EL_MEASURE.stack
   if(b&&(q.dx||q.dy||(q.s&&q.s!==1))){const cx=b.x+b.w/2,cy=b.y+b.h/2,k=q.s||1;ctx.translate((q.dx||0)*W+cx,(q.dy||0)*H+cy);ctx.scale(k,k);ctx.translate(-cx,-cy);}}
 function elEnd(ctx,R,id,_b,W,H){if(EL_MEASURE){EL_MEASURE.stack.pop();return;}
   const b=EL_BASE[id],q=LAY().pos[elKey(id)]||{},k=q.s||1,hid=EL_HID.pop();
-  if(b&&!hid){const pad=id==='producto'||id==='visual'||id==='logo'||/^p\d$/.test(id)?0:Math.min(24,Math.min(b.w,b.h)*.12);elStroke(ctx,id,b.x-pad,b.y-pad,b.w+pad*2,b.h+pad*2,EL_DEF[elKey(id)]);}
+  if(b&&!hid){const pad=id==='producto'||id==='visual'||id==='logo'||id==='cinta'||/^p\d$/.test(id)?0:Math.min(24,Math.min(b.w,b.h)*.12);elStroke(ctx,id,b.x-pad,b.y-pad,b.w+pad*2,b.h+pad*2,EL_DEF[elKey(id)]);}
   ctx.restore();if(id==='logo'&&R.logoH)R.logoH*=k;
   if(b&&!hid){W=W||ctx.canvas?.width;const cx=b.x+b.w/2,cy=b.y+b.h/2;(R.boxes??={})[id]={x:cx-b.w*k/2+(q.dx||0)*(R.W||0),y:cy-b.h*k/2+(q.dy||0)*(R.H||0),w:b.w*k,h:b.h*k};}}
 function elStroke(ctx,id,x,y,w,h,def){const st=LAY().sty[elKey(id)]||def;if(!st||!st.t||st.t==='none')return;const col=(STROKE_COL.find(c=>c[0]===st.c)||STROKE_COL[0])[2];const u=Math.min(w,h);
