@@ -31,11 +31,13 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
 - La configuración se guarda por composición (`lay.pos/sty/hide` con claves `layout.elemento`) y en el borrador del navegador; aplica al PNG, al SVG, al kit y al video.
 - **Logo:** opcional solo en Video y Foto de fondo (`EL_LOGO_OPT`; la regla pasa con "Logo oculto a propósito"). En las demás se puede mover y redimensionar, pero no ocultar, y la regla de tamaño mínimo mide el logo ya escalado.
 - `SvgCtx` soporta `setLineDash` (punteado en el SVG).
+- **Productos recortados libres:** cada producto es un elemento propio (`p0`…`p3`): se arrastra y redimensiona en la vista previa (gana el elemento más pequeño bajo el cursor), se reordena con ↑/↓ y tiene giro, tamaño y **silueta** (`silImg`: contorno, línea separada o sombra plana, en verde, crema o azul; se genera desde la transparencia del PNG y se guarda en caché). La sombra es plana, sin desenfoque, para no romper la regla de "sin sombras".
 
 ## Copy
 - Campos del Mensaje: antetítulo, titular, subtítulo, destacado y llamado a la acción. **Empiezan vacíos.** La propuesta escrita no se guarda en el borrador del navegador.
 - Elementos permitidos (paso 4), todos **opcionales y vacíos por defecto**: nota del destacado, fecha, código, legal, QR, logos de aliados (máx. 3) y mensaje de WhatsApp/push. Nunca se llenan solos; solo el ejecutor o Claude a pedido explícito, marcando "Completado con IA".
 - El pedido abierto del paso 4 no toca los campos del Mensaje.
+- **Jerarquía dentro de un texto** (titular, subtítulo y todo lo que pasa por `text()`): `*resaltado*`, `^más grande^` (×1,6), `~más pequeño~` (×0,62) y `|` para salto de línea. Barra de botones (Resaltar, A+, A−, Salto) en Mensaje y en Diseño ("Editar textos aquí"), `fmtBar`/`bindFmt`. Las líneas toman la altura de su palabra más grande y las palabras se alinean por la base. Contadores, reglas y nombres de archivo ignoran las marcas.
 - Tono: skill Upper UX Writer, embebido en la constante `VOICE` de `index.html`. La app no depende del skill instalado.
 
 ## Marca
