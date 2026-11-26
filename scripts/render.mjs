@@ -116,7 +116,7 @@ function pageKnowledge(pais) {
 }
 async function pageRender(brief) {
   const img = (src) => (src ? new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("imagen")); i.src = src; }) : Promise.resolve(null));
-  const prods = async (list) => Promise.all((list || []).slice(0, 4).map(async (p) => ({ img: p.img ? await img(p.img) : null, name: p.nombre || "producto", nombre: p.nombre || "", precio: p.precio || "", antes: p.antes || "", sil: p.silueta || "none", silc: p.color_silueta || "green", rot: p.giro ?? undefined })));
+  const prods = async (list) => Promise.all((list || []).slice(0, 4).map(async (p) => ({ img: p.img ? await img(p.img) : null, name: p.nombre || "producto", nombre: p.nombre || "", precio: p.precio || "", antes: p.antes || "", desc: p.descuento || p.desc || "", sil: p.silueta || "none", silc: p.color_silueta || "green", rot: p.giro ?? undefined })));
   if (!PAISES[brief.pais || "ec"]) throw new Error(`País desconocido: ${brief.pais}`);
   S.req.pais = brief.pais || "ec";
   const fmt = brief.formato || "social";
@@ -136,6 +136,7 @@ async function pageRender(brief) {
     if (v.borde) L2.sty[k] = { t: v.borde, c: v.color || "green" };
   }
   S.extras.qr = brief.qr || ""; S.waMsg = brief.mensaje || "";
+  S.extras.icono = brief.icono === "tiktok" ? "tiktok" : "none";
   S.extras.textos = (brief.textos || []).slice(0, 3).map((t) => (typeof t === "string" ? { texto: t } : t)).map((t) => ({
     texto: t.texto || "", fuente: t.tipografia === "noland" ? "d" : "t", caso: t.caso || "normal", color: t.color || "auto",
     bloque: t.bloque || "none", borde: t.borde || "none", bordeColor: t.color_borde || "green" }));

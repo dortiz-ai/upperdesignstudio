@@ -336,6 +336,7 @@ const FORMATS={
     {id:'foto',name:'Foto de fondo 4:5',w:1080,h:1350,layout:'foto',desc:'Foto a sangre con el texto de marca abajo. Para UGC y portadas de carrusel.'},
     {id:'campana',hidden:true,name:'Campaña 3:4',w:1080,h:1440,layout:'campana',desc:'Fondo azul con patrón difuminado, título 3D, recuadro de información y personas recortadas (Black Friday 2025).'},
     {id:'campanastory',hidden:true,name:'Campaña 9:16',w:1080,h:1920,layout:'campana',desc:'La misma campaña para historias.'},
+    {id:'ofertasstory',hidden:true,name:'Ofertas 9:16',w:1080,h:1920,layout:'ofertas',desc:'Historia de ofertas: título de fecha, marca y 4 cards de producto (estilo 11.11).'},
     {id:'fotostory',name:'Foto de fondo 9:16',w:1080,h:1920,layout:'foto',opt:{safeTop:.11,safeBot:.14},desc:'Foto a sangre para historias, con zonas seguras.'}]},
   wa:{label:'Imagen WhatsApp',canal:'WhatsApp',templates:[
     {id:'wsq',name:'Post cuadrado',w:1080,h:1080,layout:'tab',desc:'Se entiende en miniatura dentro del chat.'},
@@ -386,11 +387,12 @@ function slideChips(){if(!isCar())return'';
   return `<div class="slidebar" role="group" aria-label="Láminas del carrusel"><span class="hint">Lámina</span>${S.car.slides.map((_,i)=>{const v=withSlide(i,localVerdict);const st=v.empty?'empty':v.ok?'ok':'bad';
     return `<button class="fmt sl-${st} ${i===S.car.idx?'sel':''}" data-slide="${i}" aria-pressed="${i===S.car.idx}" title="${v.empty?'Sin copy':v.ok?'Cumple':'Por corregir'}">${i+1}</button>`;}).join('')}</div>`;}
 function bindSlideChips(){document.querySelectorAll('[data-slide]').forEach(b=>b.onclick=()=>{selectSlide(+b.dataset.slide);saveDraft();drawMain();drawLive();});}
-function saveDraft(){syncSlide();store.set('draft',{v:3,lay:S.extras.lay||null,textos:S.extras.textos,icono:S.extras.icono,req:S.req,car:S.car.on?{on:true,n:S.car.n,idx:S.car.idx,slides:S.car.slides.map(x=>({copy:x.copy,visual:x.visual}))}:null,copy:S.copy,waMsg:S.waMsg,formato:S.formato,tpl:S.tpl,scheme:S.scheme,visual:S.extras.visual,qr:S.extras.qr});}
+function saveDraft(){syncSlide();store.set('draft',{v:3,cards:S.extras.productos.map(p=>({nombre:p.nombre||'',precio:p.precio||'',antes:p.antes||'',desc:p.desc||''})),lay:S.extras.lay||null,textos:S.extras.textos,icono:S.extras.icono,req:S.req,car:S.car.on?{on:true,n:S.car.n,idx:S.car.idx,slides:S.car.slides.map(x=>({copy:x.copy,visual:x.visual}))}:null,copy:S.copy,waMsg:S.waMsg,formato:S.formato,tpl:S.tpl,scheme:S.scheme,visual:S.extras.visual,qr:S.extras.qr});}
 /* Nota, fecha, código y legal ahora son textos adicionales: si llegan en el copy (borradores antiguos), se pasan a textos */
 function migrateExtras(){const ts=S.extras.textos;for(const k of['fecha','codigo','legal','nota']){const v=S.copy[k];if(v&&ts.length<XT_MAX)ts.push({texto:k==='codigo'?'Código: '+v:v,fuente:'t',caso:'normal',color:'auto',bloque:'none',borde:'none',bordeColor:'green'});S.copy[k]='';}}
 function loadDraft(){const d=store.get('draft');if(!d)return;if(!d.v){if(d.copy)['nota','codigo','fecha','legal'].forEach(k=>d.copy[k]='');d.waMsg='';}Object.assign(S.req,d.req||{});Object.assign(S.copy,d.copy||{});['waMsg','formato','tpl','scheme'].forEach(k=>{if(d[k]!=null)S[k]=d[k]});if(d.visual)S.extras.visual=d.visual;if(!VISUALS.some(v=>v[0]===S.extras.visual))S.extras.visual=DEFAULTS.visual;if(d.qr!=null)S.extras.qr=d.qr;if(!FORMATS[S.formato]){S.formato='inapp';S.tpl='hero';}if(!SCHEMES[S.scheme])S.scheme='oscuro';
   if(d.icono)S.extras.icono=d.icono;
+  if(Array.isArray(d.cards)&&d.cards.some(c=>c.nombre||c.precio)&&!S.extras.productos.length)S.extras.productos=d.cards.slice(0,4).map(c=>({img:null,name:c.nombre,...c}));
   if(Array.isArray(d.textos))S.extras.textos=d.textos.filter(t=>t&&typeof t==='object').slice(0,XT_MAX);
   migrateExtras();
   if(d.lay&&typeof d.lay==='object')S.extras.lay={pos:d.lay.pos||{},sty:d.lay.sty||{},hide:d.lay.hide||{}};
@@ -785,10 +787,10 @@ function drawExtras(ctx,W,H,sc,R){(S.extras.textos||[]).slice(0,XT_MAX).forEach(
    Posiciones en fracciones del lienzo (sirven para 4:5 y 1:1). Bordes siempre rectos, en colores de la paleta. */
 const EL_NAMES={patron:'Fondo con patrón',destellos:'Destellos',info:'Recuadro de información',x0:'Texto adicional 1',x1:'Texto adicional 2',x2:'Texto adicional 3',p0:'Producto 1',p1:'Producto 2',p2:'Producto 3',p3:'Producto 4',logo:'Logo de Upper',titular:'Titular',eyebrow:'Antetítulo',subtitulo:'Subtítulo',destacado:'Destacado',codigo:'Código',fecha:'Fecha',legal:'Legal',tarjeta:'Tarjeta del visual',producto:'Card de producto',cta:'CTA',mensaje:'Mensaje (subtítulo)',textos:'Textos',visual:'Visual',cinta:'Cinta verde',oferta:'Destacado y CTA'};
 const EL_X=['x0','x1','x2'];
-const EL_SETS={campana:['logo','patron','destellos','eyebrow','titular','info','visual','mensaje',...EL_X],video:['logo','titular','producto','cta','mensaje',...EL_X],foto:['logo','eyebrow','titular','destacado','fecha','subtitulo','cta','legal',...EL_X],
+const EL_SETS={ofertas:['logo','patron','destellos','eyebrow','titular','subtitulo','visual','destacado','cta',...EL_X],campana:['logo','patron','destellos','eyebrow','titular','info','visual','mensaje',...EL_X],video:['logo','titular','producto','cta','mensaje',...EL_X],foto:['logo','eyebrow','titular','destacado','fecha','subtitulo','cta','legal',...EL_X],
   hero:['logo','fecha','eyebrow','titular','subtitulo','visual','tarjeta','cinta','destacado','cta','codigo','legal',...EL_X],tab:['logo','eyebrow','titular','subtitulo','visual','tarjeta','cinta','destacado','cta','fecha','codigo','legal',...EL_X],
   cupon:['tarjeta','logo','fecha','cinta','titular','destacado','codigo','subtitulo','visual','cta','legal',...EL_X]};
-const EL_LOGO_OPT=new Set(['video','foto','campana']);
+const EL_LOGO_OPT=new Set(['video','foto','campana','ofertas']);
 const EL_DEF={'video.producto':{t:'fino',c:'green'}};
 const STROKES=[['none','Sin borde'],['fino','Fino'],['grueso','Grueso'],['doble','Doble'],['punteado','Punteado']];
 const STROKE_COL=[['green','Verde',C.green],['cream','Crema',C.cream],['navy','Azul',C.navy]];
@@ -894,6 +896,11 @@ const CAMP={'3x4':{info:[.2565,.4235,.487,.1226,25],msg:[.1318,.8831,.7364,.0775
 const CAMP_IMG={};
 async function loadCampPeople(){const ims=await Promise.all(['persona-1','persona-2'].map(n=>new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=`assets/campana/${n}.png`;})));
   S.extras.productos=ims.filter(Boolean).map((img,i)=>({img,name:'persona-'+(i+1),nombre:'',precio:'',antes:''}));}
+async function loadOfertas(){setCarousel(false);S.formato='social';S.tpl='ofertasstory';S.scheme='oscuro';
+  S.copy={...emptyCopy(),eyebrow:'Ofertas por',titular:'Black Friday 🇺🇸',subtitulo:'Columbia · Tommy Hilfiger · Calvin Klein'};S.extras.textos=[];S.extras.visual='cards';
+  S.extras.productos=[['Jean Calvin Klein','$29.70','70% OFF'],['Polo Tommy Hilfiger','$26.07','65% OFF'],['Jean Calvin Klein','$34.65','65% OFF'],['Chaqueta Columbia','$27.50','50% OFF']].map(([nombre,precio,desc])=>({img:null,name:nombre,nombre,precio,antes:'',desc}));
+  const L2=LAY();for(const o of[L2.pos,L2.sty,L2.hide])for(const k of Object.keys(o))if(k.startsWith('ofertas.'))delete o[k];L2.hide['ofertas.logo']=true;
+  saveDraft();drawSteps();go(4);}
 async function loadCyberDay(){setCarousel(false);S.formato='social';S.tpl='campana';S.scheme='oscuro';S.req.pais=S.req.pais||'ec';
   S.copy={...emptyCopy(),titular:'El verdadero|*Cyber Day*|está en 🇺🇸',destacado:'27/11|9:00 PM',cta:'Live en',subtitulo:'Tendremos sorteos para aprovechar la temporada de ofertas'};
   S.extras.icono='tiktok';S.extras.textos=[];S.extras.visual='recortes';const L2=LAY();for(const o of[L2.pos,L2.sty,L2.hide])for(const k of Object.keys(o))if(k.startsWith('campana.'))delete o[k];L2.hide['campana.logo']=true;
@@ -932,6 +939,52 @@ L.campana=(ctx,W,H,d,sc,R,o)=>{
     R.pairs.push({fg,bg:boxFill,large:true,label:'Recuadro de información'});elEnd(ctx,R,'info');}
   if(d.subtitulo){elBegin(ctx,'mensaje');const[x,y,w,h,r]=G.msg;campBox(ctx,x*W,y*H,w*W,h*H,r*u,boxFill,line,Math.max(1.5,1.6*u));campLines(ctx,h/w*H/W>.13?balanceLines(d.subtitulo,d.subtitulo.length>34?3:2):twoLines(d.subtitulo),(x+w/2)*W,(y+h/2)*H,w*W*.86,h*H*.78,W*.036,fg,500,.08);
     R.pairs.push({fg,bg:boxFill,large:false,label:'Mensaje'});elEnd(ctx,R,'mensaje');}
+};
+/* OFERTAS (historia estilo "Ofertas por el 11.11"): mismo lenguaje de la campaña (patrón difuminado, destellos) con
+   antetítulo espaciado, título grande en verde, marca de la tienda y hasta 4 cards de producto (2×2): parte clara con la foto
+   y la etiqueta de descuento, sello con destello, nombre, divisor y precio. Deja libre la zona baja para el sticker de enlace. */
+/* Fotos con fondo blanco (sin transparencia): se quita el blanco conectado a los bordes para que el producto quede sobre la card. */
+const KW=new WeakMap();
+function knockWhite(img){if(!img||!img.width)return img;if(KW.has(img))return KW.get(img);let out=img;
+  try{const sc=Math.min(1,900/Math.max(img.width,img.height)),w=Math.round(img.width*sc),h=Math.round(img.height*sc);const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(img,0,0,w,h);
+    const d=x.getImageData(0,0,w,h),a=d.data;let opaque=true;for(let i=3;i<a.length;i+=4*97)if(a[i]<250){opaque=false;break;}
+    if(opaque){const seen=new Uint8Array(w*h),st=[];const wh=i=>a[i*4]>238&&a[i*4+1]>238&&a[i*4+2]>238;
+      for(let i=0;i<w;i++){st.push(i,(h-1)*w+i);}for(let j=0;j<h;j++){st.push(j*w,j*w+w-1);}
+      while(st.length){const i=st.pop();if(seen[i]||!wh(i))continue;seen[i]=1;a[i*4+3]=0;const px=i%w;if(px>0)st.push(i-1);if(px<w-1)st.push(i+1);if(i>=w)st.push(i-w);if(i<w*h-w)st.push(i+w);}
+      x.putImageData(d,0,0);out=c;}}catch{}
+  KW.set(img,out);return out;}
+function campStar(ctx,cx,cy,r,dark){ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=dark?C.navy:C.cream;ctx.fill();ctx.lineWidth=Math.max(2,r*.12);ctx.strokeStyle=dark?C.cream:C.navy;ctx.stroke();
+  const w=r*1.15;normPath(ctx,DESTELLO_D,cx-w/2,cy-w/2/DESTELLO_AR,w,w/DESTELLO_AR);ctx.fillStyle=C.green;ctx.fill();}
+function offerCard(ctx,R,p,x,y,w,h,dark,u){const r=w*.09,top=h*.58,line=C.green,fg=dark?C.cream:C.navy;
+  rr(ctx,x,y,w,h,r);ctx.fillStyle=dark?C.navy:C.cream;ctx.fill();
+  ctx.save();rr(ctx,x,y,w,h,r);ctx.clip();ctx.fillStyle=C.cream;ctx.fillRect(x,y,w,top);ctx.restore();
+  ctx.fillStyle=line;ctx.fillRect(x,y+top-1.5*u,w,3*u);
+  {const pad=w*.08;const im=p.img?knockWhite(p.img):phImg();contain(ctx,im,x+pad,y+pad*.8,w-pad*2,top-pad*1.3);}
+  rr(ctx,x,y,w,h,r);ctx.lineWidth=Math.max(3,4*u);ctx.strokeStyle=line;ctx.stroke();
+  if(p.desc){const fs=w*.075;ctx.font=ft(700,fs);const tw=ctx.measureText(p.desc).width,bw=tw+fs*.9,bh=fs*1.55,bx=x+w-bw-w*.045,by=y+w*.05;rr(ctx,bx,by,bw,bh,bh/2);ctx.fillStyle=C.green;ctx.fill();
+    ctx.fillStyle=C.navy;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.desc,bx+bw/2,by+bh/2+fs*.04);}
+  let ty=y+top+(h-top)*.1;const bh=h-top;ctx.textAlign='center';
+  if(p.nombre){const fs=w*.085;ctx.font=ft(500,fs);ctx.fillStyle=fg;ctx.textBaseline='top';const ls=fitLines(ctx,p.nombre,w*.84,2);const yy=y+top+bh*(ls.length>1?.1:.17);ls.forEach((l,i)=>ctx.fillText(l,x+w/2,yy+i*fs*1.12));ty=yy+ls.length*fs*1.12+bh*.04;}
+  ctx.fillStyle=line;ctx.fillRect(x+w*.27,ty,w*.46,Math.max(2,2.5*u));
+  if(p.precio){const fs=w*.1;ctx.font=ft(800,fs);ctx.fillStyle=C.green;ctx.textBaseline='top';ctx.fillText(p.precio,x+w/2,ty+bh*.1);}
+  R.pairs.push({fg,bg:dark?C.navy:C.cream,large:false,label:'Card de producto'});}
+L.ofertas=(ctx,W,H,d,sc,R,o)=>{
+  const dark=sc.bg===C.navy,fg=dark?C.cream:C.navy,u=W/1080;R.logoOptional=true;
+  ctx.fillStyle=dark?C.navy:C.cream;ctx.fillRect(0,0,W,H);
+  elBegin(ctx,'patron');const pim=CAMP_IMG['patron-9x16'];if(pim){ctx.save();if(!dark)ctx.globalAlpha=.45;coverMedia(ctx,tinted(pim,dark?'#384D66':'#9FB3A0'),W,H);ctx.restore();}elEnd(ctx,R,'patron');
+  elBegin(ctx,'destellos');[[.81,.115]].forEach(([x,y])=>{const w=.032*W;normPath(ctx,DESTELLO_D,x*W,y*H,w,w/DESTELLO_AR);ctx.lineWidth=2*u;ctx.strokeStyle=fg;ctx.stroke();});elEnd(ctx,R,'destellos');
+  if(!elHidden('logo')){elBegin(ctx,'logo');const tabH=Math.max(W*.09,minLogo(R)/.42),tabW=tabH*2.6,tx=(W-tabW)/2;rr(ctx,tx,-tabH*.5,tabW,tabH*1.5,tabH*.32);ctx.fillStyle=C.green;ctx.fill();
+    const lgh=Math.max(tabH*.42,minLogo(R));drawLogo(ctx,tx+(tabW-lgh*LB.w/LB.h)/2,(tabH-lgh)/2,lgh,C.navy);R.logo=true;R.logoH=lgh;elEnd(ctx,R,'logo');}
+  if(d.eyebrow){elBegin(ctx,'eyebrow');campLines(ctx,d.eyebrow,W/2,H*.163,W*.62,H*.035,W*.05,fg,800,.32);elEnd(ctx,R,'eyebrow');}
+  if(d.titular){elBegin(ctx,'titular');text(ctx,R,'Titular',d.titular,{x:W*.12,y:H*.18,w:W*.76,h:H*.075},{font:'d',upper:true,max:W*.17,min:W*.06,color:C.green,bg:dark?C.navy:C.cream,lh:1,maxLines:1,align:'center',valign:'middle',hi:fg,hiMode:'color'});elEnd(ctx,R,'titular');}
+  if(d.subtitulo){elBegin(ctx,'subtitulo');text(ctx,R,'Subtítulo',d.subtitulo,{x:W*.12,y:H*.258,w:W*.76,h:H*.062},{font:'t',weight:500,max:W*.11,min:W*.04,color:fg,bg:dark?C.navy:C.cream,lh:1,maxLines:1,align:'center',valign:'middle'});elEnd(ctx,R,'subtitulo');}
+  const items=S.extras.productos.filter(p=>p.img||p.nombre||p.precio).slice(0,4);const ps=items.length?items:PH_PRODUCTS().concat(PH_PRODUCTS()).slice(0,4).map(p=>({...p,desc:'70% OFF',nombre:'Producto',precio:'$00.00'}));
+  if(!items.length)R.checks.push({lvl:'warn',msg:'Ofertas: lo que ves son marcadores. Sube los productos con su precio y descuento.'});
+  elBegin(ctx,'visual');const cw=W*.365,ch=H*.172,gx=W*.04,gy=H*.024,x0=(W-cw*2-gx)/2,y0=H*.352,n=ps.length,cols=n===1?1:2;
+  ps.forEach((p,i)=>{const row=Math.floor(i/cols),col=i%cols,lastOdd=n%2===1&&i===n-1&&cols===2;const x=lastOdd?(W-cw)/2:x0+col*(cw+gx),y=y0+row*(ch+gy);
+    elBegin(ctx,'p'+i);offerCard(ctx,R,p,x,y,cw,ch,dark,u);campStar(ctx,x+cw*.035,y+ch*.035,cw*.085,dark);elEnd(ctx,R,'p'+i);});R.visual=true;elEnd(ctx,R,'visual');
+  if(d.cta){elBegin(ctx,'cta');const h=W*.075;ctaText(ctx,R,d.cta,W/2,H*.775,h,C.navy,C.green,{align:'center',maxW:W*.7});elEnd(ctx,R,'cta');}
+  if(d.destacado){elBegin(ctx,'destacado');campLines(ctx,d.destacado,W/2,H*.745,W*.7,H*.04,W*.045,fg,700,.08);elEnd(ctx,R,'destacado');}
 };
 const curFormatFor=R=>FORMATS[R.fmt];
 const minLogo=R=>curFormatFor(R).print?64:40;
@@ -1433,6 +1486,7 @@ function drawWire(c,t){const k=Math.min(.4,340/Math.max(t.w,t.h));const W=t.w,H=
     else{const p=W*.08;box(p,top+p,W*.28,W*.06,ln);bars(p,top+A*.14,W*.8,2,A*.05,A*.02);bars(p,top+A*.3,W*.75,2,A*.015,A*.012);box(p,top+A*.38,W-p*2,A*.4);box(p,top+A*.84,W*.3,A*.06,ac,A*.03);}}
   else if(t.layout==='tab'){if(wide){box(W*.06,-H*.05,H*.36,H*.19,ln);bars(W*.06,H*.28,W*.42,2,H*.1,H*.04);bars(W*.06,H*.56,W*.4,2,H*.035,H*.025);box(W*.06,H*.76,W*.13,H*.11,ac,H*.055);box(W*.56,H*.14,W*.4,H*.76);}
     else{const p=W*.08;box(W/2-W*.13,top-W*.05,W*.26,W*.15,ln);bars(W*.18,top+A*.12,W*.64,2,A*.05,A*.02);bars(W*.22,top+A*.27,W*.56,1,A*.015,A*.01);box(p,top+A*.33,W-p*2,A*.45);box(W/2-W*.16,top+A*.83,W*.32,A*.06,ac,A*.03);}}
+  else if(t.layout==='ofertas'){x.fillStyle=dark?'#2A3756':'#DCE6D3';x.fillRect(0,0,W,H);bars(W*.3,H*.15,W*.4,1,H*.015,0);box(W*.35,H*.18,W*.3,H*.07,ac);bars(W*.25,H*.27,W*.5,1,H*.04,0);[0,1,2,3].forEach(i=>box(W*(.115+(i%2)*.405),H*(.352+Math.floor(i/2)*.196),W*.365,H*.172));}
   else if(t.layout==='campana'){x.fillStyle=dark?'#2A3756':'#DCE6D3';x.fillRect(0,0,W,H);box(W*.2,H*.08,W*.6,H*.3,ac);box(W*.26,H*.43,W*.48,H*.12);box(W*.1,H*.58,W*.8,H*.3,fl);box(W*.13,H*.88,W*.74,H*.08);}
   else if(t.layout==='video'){x.fillStyle=dark?'#3A4A6B':'#C9D6BE';x.fillRect(0,0,W,H);const p=W*.07;box(W/2-W*.12,-W*.04,W*.24,W*.13,ac);box(W*.15,H*.1,W*.7,H*.08,ac,0);box(W*.25,H*.62,W*.5,H*.15,'#FFFFFF',0);box(W*.38,H*.79,W*.24,H*.04,ac,0);box(p,H*.85,W-p*2,H*.08,ac,0);}
   else if(t.layout==='foto'){x.fillStyle=dark?'#3A4A6B':'#C9D6BE';x.fillRect(0,0,W,H);const p=W*.08;box(W/2-W*.13,top-W*.05,W*.26,W*.15,ac);bars(W*.3,top+A*.62,W*.4,1,A*.02,0);box(p,top+A*.67,W-p*2,A*.05,ac,0);bars(W*.18,top+A*.74,W*.64,1,A*.05,0);bars(W*.25,top+A*.82,W*.5,2,A*.015,A*.012);box(W/2-W*.14,top+A*.89,W*.28,A*.05,ac,0);}
@@ -1604,7 +1658,7 @@ function step4(){const x=S.extras,a=S.extrasAI,t=curTpl();const filled=new Set(a
     <div class="fields" style="margin-top:8px">${QE_FIELDS().map(([k,l])=>`<label class="f ${k==='titular'||k==='subtitulo'?'full':''}">${l}${fmtBar(k,'q_'+k)}<input type="text" id="q_${k}" value="${esc(S.copy[k])}"></label>`).join('')}</div>
     <p class="hint" style="margin:6px 0 0">Usa | para cortar la línea${curTpl().layout==='campana'?' (en el título, cada línea ocupa el mismo ancho)':''}.</p></details>
   <div class="box"><h3>1. Visual de la pieza</h3>
-    ${isVid()?videoEditor():isFoto()?fotoEditor():curTpl().layout==='campana'?campEditor():`
+    ${isVid()?videoEditor():isFoto()?fotoEditor():curTpl().layout==='campana'?campEditor():curTpl().layout==='ofertas'?ofertasEditor():`
     <div class="visuals">${VISUALS.map(([k,l])=>`<button class="vis ${x.visual===k?'sel':''}" data-v="${k}" aria-pressed="${x.visual===k}"><canvas width="240" height="160" data-vis="${k}"></canvas>${l}</button>`).join('')}</div>
     ${x.visual==='producto'?fotoProdField():''}
     ${x.visual==='recortes'||x.visual==='cards'?prodEditor():''}
@@ -1635,7 +1689,9 @@ function elPanel(){const lay=curTpl().layout,set=EL_SETS[lay];if(!set)return'';c
     ${id==='logo'?(canHide?'<span class="hint">Opcional en este formato.</span>':'<span class="hint">Obligatorio en esta composición.</span>'):`<select data-els="${id}" aria-label="Borde de ${nm}">${STROKES.map(([v,l])=>`<option value="${v}" ${(st.t||'none')===v?'selected':''}>${l}</option>`).join('')}</select>
     <select data-elc="${id}" aria-label="Color del borde">${STROKE_COL.map(([v,l])=>`<option value="${v}" ${(st.c||'green')===v?'selected':''}>${l}</option>`).join('')}</select>`}</div>`;}).join('')}</div>
   <div class="row" style="margin-top:8px"><button class="btn sm" id="elReset" ${layHas(lay)?'':'disabled'}>Restablecer diseño</button></div></div>`;}
-function campEditor(){return `<p class="hint" style="margin:0 0 8px">Campaña: el <b>titular</b> va en 3D (usa A+, A−, Resaltar y Salto para la jerarquía), el <b>destacado</b> y el <b>CTA</b> van en el recuadro de información y el <b>subtítulo</b> en el recuadro de abajo.</p>
+function campPicker(){return `<div class="row" style="gap:8px;margin:0 0 10px;align-items:center"><b style="font-size:13px">Piezas de campaña</b>${[['cyber','El verdadero Cyber Day'],['ofertas','Ofertas Black Friday']].map(([k,l])=>`<button class="fmt ${(k==='ofertas')===(curTpl().layout==='ofertas')?'sel':''}" data-campo="${k}">${l}</button>`).join('')}</div>`;}
+function ofertasEditor(){return campPicker()+`<p class="hint" style="margin:0 0 8px">Ofertas: el <b>antetítulo</b> va espaciado arriba, el <b>titular</b> es la fecha o el evento (verde), el <b>subtítulo</b> es la tienda o marca, y cada <b>card</b> lleva foto, descuento, nombre y precio. El CTA es opcional: la zona baja queda libre para el sticker de enlace de Instagram.</p>${prodEditor(true)}`;}
+function campEditor(){return campPicker()+`<p class="hint" style="margin:0 0 8px">Campaña: el <b>titular</b> va en 3D (usa A+, A−, Resaltar y Salto para la jerarquía), el <b>destacado</b> y el <b>CTA</b> van en el recuadro de información y el <b>subtítulo</b> en el recuadro de abajo.</p>
   <div class="row" style="gap:10px"><b style="font-size:13px">Ícono del recuadro</b><div class="fmts" role="group" style="margin:0">${[['none','Ninguno'],['tiktok','TikTok']].map(([k,l])=>`<button class="fmt ${S.extras.icono===k?'sel':''}" data-ico="${k}" aria-pressed="${S.extras.icono===k}">${l}</button>`).join('')}</div>
   <button class="btn sm" id="campFotos">Usar las personas del ejemplo</button></div>${prodEditor(false,true).replace('Productos recortados (máx.','Personas o productos recortados (máx.')}`;}
 function videoEditor(){const x=S.extras,v=x.video;
@@ -1674,7 +1730,7 @@ function prodEditor(force,rec){const x=S.extras,cards=!rec&&(force||x.visual==='
     <input type="file" id="prods" accept="image/png,image/webp" multiple ${x.productos.length>=PROD_MAX?'disabled':''}>
     <span class="hint">${cards?`Foto, precio, precio anterior y nombre son opcionales. Si solo subes la foto (por ejemplo, una card ya diseñada), se muestra completa, sin recuadro de texto. ${force?'En video se usa el primer producto.':'Se usan las 3 primeras.'}`:'PNG o WebP sin fondo. Ordénalos con las flechas, arrástralos en la vista previa y cambia su tamaño desde la esquina. Cada uno puede llevar silueta: contorno, línea separada o sombra plana.'}</span>
     ${x.productos.map((p,i)=>`<div class="prod-row">${p.img?`<img src="${p.img.src}" alt="">`:'<span class="hint">Sin foto</span>'}
-      ${!cards?recRow(p,i):''}${cards?`<input type="text" data-pf="precio" data-pi="${i}" value="${esc(p.precio||'')}" placeholder="Precio (USD 34,99)" maxlength="14"><input type="text" data-pf="antes" data-pi="${i}" value="${esc(p.antes||'')}" placeholder="Antes (USD 69,99)" maxlength="14"><input type="text" data-pf="nombre" data-pi="${i}" value="${esc(p.nombre||'')}" placeholder="Nombre del producto" maxlength="60">`:''}
+      ${!cards?recRow(p,i):''}${cards?`<input type="text" data-pf="precio" data-pi="${i}" value="${esc(p.precio||'')}" placeholder="Precio (USD 34,99)" maxlength="14"><input type="text" data-pf="antes" data-pi="${i}" value="${esc(p.antes||'')}" placeholder="Antes (USD 69,99)" maxlength="14"><input type="text" data-pf="nombre" data-pi="${i}" value="${esc(p.nombre||'')}" placeholder="Nombre del producto" maxlength="60">${curTpl().layout==='ofertas'?`<input type="text" data-pf="desc" data-pi="${i}" value="${esc(p.desc||'')}" placeholder="Descuento (70% OFF)" maxlength="12">`:''}`:''}
       <button class="btn sm" data-prm="${i}" aria-label="Quitar producto">×</button></div>`).join('')}</div>`;}
 function readImg(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=fr.result;};fr.onerror=rej;fr.readAsDataURL(file);});}
 let vidPlaying=false,vidRaf=0;
@@ -1723,6 +1779,7 @@ function bindEls(){const L2=LAY(),lay=curTpl().layout,key=id=>lay+'.'+id;
   for(const el of[cv,sel.querySelector('.el-h')]){el.onpointermove=e=>{if(drag)move(e);else if(el===cv)cv.style.cursor=hit(pt(e))?'move':'default';};el.onpointerup=el.onpointercancel=up;}}
 
 function bind4(){
+  document.querySelectorAll('[data-campo]').forEach(b=>b.onclick=()=>b.dataset.campo==='cyber'?loadCyberDay():loadOfertas());
   document.querySelectorAll('[data-ico]').forEach(b=>b.onclick=()=>{S.extras.icono=b.dataset.ico;saveDraft();drawMain();drawLive();});
   $('#campFotos')&&($('#campFotos').onclick=async()=>{await loadCampPeople();drawMain();drawLive();});
   bindEls();bindFmt();QE_FIELDS().forEach(([k])=>{const el=$('#q_'+k);if(el)el.oninput=()=>{S.copy[k]=el.value;saveDraft();drawLive();};});  $('#vidIn')&&($('#vidIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;stopVid();$('#st4')&&($('#st4').textContent='Cargando video…');try{S.extras.video=await readVideo(f);S.extras.videoName=f.name;}catch{toast('No se pudo leer el video. Usa MP4 (H.264) o MOV.');}drawMain();drawLive();});
@@ -2281,8 +2338,8 @@ $('#kitBtn').onclick=()=>{const k=$('#kit');k.hidden=!k.hidden;$('#kitBtn').setA
 (async()=>{
   document.getElementById('logoPath').setAttribute('d',LOGO_D);
   loadDraft();await Promise.all([bootFonts(),loadIllus(),loadCampana()]);
-  try{if(!localStorage.getItem('upper_cyberday_v2')){localStorage.setItem('upper_cyberday_v2','1');await loadCyberDay();}}catch{}
-  if(curTpl().layout==='campana'&&!S.extras.productos.length)await loadCampPeople();
+  try{if(!localStorage.getItem('upper_cyberday_v2')){localStorage.setItem('upper_cyberday_v2','1');await loadCyberDay();}if(!localStorage.getItem('upper_ofertas_v1')){localStorage.setItem('upper_ofertas_v1','1');await loadOfertas();}}catch{}
+  if(curTpl().layout==='campana'&&!S.extras.productos.some(p=>p.img))await loadCampPeople();
   if(curTpl().hidden)S.step=4;drawKit();drawSteps();drawMain();drawLive();window.__studioReady=true;
   $('#kbExport').onclick=()=>{const data={version:1,exportado:new Date().toISOString(),conocimiento:{ec:KB.data?.ec??null,co:KB.data?.co??null,updatedAt:KB.updatedAt},reglas:{overrides:RULES.overrides,custom:RULES.custom,updatedAt:RULES.updatedAt}};
     deliver(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'equipo.json',$('#kbExpSt'));};
