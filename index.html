@@ -914,7 +914,7 @@ function campLines(ctx,str,cx,cy,maxW,maxH,size,color,weight=600,track=.08){cons
   while(fs>8&&(meas()>maxW||lines.length*fs*1.2>maxH))fs*=.94;
   ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';const y0=cy-(lines.length-1)*fs*1.2/2;lines.forEach((l,i)=>ctx.fillText(l,cx,y0+i*fs*1.2));if('letterSpacing' in ctx)ctx.letterSpacing='0px';}
 /* OFERTAS (story): título, hasta 4 cards de producto en cuadrícula 2×2 (foto, nombre, precio y etiqueta de descuento) y, debajo, un hueco libre para el sticker de enlace de la app.
-   Cards de esquinas rectas (regla de marca). Todo dentro de las zonas seguras de story. */
+   Cards y etiquetas de esquinas redondeadas, a pedido del equipo (como la campaña). Todo dentro de las zonas seguras de story. */
 async function loadOfertasImgs(){return Promise.all([1,2,3,4].map(n=>new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=`assets/campana/oferta-${n}.png`;})));}
 async function loadOfertas(){setCarousel(false);S.formato='social';S.tpl='ofertasstory';S.scheme='oscuro';S.req.pais=S.req.pais||'ec';
   S.copy={...emptyCopy(),eyebrow:'Ofertas por',titular:'*Black Friday* 🇺🇸'};S.extras.icono='none';S.extras.textos=[];S.extras.visual='recortes';
@@ -933,11 +933,11 @@ L.ofertas=(ctx,W,H,d,sc,R,o)=>{
   const ps=S.extras.productos.filter(p=>p.img||p.nombre||p.precio).slice(0,4);
   elBegin(ctx,'visual');const mx=W*.09,gap=W*.024,cw=(W-mx*2-gap)/2,ch=H*.215,y0=H*.322;
   ps.forEach((p,i)=>{const x=mx+(i%2)*(cw+gap),y=y0+Math.floor(i/2)*(ch+gap),bh=ch*.34,ph=ch-bh,lw=Math.max(3,4*u);
-    ctx.fillStyle=C.navy;ctx.fillRect(x,y,cw,ch);ctx.fillStyle=photoBg;ctx.fillRect(x,y,cw,ph);
+    const r=34*u;rr(ctx,x,y,cw,ch,r);ctx.fillStyle=C.navy;ctx.fill();ctx.beginPath();ctx.moveTo(x,y+ph);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.lineTo(x+cw-r,y);ctx.arcTo(x+cw,y,x+cw,y+r,r);ctx.lineTo(x+cw,y+ph);ctx.closePath();ctx.fillStyle=photoBg;ctx.fill();
     if(p.img){const k=Math.min((cw-cw*.08)/p.img.width,(ph-ph*.1)/p.img.height),iw=p.img.width*k,ih=p.img.height*k;ctx.drawImage(p.img,x+(cw-iw)/2,y+(ph-ih)/2+ph*.02,iw,ih);R.visual=true;}
-    ctx.strokeStyle=line;ctx.lineWidth=lw;ctx.strokeRect(x,y,cw,ch);ctx.beginPath();ctx.moveTo(x,y+ph);ctx.lineTo(x+cw,y+ph);ctx.stroke();
+    ctx.strokeStyle=line;ctx.lineWidth=lw;rr(ctx,x,y,cw,ch,r);ctx.stroke();ctx.beginPath();ctx.moveTo(x,y+ph);ctx.lineTo(x+cw,y+ph);ctx.stroke();
     if(p.dto){const fs=ch*.075;ctx.font=fd(fs);ctx.textAlign='center';ctx.textBaseline='middle';const t=p.dto.toUpperCase(),tw=ctx.measureText(t).width+fs*.9,th=fs*1.6,tx=x+cw-tw-cw*.04,ty=y+ph*.05;
-      ctx.fillStyle=C.green;ctx.fillRect(tx,ty,tw,th);ctx.fillStyle=C.navy;ctx.fillText(t,tx+tw/2,ty+th/2+fs*.04);R.pairs.push({fg:C.navy,bg:C.green,large:true,label:'Descuento'});}
+      rr(ctx,tx,ty,tw,th,th*.4);ctx.fillStyle=C.green;ctx.fill();ctx.fillStyle=C.navy;ctx.fillText(t,tx+tw/2,ty+th/2+fs*.04);R.pairs.push({fg:C.navy,bg:C.green,large:true,label:'Descuento'});}
     const nm=String(p.nombre||'').trim();if(nm){let fs=bh*.19,t=nm;ctx.font=ft(500,fs);ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=C.cream;
       if(ctx.measureText(t).width>cw*.88){t=twoLines(t.length<28?nm+' '.repeat(0)+'':nm);if(!t.includes('|')){const m=nm.indexOf(' ');t=m>0?nm.slice(0,m)+'|'+nm.slice(m+1):nm;}fs*=.9;}
       const ls=t.split('|');while(fs>10&&(ls.length*fs*1.1>bh*.42||Math.max(...ls.map(l=>(ctx.font=ft(500,fs),ctx.measureText(l).width)))>cw*.88))fs*=.94;ctx.font=ft(500,fs);
