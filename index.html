@@ -335,7 +335,7 @@ const FORMATS={
     {id:'sq',name:'Cuadrado',w:1080,h:1080,layout:'cupon',desc:'Cupón para anuncios y carrusel.'},
     {id:'foto',name:'Foto de fondo 4:5',w:1080,h:1350,layout:'foto',desc:'Foto a sangre con el texto de marca abajo. Para UGC y portadas de carrusel.'},
     {id:'campana',hidden:true,name:'Campaña 3:4',w:1080,h:1440,layout:'campana',desc:'Fondo azul con patrón difuminado, título 3D, recuadro de información y personas recortadas (Black Friday 2025).'},
-    {id:'ofertasstory',hidden:true,name:'Ofertas 9:16',w:1080,h:1920,layout:'ofertas',opt:{safeTop:.11,safeBot:.14},desc:'Story de ofertas: título, hasta 4 cards de producto con descuento y precio, y hueco para el sticker de enlace.'},
+    {id:'ofertasstory',hidden:true,name:'Ofertas 9:16',w:1080,h:1920,layout:'ofertas',opt:{safeTop:.14,safeBot:.14},desc:'Story de ofertas: título, hasta 4 cards de producto con descuento y precio, y hueco para el sticker de enlace.'},
     {id:'campanastory',hidden:true,name:'Campaña 9:16',w:1080,h:1920,layout:'campana',opt:{safeTop:.11,safeBot:.14},desc:'La misma campaña para historias.'},
     {id:'fotostory',name:'Foto de fondo 9:16',w:1080,h:1920,layout:'foto',opt:{safeTop:.11,safeBot:.14},desc:'Foto a sangre para historias, con zonas seguras.'}]},
   wa:{label:'Imagen WhatsApp',canal:'WhatsApp',templates:[
@@ -925,13 +925,13 @@ L.ofertas=(ctx,W,H,d,sc,R,o)=>{
   const dark=sc.bg===C.navy,fg=dark?C.cream:C.navy,line=dark?C.green:C.navy,photoBg=dark?C.cream:C.green,u=W/1080;R.logoOptional=true;
   ctx.fillStyle=dark?C.navy:C.cream;ctx.fillRect(0,0,W,H);
   elBegin(ctx,'patron');const pim=CAMP_IMG['patron-9x16'];if(pim){ctx.save();if(!dark)ctx.globalAlpha=.45;coverMedia(ctx,tinted(pim,dark?'#485367':'#9FB3A0'),W,H);ctx.restore();}elEnd(ctx,R,'patron');
-  elBegin(ctx,'destellos');[[.05,.13],[.9,.2],[.06,.285]].forEach(([x,y])=>{const w=.0302*W;normPath(ctx,DESTELLO_D,x*W,y*H,w,w/DESTELLO_AR);ctx.fillStyle=fg;ctx.fill();});elEnd(ctx,R,'destellos');
+  elBegin(ctx,'destellos');[[.095,.165],[.86,.235],[.1,.31]].forEach(([x,y])=>{const w=.0302*W;normPath(ctx,DESTELLO_D,x*W,y*H,w,w/DESTELLO_AR);ctx.fillStyle=fg;ctx.fill();});elEnd(ctx,R,'destellos');
   if(!elHidden('logo')){elBegin(ctx,'logo');const tabH=Math.max(W*.09,minLogo(R)/.42),tabW=tabH*2.6,tx=(W-tabW)/2;rr(ctx,tx,-tabH*.5,tabW,tabH*1.5,tabH*.32);ctx.fillStyle=C.green;ctx.fill();
     const lgh=Math.max(tabH*.42,minLogo(R));drawLogo(ctx,tx+(tabW-lgh*LB.w/LB.h)/2,(tabH-lgh)/2,lgh,C.navy);R.logo=true;R.logoH=lgh;R.pairs.push({fg:C.navy,bg:C.green,large:true,label:'Logo'});elEnd(ctx,R,'logo');}
-  if(d.eyebrow){elBegin(ctx,'eyebrow');campLines(ctx,d.eyebrow,W/2,H*.138,W*.7,H*.03,W*.04,fg,700,.3);R.pairs.push({fg,bg:dark?C.navy:C.cream,large:true,label:'Antetítulo'});elEnd(ctx,R,'eyebrow');}
-  if(d.titular){elBegin(ctx,'titular');text(ctx,R,'Titular',d.titular,{x:W*.06,y:H*.158,w:W*.88,h:H*.125},{fitLines:true,font:'d',upper:true,max:W*.2,min:W*.06,color:fg,bg:dark?C.navy:C.cream,lh:.92,maxLines:2,align:'center',valign:'middle',hi:C.green,hiMode:'color',extrude:{d:W*.014,dx:.35,dy:1,color:dark?'#070E1A':C.green}});elEnd(ctx,R,'titular');}
+  if(d.eyebrow){elBegin(ctx,'eyebrow');campLines(ctx,d.eyebrow,W/2,H*.168,W*.7,H*.03,W*.04,fg,700,.3);R.pairs.push({fg,bg:dark?C.navy:C.cream,large:true,label:'Antetítulo'});elEnd(ctx,R,'eyebrow');}
+  if(d.titular){elBegin(ctx,'titular');text(ctx,R,'Titular',d.titular,{x:W*.1,y:H*.19,w:W*.8,h:H*.115},{fitLines:true,font:'d',upper:true,max:W*.2,min:W*.06,color:fg,bg:dark?C.navy:C.cream,lh:.92,maxLines:2,align:'center',valign:'middle',hi:C.green,hiMode:'color',extrude:{d:W*.014,dx:.35,dy:1,color:dark?'#070E1A':C.green}});elEnd(ctx,R,'titular');}
   const ps=S.extras.productos.filter(p=>p.img||p.nombre||p.precio).slice(0,4);
-  elBegin(ctx,'visual');const mx=W*.075,gap=W*.024,cw=(W-mx*2-gap)/2,ch=H*.225,y0=H*.315;
+  elBegin(ctx,'visual');const mx=W*.09,gap=W*.024,cw=(W-mx*2-gap)/2,ch=H*.215,y0=H*.335;
   ps.forEach((p,i)=>{const x=mx+(i%2)*(cw+gap),y=y0+Math.floor(i/2)*(ch+gap),bh=ch*.34,ph=ch-bh,lw=Math.max(3,4*u);
     ctx.fillStyle=C.navy;ctx.fillRect(x,y,cw,ch);ctx.fillStyle=photoBg;ctx.fillRect(x,y,cw,ph);
     if(p.img){const k=Math.min((cw-cw*.08)/p.img.width,(ph-ph*.1)/p.img.height),iw=p.img.width*k,ih=p.img.height*k;ctx.drawImage(p.img,x+(cw-iw)/2,y+(ph-ih)/2+ph*.02,iw,ih);R.visual=true;}
