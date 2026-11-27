@@ -90,6 +90,14 @@ Ejemplo:
    - fotos de personas o productos que no te dio el usuario: pide los recursos propios.
 4. En la entrega explica en 2 o 3 líneas **qué tomaste** de la referencia y **qué adaptaste** a Upper.
 
+### Nuevas propuestas (lee `direccion-de-arte.md`)
+
+Si piden "nuevas propuestas", "una idea distinta" o "algo nuevo":
+1. Comparte el **requerimiento para nuevas propuestas** de `direccion-de-arte.md` (sección 1) y pide en un solo mensaje lo que falte. El formato es obligatorio.
+2. Entrega **3 direcciones** en el mismo formato: segura (plantilla), de campaña (título 3D con `scripts/titulo3d.py`, cards o composición de PNG) y exploratoria, cada una con 1 o 2 líneas de por qué funciona.
+3. Antes de entregar, pasa la **revisión visual** (sección 4).
+4. Si la propuesta depende de algo que el equipo aún no entregó (sección 5), dilo y usa la mejor alternativa.
+
 ## 4. Escribir el copy
 
 - **Tono:** el de `--conocimiento` (Upper UX Writer).

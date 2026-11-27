@@ -8,13 +8,14 @@ Este paquete convierte Upper Studio en un agente: recibe pedidos por chat, pregu
 |---|---|
 | `PROMPT_SISTEMA.md` | Instrucciones del agente: rol, proceso, preguntas, adaptación de referencias, marca y formato del pedido. Pégalo como *system prompt* o instrucciones del agente. |
 | `conocimiento/ecuador.md`, `conocimiento/colombia.md` | Tono, conocimiento de negocio y reglas de cada país, exportados de la plataforma. |
+| `conocimiento/direccion-de-arte.md` | Requerimiento para nuevas propuestas, reglas visuales aprobadas por el equipo, revisión visual antes de entregar y lo que falta entregar. Se edita a mano. |
 | `conocimiento/catalogo.json` | Formatos, plantillas, visuales, elementos y límites. |
 | `conocimiento/pedido-ejemplo.json` | Ejemplo del pedido que recibe el generador. |
 | `mcp-server.mjs` | Servidor MCP con 3 herramientas: `catalogo`, `conocimiento` y `generar_pieza`. |
 | `Dockerfile` | Imagen del servidor MCP en modo HTTP para publicarlo en la nube. |
 | `INSTRUCCIONES.md` | Versión de las instrucciones para Claude en Slack o Claude Code (usa el generador por comando). |
 
-El motor está en la raíz del repo: `index.html` (plataforma completa, con tipografías incrustadas), `assets/`, `lib/pagina.js` y `scripts/render.mjs`.
+El motor está en la raíz del repo: `index.html` (plataforma completa, con tipografías incrustadas), `assets/`, `lib/pagina.js` y `scripts/render.mjs`. El título 3D de campaña se genera con `python3 scripts/titulo3d.py` (requiere `pip install pillow`).
 
 ## Buzz: importar el agente
 
