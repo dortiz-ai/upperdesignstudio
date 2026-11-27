@@ -59,6 +59,10 @@ Ejemplo:
 | En la referencia | En Upper |
 |---|---|
 | Pieza de campaña del equipo (fondo azul con patrón, título 3D, recuadros con borde, personas) | `social` / `campana` (3:4) o `campanastory`: titular con marcas, `destacado` y `cta` en el recuadro de información, `subtitulo` en el de mensaje, `productos` para personas |
+| Banner horizontal de la app (texto a la izquierda, visual a la derecha) | `inapp` / `hero` (plantilla **Banner**, 1059×465): sigue los patrones de `docs/referencias/banners/` |
+| Producto o caja recortada grande, con arco o círculo verde detrás | `visual: "recortes"` en `hero`: el PNG sale por el borde y la `cinta` es el arco; para el círculo grande detrás del texto, mueve y agranda la `cinta` con `disposicion` |
+| Composición de varios PNG (producto + manos, varias cajas, persona + producto) | `visual: "recortes"` con hasta 4 `productos`, cada uno con `giro`, y `disposicion` `p0`…`p3` (`x`, `y`, `tamano`) para superponerlos |
+| Ilustración en tarjeta redondeada | Ilustración oficial en `hero`: la tarjeta con borde verde sale sola |
 | Foto a sangre con texto encima | `social` / `foto` (4:5) o `fotostory` (9:16) |
 | Productos sueltos, girados o superpuestos | `visual: "recortes"` + `disposicion` (`p0`…`p3`) + silueta |
 | Cards de tienda con precio | `visual: "cards"` (o solo la foto si ya trae precios) |

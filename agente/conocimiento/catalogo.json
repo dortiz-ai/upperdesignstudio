@@ -30,10 +30,10 @@
       "plantillas": [
         {
           "id": "hero",
-          "nombre": "Hero + ilustración",
+          "nombre": "Banner",
           "tamano": "1059x465",
-          "composicion": "hero",
-          "descripcion": "Titular grande a la izquierda y visual con la cinta Upper."
+          "composicion": "banner",
+          "descripcion": "Como los banners de referencia: texto centrado a la izquierda y a la derecha ilustración en tarjeta, PNG recortados con arco verde, foto o cards. Fondo con patrón."
         },
         {
           "id": "tab",
@@ -96,6 +96,13 @@
           "tamano": "1080x1920",
           "composicion": "campana",
           "descripcion": "La misma campaña para historias."
+        },
+        {
+          "id": "ofertasstory",
+          "nombre": "Ofertas 9:16",
+          "tamano": "1080x1920",
+          "composicion": "ofertas",
+          "descripcion": "Historia de ofertas: título de fecha, marca y 4 cards de producto (estilo 11.11)."
         },
         {
           "id": "fotostory",
@@ -178,6 +185,38 @@
     "none": "Solo cinta Upper"
   },
   "elementos_por_composicion": {
+    "banner": [
+      "logo",
+      "patron",
+      "fecha",
+      "eyebrow",
+      "titular",
+      "subtitulo",
+      "visual",
+      "tarjeta",
+      "cinta",
+      "destacado",
+      "cta",
+      "codigo",
+      "legal",
+      "x0",
+      "x1",
+      "x2"
+    ],
+    "ofertas": [
+      "logo",
+      "patron",
+      "destellos",
+      "eyebrow",
+      "titular",
+      "subtitulo",
+      "visual",
+      "destacado",
+      "cta",
+      "x0",
+      "x1",
+      "x2"
+    ],
     "campana": [
       "logo",
       "patron",

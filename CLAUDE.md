@@ -12,6 +12,12 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
    - Visuales: 6 ilustraciones, foto de producto, **Productos recortados** (1 a 4 PNG sin fondo, grandes y algo girados; `drawRecortes`), **Cards de producto** (hasta 3, tipo tienda: foto, precio en Noland, precio anterior tachado y nombre, todo opcional; con solo foto, la foto ocupa la card completa; esquinas rectas; `drawCards`) y solo cinta. Recortes y cards van sueltos sobre la cinta verde en arco (`tabCard`), no sobre la tarjeta. El pedido libre puede elegir estos visuales y completar nombre y precios de las cards solo con datos que el ejecutor dé (campo `productos`).
 4. **Descarga:** las dos combinaciones de color, PNG y **SVG editable** por pieza, y kit .zip de 12 formatos (PNG + SVG) con `revision.txt`.
 
+## Banner in-app (referencias en `docs/referencias/banners/`)
+- La plantilla `hero` de in-app (1059×465, nombre "Banner") usa la composición `L.banner`, hecha a partir de los banners de referencia del equipo: fondo con patrón (`patron`), texto a la izquierda centrado en vertical (antetítulo en Rethink 500 como frase, titular Noland, CTA justo debajo; `textH` mide antes de dibujar) y visual a la derecha: ilustración en tarjeta redondeada con borde verde, PNG recortados grandes saliendo por el borde con arco verde (`cinta`), foto de producto o cards.
+- **Logo oculto por defecto** en el banner (pedido del equipo, como en las referencias: vive dentro de la app). `EL_HIDE_DEF` define elementos ocultos por defecto; `elHidden` lo respeta y el panel permite mostrarlo.
+- Las demás plantillas que usan `L.hero` (historias, A5, etc.) no cambian.
+- Conocimiento: secciones `ec_banners` y `co_banners`. El agente (`agente/PROMPT_SISTEMA.md`, `INSTRUCCIONES.md`, `conocimiento/marca.md`) prioriza PNG recortados y composiciones sobre las ilustraciones cuando hay recursos.
+
 ## Carrusel (solo Redes sociales)
 - En Formato, "Tipo: Post | Carrusel" y número de láminas (2 a 10, `CAR_MIN`/`CAR_MAX`). Todas comparten formato, plantilla (no historias) y combinación de color.
 - Estado en `S.car` (`on`, `n`, `idx`, `slides`). La lámina activa vive en `S.copy` y `S.extras` (visual, productos, foto), así render y reglas no cambian; `selectSlide`, `withSlide(i, fn)` y `slideTpl(i)` (con `__slide`, que entienden `reviewOf` y `pieceName`) manejan las demás.
@@ -92,7 +98,7 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
 - El artifact publicado vive en https://claude.ai/artifact/PVXfvYdm6SMJGQyHL5gZqo. Capacidades: `sample`, `downloads`, `db`, `user` (perfil).
 - Vercel (`upperdesignstudio.vercel.app`): `npm run build` (`scripts/build.mjs`) genera `public/` con la página envuelta por `lib/pagina.js`; `server.js` queda como función solo para `/api`; `proxy.js` (Routing Middleware) pide usuario y contraseña con `STUDIO_USERS`. Sin almacenamiento externo, en Vercel los endpoints de reglas y conocimiento responden 404 y la app usa el navegador. No sirvas archivos estáticos desde `server.js` en Vercel: no se incluyen en la función.
 - `server.js`: Node 20+, SDK `@anthropic-ai/sdk`, modelo por defecto `claude-opus-5-5`. Usuarios en `STUDIO_USERS="nombre:clave,…"`. La API key nunca llega al navegador.
-- Plantillas: 3 composiciones adaptables (`L.hero`, `L.tab`, `L.cupon`) × 4 formatos = 12 piezas, más Foto de fondo (`L.foto`) en Redes sociales: 14 en el kit (Campaña está oculta). Las medidas se calculan en proporción al lienzo.
+- Plantillas: 3 composiciones adaptables (`L.hero`, `L.tab`, `L.cupon`; el banner in-app usa `L.banner`) × 4 formatos = 12 piezas, más Foto de fondo (`L.foto`) en Redes sociales: 14 en el kit (Campaña está oculta). Las medidas se calculan en proporción al lienzo.
 - Verificación visual: prueba solo la pieza afectada (no renderices las 12 plantillas salvo que se pida): el equipo pidió ahorrar tokens.
 
 ## Agente de Slack y generador por comando

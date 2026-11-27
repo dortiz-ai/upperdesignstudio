@@ -326,7 +326,7 @@ const FORMATS={
     {id:'vfeed',name:'Video feed 4:5',w:1080,h:1350,layout:'video',desc:'Video madre con título, card de producto y mensaje de marca encima.'},
     {id:'vsq',name:'Video cuadrado',w:1080,h:1080,layout:'video',desc:'Mismo diseño para feed cuadrado y anuncios.'}]},
   inapp:{label:'Banner in-app',canal:'App Upper',templates:[
-    {id:'hero',name:'Hero + ilustración',w:1059,h:465,layout:'hero',desc:'Titular grande a la izquierda y visual con la cinta Upper.'},
+    {id:'hero',name:'Banner',w:1059,h:465,layout:'banner',desc:'Como los banners de referencia: texto centrado a la izquierda y a la derecha ilustración en tarjeta, PNG recortados con arco verde, foto o cards. Fondo con patrón.'},
     {id:'tab',name:'Pestaña de logo',w:1080,h:540,layout:'tab',desc:'Logo en pestaña, titular y tarjeta de producto.'},
     {id:'cupon',name:'Cupón',w:1080,h:400,layout:'cupon',desc:'Tarjeta tipo gift card con monto y código.'}]},
   social:{label:'Redes sociales',canal:'Instagram / Facebook',templates:[
@@ -787,22 +787,24 @@ function drawExtras(ctx,W,H,sc,R){(S.extras.textos||[]).slice(0,XT_MAX).forEach(
    Posiciones en fracciones del lienzo (sirven para 4:5 y 1:1). Bordes siempre rectos, en colores de la paleta. */
 const EL_NAMES={patron:'Fondo con patrón',destellos:'Destellos',info:'Recuadro de información',x0:'Texto adicional 1',x1:'Texto adicional 2',x2:'Texto adicional 3',p0:'Producto 1',p1:'Producto 2',p2:'Producto 3',p3:'Producto 4',logo:'Logo de Upper',titular:'Titular',eyebrow:'Antetítulo',subtitulo:'Subtítulo',destacado:'Destacado',codigo:'Código',fecha:'Fecha',legal:'Legal',tarjeta:'Tarjeta del visual',producto:'Card de producto',cta:'CTA',mensaje:'Mensaje (subtítulo)',textos:'Textos',visual:'Visual',cinta:'Cinta verde',oferta:'Destacado y CTA'};
 const EL_X=['x0','x1','x2'];
-const EL_SETS={ofertas:['logo','patron','destellos','eyebrow','titular','subtitulo','visual','destacado','cta',...EL_X],campana:['logo','patron','destellos','eyebrow','titular','info','visual','mensaje',...EL_X],video:['logo','titular','producto','cta','mensaje',...EL_X],foto:['logo','eyebrow','titular','destacado','fecha','subtitulo','cta','legal',...EL_X],
+const EL_SETS={banner:['logo','patron','fecha','eyebrow','titular','subtitulo','visual','tarjeta','cinta','destacado','cta','codigo','legal',...EL_X],ofertas:['logo','patron','destellos','eyebrow','titular','subtitulo','visual','destacado','cta',...EL_X],campana:['logo','patron','destellos','eyebrow','titular','info','visual','mensaje',...EL_X],video:['logo','titular','producto','cta','mensaje',...EL_X],foto:['logo','eyebrow','titular','destacado','fecha','subtitulo','cta','legal',...EL_X],
   hero:['logo','fecha','eyebrow','titular','subtitulo','visual','tarjeta','cinta','destacado','cta','codigo','legal',...EL_X],tab:['logo','eyebrow','titular','subtitulo','visual','tarjeta','cinta','destacado','cta','fecha','codigo','legal',...EL_X],
   cupon:['tarjeta','logo','fecha','cinta','titular','destacado','codigo','subtitulo','visual','cta','legal',...EL_X]};
-const EL_LOGO_OPT=new Set(['video','foto','campana','ofertas']);
+const EL_LOGO_OPT=new Set(['video','foto','campana','ofertas','banner']);
+/* Elementos ocultos por defecto (se muestran desde el panel Elementos) */
+const EL_HIDE_DEF={'banner.logo':true};
 const EL_DEF={'video.producto':{t:'fino',c:'green'}};
 const STROKES=[['none','Sin borde'],['fino','Fino'],['grueso','Grueso'],['doble','Doble'],['punteado','Punteado']];
 const STROKE_COL=[['green','Verde',C.green],['cream','Crema',C.cream],['navy','Azul',C.navy]];
 const LAY=()=>S.extras.lay??={pos:{},sty:{},hide:{}};
 let EL_LAYOUT='',EL_BASE={},EL_MEASURE=null,EL_W=0,EL_H=0,EL_HID=[];
 /* Cada bloque de texto es su propio elemento en estas composiciones: text(), eyebrow(), ctaText(), offer() y tag() se envuelven solos */
-const AUTO_EL=new Set(['hero','tab','cupon','foto']),EL_ACTIVE=new Set();
+const AUTO_EL=new Set(['hero','tab','cupon','foto','banner']),EL_ACTIVE=new Set();
 const TXT_EL={'Titular':'titular','Subtítulo':'subtitulo','Destacado':'destacado','Legal':'legal','Fecha':'fecha','Antetítulo':'eyebrow','Código':'codigo'};
 const autoOn=(ctx,id)=>id&&AUTO_EL.has(EL_LAYOUT)&&!EL_ACTIVE.has(id)&&ctx!==measureCtx;
 function autoEl(ctx,R,id,fn){elBegin(ctx,id);try{return fn();}finally{elEnd(ctx,R,id);}}
 const elKey=id=>EL_LAYOUT+'.'+id;
-const elHidden=id=>!!LAY().hide[elKey(id)];
+const elHidden=id=>{const k=elKey(id),h=LAY().hide;return k in h?!!h[k]:!!EL_HIDE_DEF[k];};
 const layHas=l=>{if((S.extras.textos||[]).some(t=>t&&t.borde&&t.borde!=='none'))return true;const L2=LAY(),pre=l+'.';return[L2.pos,L2.sty,L2.hide,EL_DEF].some(o=>Object.keys(o).some(k=>k.startsWith(pre)));};
 /* Medición: un contexto de 1×1 que registra el contorno de todo lo que dibuja cada grupo */
 function trackCtx(){const c=document.createElement('canvas');c.width=c.height=1;const x=c.getContext('2d');const P=CanvasRenderingContext2D.prototype;let pts=[];
@@ -986,6 +988,49 @@ L.ofertas=(ctx,W,H,d,sc,R,o)=>{
   if(d.cta){elBegin(ctx,'cta');const h=W*.075;ctaText(ctx,R,d.cta,W/2,H*.775,h,C.navy,C.green,{align:'center',maxW:W*.7});elEnd(ctx,R,'cta');}
   if(d.destacado){elBegin(ctx,'destacado');campLines(ctx,d.destacado,W/2,H*.745,W*.7,H*.04,W*.045,fg,700,.08);elEnd(ctx,R,'destacado');}
 };
+/* BANNER in-app (docs/referencias/banners): fondo con patrón, bloque de texto centrado en vertical a la izquierda
+   (antetítulo en Rethink, titular Noland, CTA justo debajo) y visual a la derecha según el tipo:
+   ilustración dentro de una tarjeta redondeada con borde verde; PNG recortados grandes, saliendo por el borde, con arco verde
+   detrás; foto de producto o cards. El logo va oculto por defecto (el banner vive dentro de la app) y se puede mostrar. */
+const MCTX=document.createElement('canvas').getContext('2d');
+function textH(str,w,o){const words=parseRich(str||'',o.upper);if(!words.length)return 0;const font=s=>o.font==='d'?fd(s):ft(o.weight||400,s),lh=o.lh||1.15,step=Math.max(.5,o.max*.03);
+  for(let size=o.max;size>=o.min;size-=step){const r=wrapWords(MCTX,words,w,font,size);if(r&&r.lines.length<=(o.maxLines||8))return r.lines.reduce((a,l)=>a+(l.k||1),0)*size*lh;}
+  return (o.maxLines||1)*o.min*lh;}
+L.banner=(ctx,W,H,d,sc,R,o)=>{
+  const dark=sc.bg===C.navy,p=W*.048,v=S.extras.visual,ill=isIllus(v),none=!v||v==='none'||elHidden('visual');R.logoOptional=true;
+  ctx.fillStyle=sc.bg;ctx.fillRect(0,0,W,H);
+  elBegin(ctx,'patron');const pim=CAMP_IMG['patron-9x16'];if(pim){ctx.save();ctx.globalAlpha=dark?.75:.4;coverMedia(ctx,tinted(pim,dark?'#33465F':'#9FB3A0'),W,H,1);ctx.restore();}elEnd(ctx,R,'patron');
+  /* visual */
+  if(!none){elBegin(ctx,'visual');
+    if(ill){const cb={x:W*.6,y:H*.13,w:W*.355,h:H*.74},card=dark?C.green:C.navy;
+      if(!elHidden('tarjeta')){elBegin(ctx,'tarjeta');rr(ctx,cb.x,cb.y,cb.w,cb.h,H*.06);ctx.fillStyle=card;ctx.fill();ctx.lineWidth=Math.max(2,H*.008);ctx.strokeStyle=dark?C.cream:C.green;ctx.stroke();elEnd(ctx,R,'tarjeta');}
+      drawIllus(ctx,R,v,{x:cb.x+cb.w*.06,y:cb.y+cb.h*.08,w:cb.w*.88,h:cb.h*.84},elHidden('tarjeta')?sc.bg:card);}
+    else{const r=H*.66,cx=W*.785-r,cy=H*.54;
+      if(!elHidden('cinta')){elBegin(ctx,'cinta');ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2.1,Math.PI/2.1);ctx.lineWidth=W*.068;ctx.strokeStyle=C.green;ctx.stroke();elEnd(ctx,R,'cinta');}
+      if(v==='recortes')drawRecortes(ctx,R,{x:W*.5,y:H*.1,w:W*.48,h:H*.98});
+      else if(v==='cards')drawCards(ctx,R,{x:W*.53,y:H*.1,w:W*.43,h:H*.8},sc.bg);
+      else if(v==='producto'){if(S.extras.producto){contain(ctx,S.extras.producto,W*.52,H*.1,W*.46,H*.98);R.visual=true;}else R.checks.push({lvl:'warn',msg:'Elegiste foto de producto pero no hay imagen cargada.'});}}
+    elEnd(ctx,R,'visual');}
+  /* texto: se mide primero para centrarlo en vertical */
+  const cw=none?W*.8:W*.47,showLogo=!elHidden('logo'),lh=Math.max(H*.07,minLogo(R)),gap=H*.035;
+  const EO={font:'t',weight:500,max:H*.062,min:H*.035,lh:1.15,maxLines:2},TO={font:'d',upper:true,lh:.98,maxLines:3,max:H*.16,min:H*.07},SO={font:'t',max:H*.048,min:H*.03,lh:1.25,maxLines:3};
+  const ctaH=H*.145,rowH=d.destacado||d.cta||d.codigo?ctaH*1.1:0;
+  let k=1,tot=0;const hs=()=>{const e=d.eyebrow?textH(d.eyebrow,cw,EO)+gap*.5:0,t=d.titular?textH(d.titular,cw,{...TO,max:TO.max*k})+gap:0,u=d.subtitulo?textH(d.subtitulo,cw*.95,SO)+gap:0;return{e,t,u};};
+  let h=hs();const avail=H-p*2-(showLogo?lh+gap:0)-(d.fecha?H*.08:0)-(d.legal?H*.07:0);
+  while((tot=h.e+h.t+h.u+rowH)>avail&&k>.5){k*=.93;h=hs();}
+  let y=(showLogo?p+lh+gap:0)+Math.max(p,(H-(showLogo?p+lh+gap:0)-tot-(d.legal?H*.07:0))/2);
+  if(showLogo){elBegin(ctx,'logo');logoRow(ctx,R,p,p,lh,cw*.7,'left',sc.logo);elEnd(ctx,R,'logo');}
+  if(d.fecha){tag(ctx,R,d.fecha,p,y-H*.08,H*.07,sc.fg,{maxW:cw,label:'Fecha',bg:sc.bg});}
+  if(d.eyebrow){text(ctx,R,'Antetítulo',d.eyebrow,{x:p,y,w:cw,h:h.e},{...EO,color:dark?C.green:C.navy,bg:sc.bg});y+=h.e;}
+  if(d.titular){text(ctx,R,'Titular',d.titular,{x:p,y,w:cw,h:h.t-gap+1},{...TO,max:TO.max*k,color:sc.fg,bg:sc.bg,...hiOpts(sc)});y+=h.t;}
+  if(d.subtitulo){text(ctx,R,'Subtítulo',d.subtitulo,{x:p,y,w:cw*.95,h:h.u-gap+1},{...SO,color:sc.fg,bg:sc.bg});y+=h.u;}
+  let x=p;
+  if(d.destacado)x+=offer(ctx,R,d,x,y,ctaH*1.05,cw*.55,sc)+W*.018;
+  if(d.cta)x+=ctaText(ctx,R,d.cta,x,y+ctaH*.05,ctaH,sc.hi,sc.bg,{maxW:Math.max(60,cw-(x-p))})+W*.015;
+  if(d.codigo&&cw-(x-p)>W*.1)tag(ctx,R,'Código: '+d.codigo,x+W*.005,y+ctaH*.15,ctaH*.8,sc.fg,{maxW:cw-(x-p),label:'Código',bg:sc.bg});
+  if(S.extras.qr)qr(ctx,R,W-p-H*.26,H-p*.6-H*.26*1.18,H*.26,false);
+  text(ctx,R,'Legal',d.legal,{x:p,y:H-p*.6-H*.07,w:cw*1.05,h:H*.07},{font:'t',max:H*.034,min:H*.022,color:sc.fg,bg:sc.bg,lh:1.2,maxLines:2,valign:'bottom'});
+};
 const curFormatFor=R=>FORMATS[R.fmt];
 const minLogo=R=>curFormatFor(R).print?64:40;
 
@@ -1100,6 +1145,16 @@ A domicilio con Servientrega a todo el país (ver Tarifas).`},
 - Recuadro de mensaje abajo, redondeado con borde claro, en mayúsculas espaciadas (Rethink Sans): la acción o el beneficio ("Tendremos sorteos…", "Desliza para ver los premios…").
 - Destellos de cuatro puntas en crema como acento.
 - Carrusel de la campaña: portada + una lámina por premio (GIVEAWAY + categoría, productos al centro, requisitos en el recuadro de abajo).`},
+ {id:'ec_banners',titulo:'Formatos de banners in-app',texto:`Referencias aprobadas de banners in-app (1059×465; imágenes en docs/referencias/banners/). Plantilla "Banner" (in-app / hero). Patrones a seguir:
+- Fondo azul oscuro o claro Upper con el patrón de líneas de la marca, suave.
+- Texto a la izquierda (menos de la mitad del ancho), centrado en vertical: antetítulo corto en Rethink Sans (minúsculas, como frase), titular en Noland de 2 o 3 líneas con una línea resaltada, y el CTA justo debajo del titular.
+- Visual a la derecha, según el recurso:
+  1. Ilustración oficial dentro de una tarjeta redondeada azul (o verde sobre azul) con borde verde (banner-01).
+  2. PNG recortado grande, que sale por el borde inferior, con un arco verde grueso detrás (banner-02, banner-04). Sirve para cajas, productos, manos o composiciones de varios PNG.
+  3. Círculo verde grande detrás del texto con el producto recortado a la derecha (banner-03): se logra moviendo y agrandando la cinta.
+  4. Cupón con código grande (banner-05): plantilla Cupón.
+- Sin logo de Upper: el banner vive dentro de la app (se puede mostrar desde Elementos).
+- Lo que NO se replica: CTA en cápsula redondeada (va como texto con resaltado recto), sombras y degradados del piso (banner-04), logos de terceros como protagonistas sin permiso.`},
  {id:'ec_disenos',titulo:'Formatos de diseño para redes',texto:`Referencias aprobadas de piezas para redes (feed 4:5 y portadas de carrusel; imágenes en docs/referencias/social/). Patrones a seguir:
 - Titular en Noland, grande y con jerarquía: dos niveles de tamaño o de color (una línea en crema y el remate en verde sobre azul oscuro; o todo en azul oscuro sobre fondo claro). Ej.: "LO MISMO PERO / MÁS BARATO", "LAS 4 CATEGORÍAS / QUE SIEMPRE CONVIENE TRAER DEL EXTRANJERO".
 - Titular escalonado y expresivo: líneas de distinto tamaño, alineado a la izquierda, con las palabras clave mucho más grandes ("TIENDAS EN / USA / CON / CARTERAS TOP EN OFERTA").
@@ -1162,6 +1217,16 @@ No: baterías sueltas, drones, vapes, cannabis, armas, dinero, falsificaciones, 
 - Recuadro de mensaje abajo, redondeado con borde claro, en mayúsculas espaciadas (Rethink Sans): la acción o el beneficio ("Tendremos sorteos…", "Desliza para ver los premios…").
 - Destellos de cuatro puntas en crema como acento.
 - Carrusel de la campaña: portada + una lámina por premio (GIVEAWAY + categoría, productos al centro, requisitos en el recuadro de abajo).`},
+ {id:'co_banners',titulo:'Formatos de banners in-app',texto:`Referencias aprobadas de banners in-app (1059×465; imágenes en docs/referencias/banners/). Plantilla "Banner" (in-app / hero). Patrones a seguir:
+- Fondo azul oscuro o claro Upper con el patrón de líneas de la marca, suave.
+- Texto a la izquierda (menos de la mitad del ancho), centrado en vertical: antetítulo corto en Rethink Sans (minúsculas, como frase), titular en Noland de 2 o 3 líneas con una línea resaltada, y el CTA justo debajo del titular.
+- Visual a la derecha, según el recurso:
+  1. Ilustración oficial dentro de una tarjeta redondeada azul (o verde sobre azul) con borde verde (banner-01).
+  2. PNG recortado grande, que sale por el borde inferior, con un arco verde grueso detrás (banner-02, banner-04). Sirve para cajas, productos, manos o composiciones de varios PNG.
+  3. Círculo verde grande detrás del texto con el producto recortado a la derecha (banner-03): se logra moviendo y agrandando la cinta.
+  4. Cupón con código grande (banner-05): plantilla Cupón.
+- Sin logo de Upper: el banner vive dentro de la app (se puede mostrar desde Elementos).
+- Lo que NO se replica: CTA en cápsula redondeada (va como texto con resaltado recto), sombras y degradados del piso (banner-04), logos de terceros como protagonistas sin permiso.`},
  {id:'co_disenos',titulo:'Formatos de diseño para redes',texto:`Referencias aprobadas de piezas para redes (feed 4:5 y portadas de carrusel; imágenes en docs/referencias/social/). Patrones a seguir:
 - Titular en Noland, grande y con jerarquía: dos niveles de tamaño o de color (una línea en crema y el remate en verde sobre azul oscuro; o todo en azul oscuro sobre fondo claro). Ej.: "LO MISMO PERO / MÁS BARATO", "LAS 4 CATEGORÍAS / QUE SIEMPRE CONVIENE TRAER DEL EXTRANJERO".
 - Titular escalonado y expresivo: líneas de distinto tamaño, alineado a la izquierda, con las palabras clave mucho más grandes ("TIENDAS EN / USA / CON / CARTERAS TOP EN OFERTA").
@@ -1482,7 +1547,7 @@ function drawWire(c,t){const k=Math.min(.4,340/Math.max(t.w,t.h));const W=t.w,H=
   const bars=(a,b,w,n,hh,g)=>{for(let i=0;i<n;i++){x.fillStyle=ln;x.fillRect(a,b+i*(hh+g),w*(i===n-1?.6:1),hh);}};
   const wide=W/H>1.3,top=H*(t.opt?.safeTop||0),bot=H*(t.opt?.safeBot||0),A=H-top-bot;
   if(t.opt?.safeTop){x.fillStyle=dark?'rgba(255,255,255,.06)':'rgba(20,29,48,.05)';x.fillRect(0,0,W,top);x.fillRect(0,H-bot,W,bot);}
-  if(t.layout==='hero'){if(wide){const p=H*.1;box(p,p,H*.35,H*.08,ln);bars(p,H*.3,W*.45,2,H*.11,H*.04);bars(p,H*.6,W*.4,2,H*.035,H*.025);box(p,H*.76,W*.12,H*.11,ac,H*.055);box(W*.6,H*.15,W*.34,H*.75);}
+  if(t.layout==='hero'||t.layout==='banner'){if(wide){const p=H*.1;box(p,p,H*.35,H*.08,ln);bars(p,H*.3,W*.45,2,H*.11,H*.04);bars(p,H*.6,W*.4,2,H*.035,H*.025);box(p,H*.76,W*.12,H*.11,ac,H*.055);box(W*.6,H*.15,W*.34,H*.75);}
     else{const p=W*.08;box(p,top+p,W*.28,W*.06,ln);bars(p,top+A*.14,W*.8,2,A*.05,A*.02);bars(p,top+A*.3,W*.75,2,A*.015,A*.012);box(p,top+A*.38,W-p*2,A*.4);box(p,top+A*.84,W*.3,A*.06,ac,A*.03);}}
   else if(t.layout==='tab'){if(wide){box(W*.06,-H*.05,H*.36,H*.19,ln);bars(W*.06,H*.28,W*.42,2,H*.1,H*.04);bars(W*.06,H*.56,W*.4,2,H*.035,H*.025);box(W*.06,H*.76,W*.13,H*.11,ac,H*.055);box(W*.56,H*.14,W*.4,H*.76);}
     else{const p=W*.08;box(W/2-W*.13,top-W*.05,W*.26,W*.15,ln);bars(W*.18,top+A*.12,W*.64,2,A*.05,A*.02);bars(W*.22,top+A*.27,W*.56,1,A*.015,A*.01);box(p,top+A*.33,W-p*2,A*.45);box(W/2-W*.16,top+A*.83,W*.32,A*.06,ac,A*.03);}}
@@ -1685,7 +1750,7 @@ const elPresent=id=>{const d=S.copy;const m={info:d.destacado||d.cta,eyebrow:d.e
 function elPanel(){const lay=curTpl().layout,set=EL_SETS[lay];if(!set)return'';const L2=LAY(),key=id=>lay+'.'+id;
   return `<div class="f full" style="margin-top:14px"><b>Elementos</b><span class="hint">El tamaño y la posición se ajustan en la vista previa: arrastra un elemento para moverlo y su esquina para cambiar el tamaño. Aquí eliges si se muestra y su borde.</span>
   <div class="els">${set.filter(id=>elPresent(id)&&!/^x\d$/.test(id)).map(id=>{const nm=lay==='video'&&id==='titular'?'Antetítulo y titular':lay==='cupon'&&id==='tarjeta'?'Tarjeta del cupón':EL_NAMES[id];const k=key(id),st=L2.sty[k]||EL_DEF[k]||{},sz=Math.round((L2.pos[k]?.s||1)*100),canHide=id!=='logo'||EL_LOGO_OPT.has(lay);
-    return `<div class="el-row"><label style="display:flex;gap:6px;align-items:center;min-width:190px">${canHide?`<input type="checkbox" data-elv="${id}" ${L2.hide[k]?'':'checked'}>`:''}${nm}</label>
+    return `<div class="el-row"><label style="display:flex;gap:6px;align-items:center;min-width:190px">${canHide?`<input type="checkbox" data-elv="${id}" ${(k in L2.hide?L2.hide[k]:EL_HIDE_DEF[k])?'':'checked'}>`:''}${nm}</label>
     ${id==='logo'?(canHide?'<span class="hint">Opcional en este formato.</span>':'<span class="hint">Obligatorio en esta composición.</span>'):`<select data-els="${id}" aria-label="Borde de ${nm}">${STROKES.map(([v,l])=>`<option value="${v}" ${(st.t||'none')===v?'selected':''}>${l}</option>`).join('')}</select>
     <select data-elc="${id}" aria-label="Color del borde">${STROKE_COL.map(([v,l])=>`<option value="${v}" ${(st.c||'green')===v?'selected':''}>${l}</option>`).join('')}</select>`}</div>`;}).join('')}</div>
   <div class="row" style="margin-top:8px"><button class="btn sm" id="elReset" ${layHas(lay)?'':'disabled'}>Restablecer diseño</button></div></div>`;}

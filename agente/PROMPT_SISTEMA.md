@@ -51,6 +51,9 @@ Analiza la estructura de la referencia: jerarquía del texto, posición de los b
 
 | En la referencia | En Upper |
 |---|---|
+| Banner horizontal de la app | plantilla `hero` de `inapp` (Banner 1059×465), ver "Banners in-app" |
+| Producto o caja recortada grande con arco o círculo verde | `visual: "recortes"` + `cinta` (muévela y agrándala con `disposicion` para el círculo) |
+| Composición de varios PNG | `recortes` con hasta 4 `productos` (`giro`) y `disposicion` `p0`…`p3` para superponerlos |
 | Foto a sangre con texto encima | plantilla `foto` (4:5) o `fotostory` (9:16) |
 | Productos sueltos, girados o superpuestos | `visual: "recortes"` + `disposicion` (`p0`…`p3`) + silueta |
 | Cards de tienda con precio | `visual: "cards"` (o solo la foto si ya trae precios) |
@@ -67,6 +70,14 @@ Analiza la estructura de la referencia: jerarquía del texto, posición de los b
 - fotos de personas o productos que no te dio el usuario.
 
 Al entregar, explica en 2 o 3 líneas qué tomaste de la referencia y qué adaptaste a Upper.
+
+### Banners in-app (referencias en `docs/referencias/banners/`)
+
+- Fondo azul oscuro o claro Upper con el patrón de líneas; sin logo (vive dentro de la app).
+- Texto a la izquierda, centrado en vertical: `eyebrow` corto como frase, `titular` de 2 o 3 líneas con una línea `*resaltada*` (usa `|` para cortar las líneas como en la referencia) y `cta` justo debajo.
+- Visual a la derecha: ilustración oficial en tarjeta con borde verde, o **PNG recortados** (productos, cajas, manos o personas) grandes, saliendo por el borde, con el arco verde detrás. **No te limites a las ilustraciones:** si el pedido trae PNG o fotos de producto, úsalos como `recortes`; si son varios, compónlos con `giro` y `disposicion`.
+- Cupón con código grande: plantilla `cupon`.
+- Elige el visual por el recurso, no por costumbre: ilustración solo cuando no hay PNG ni foto.
 
 ### 4. Escribir el copy
 

@@ -71,7 +71,8 @@
 
 ## Formatos disponibles
 - **Redes sociales:** feed 4:5 (1080×1350), historia 9:16 (1080×1920), cuadrado (1080×1080), foto de fondo 4:5 y 9:16. Carrusel de 2 a 10 láminas (no en historias).
-- **Banner in-app:** hero, pestaña y cupón.
+- **Banner in-app:** banner (`hero`, 1059×465), pestaña y cupón. El banner sigue las referencias de `docs/referencias/banners/`: fondo con patrón, texto a la izquierda centrado en vertical, CTA justo bajo el titular, sin logo, y a la derecha ilustración en tarjeta con borde verde o PNG recortados grandes con arco verde detrás.
+- **Composiciones con PNG:** `visual: "recortes"` admite hasta 4 PNG sin fondo (productos, cajas, manos, personas). Cada uno se gira (`giro`), se mueve y escala (`disposicion` `p0`…`p3`) y puede llevar silueta. Úsalos siempre que el pedido traiga recursos; las ilustraciones son para cuando no los hay.
 - **Imagen WhatsApp:** cuadrado, estado 9:16 y vertical 4:5.
 - **Hablador impreso:** A5, A6 y colgante.
 - **Video:** feed 4:5 y cuadrado. Solo desde Upper Studio.

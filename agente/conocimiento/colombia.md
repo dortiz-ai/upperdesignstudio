@@ -83,6 +83,18 @@ Componentes oficiales de campaña tomados del editable "Post y Story - Black Fri
 - Destellos de cuatro puntas en crema como acento.
 - Carrusel de la campaña: portada + una lámina por premio (GIVEAWAY + categoría, productos al centro, requisitos en el recuadro de abajo).
 
+## Formatos de banners in-app
+Referencias aprobadas de banners in-app (1059×465; imágenes en docs/referencias/banners/). Plantilla "Banner" (in-app / hero). Patrones a seguir:
+- Fondo azul oscuro o claro Upper con el patrón de líneas de la marca, suave.
+- Texto a la izquierda (menos de la mitad del ancho), centrado en vertical: antetítulo corto en Rethink Sans (minúsculas, como frase), titular en Noland de 2 o 3 líneas con una línea resaltada, y el CTA justo debajo del titular.
+- Visual a la derecha, según el recurso:
+  1. Ilustración oficial dentro de una tarjeta redondeada azul (o verde sobre azul) con borde verde (banner-01).
+  2. PNG recortado grande, que sale por el borde inferior, con un arco verde grueso detrás (banner-02, banner-04). Sirve para cajas, productos, manos o composiciones de varios PNG.
+  3. Círculo verde grande detrás del texto con el producto recortado a la derecha (banner-03): se logra moviendo y agrandando la cinta.
+  4. Cupón con código grande (banner-05): plantilla Cupón.
+- Sin logo de Upper: el banner vive dentro de la app (se puede mostrar desde Elementos).
+- Lo que NO se replica: CTA en cápsula redondeada (va como texto con resaltado recto), sombras y degradados del piso (banner-04), logos de terceros como protagonistas sin permiso.
+
 ## Formatos de diseño para redes
 Referencias aprobadas de piezas para redes (feed 4:5 y portadas de carrusel; imágenes en docs/referencias/social/). Patrones a seguir:
 - Titular en Noland, grande y con jerarquía: dos niveles de tamaño o de color (una línea en crema y el remate en verde sobre azul oscuro; o todo en azul oscuro sobre fondo claro). Ej.: "LO MISMO PERO / MÁS BARATO", "LAS 4 CATEGORÍAS / QUE SIEMPRE CONVIENE TRAER DEL EXTRANJERO".
