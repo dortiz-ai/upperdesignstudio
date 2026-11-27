@@ -27,7 +27,7 @@ Datos mínimos para ejecutar:
 | Dato | Si no viene en el pedido |
 |---|---|
 | País (`ec` / `co`) | Infiérelo del canal, la moneda o las tiendas; si no se puede, pregunta. Por defecto Ecuador. |
-| Formato y tamaño (plantilla) | Pregunta. Por defecto Feed 4:5 (`social` / `feed`). |
+| Formato y tamaño (plantilla) | **Pregunta siempre y espera la respuesta** (regla obligatoria, abajo). Sin valor por defecto. |
 | Post o carrusel (y cuántas láminas) | Por defecto post. Si dice "carrusel" sin número, por defecto 5. |
 | Mensaje y datos reales (monto, %, fecha, código) | Pregunta siempre que haya una oferta sin cifras. **Nunca inventes precios, fechas ni códigos.** |
 | Recursos (PNG de producto, foto de fondo, logos de aliados) | Si el diseño los necesita y no llegaron, pídelos o propón un visual que no los necesite (ilustración oficial). |
@@ -36,16 +36,22 @@ Datos mínimos para ejecutar:
 Reglas para preguntar:
 - **Un solo mensaje**, máximo 4 preguntas numeradas, cada una con una opción por defecto en negrita.
 - No preguntes lo que puedes inferir ni lo que tiene un valor por defecto razonable.
-- Cierra con: *"Si respondes **dale**, sigo con las opciones por defecto."*
-- Si el pedido está completo, no preguntes nada: ejecuta.
+- Cierra con: *"Si respondes **dale**, sigo con las opciones por defecto."* El "dale" nunca cubre el formato.
+- Si el pedido está completo (formato incluido), no preguntes nada: ejecuta.
+
+**Regla obligatoria: el formato se confirma antes de ejecutar.** Si el pedido no dice el formato y el tamaño (por ejemplo "historia", "feed 4:5", "banner de la app", "1080×1440"), pregúntalo y **no generes nada hasta tener la respuesta**. No lo asumas por defecto, ni aunque respondan "dale" a las demás preguntas: en ese caso vuelve a pedir solo el formato. Si la referencia o el canal sugieren uno, propónlo como opción recomendada, pero espera la confirmación. Ofrece las opciones con su tamaño:
+- Feed 4:5 (1080×1350) · Historia 9:16 (1080×1920) · Cuadrado (1080×1080)
+- Banner de la app (1059×465) · Pestaña de la app (1080×540) · Cupón (1080×400)
+- WhatsApp (cuadrado, estado 9:16 o vertical 4:5) · Hablador impreso (A5, A6 o colgante)
+
 
 Ejemplo:
 > Antes de diseñarlo:
-> 1. ¿Formato? **Feed 4:5** · Historia 9:16 · Cuadrado · Banner de la app
+> 1. ¿En qué formato lo necesitas? Feed 4:5 · Historia 9:16 · Cuadrado · Banner de la app (este es obligatorio)
 > 2. ¿Cuál es el descuento exacto y hasta cuándo va?
 > 3. ¿Tienes los PNG sin fondo de los productos? Si no, uso la ilustración **Compra en la app**.
 >
-> Si respondes **dale**, sigo con las opciones por defecto (sin fecha y con ilustración).
+> Dime el formato; si en lo demás respondes **dale**, sigo con las opciones por defecto (sin fecha y con ilustración).
 
 ## 3. Adaptar una referencia a Upper
 

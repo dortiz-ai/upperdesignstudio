@@ -103,6 +103,7 @@ No hay paso de Requerimiento: el equipo lo eliminó porque no incidía en la eje
 
 ## Agente de Slack y generador por comando
 - **Si la sesión viene de Slack o te piden una pieza por chat, sigue `agente/INSTRUCCIONES.md`**: preguntar una sola vez lo que falte (con opciones por defecto), adaptar referencias a Upper, generar, revisar y entregar.
+- **Regla obligatoria del agente:** si el pedido no especifica formato y tamaño, se pregunta y no se ejecuta hasta tener la respuesta (no hay formato por defecto y el "dale" no lo cubre).
 - `scripts/render.mjs`: genera PNG + SVG + `revision.json` desde un `pedido.json` (ejemplo en `agente/pedido-ejemplo.json`) abriendo la misma `index.html` en Chromium sin pantalla (Playwright). `--catalogo` lista formatos, plantillas, visuales y elementos; `--conocimiento ec|co` imprime tono, conocimiento y reglas. Admite disposición libre, jerarquía de texto, productos con silueta, foto de fondo y carruseles. No exporta video.
 - `datos/equipo.json`: conocimiento y reglas editados en la plataforma (botón "Exportar para el agente" en Conocimiento de marca). Súbelo al repo para que el agente use lo mismo que el equipo.
 - `window.__studioReady` indica que la página terminó de cargar (tipografías e ilustraciones); el generador lo espera.

@@ -34,7 +34,7 @@ Clasifícalo:
 | Dato | Si no viene |
 |---|---|
 | País | Infiérelo del canal, la moneda o las tiendas; por defecto Ecuador |
-| Formato y tamaño | Pregunta; por defecto Feed 4:5 |
+| Formato y tamaño | **Pregunta siempre y espera la respuesta** (regla obligatoria, abajo). Sin valor por defecto |
 | Post o carrusel (láminas) | Por defecto post; carrusel sin número = 5 láminas |
 | Mensaje y datos reales (monto, %, fecha, código) | **Pregunta siempre que haya una oferta sin cifras** |
 | Recursos (PNG de producto, foto, logos de aliados) | Pídelos o propone un visual sin recursos (ilustración oficial) |
@@ -42,8 +42,14 @@ Clasifícalo:
 
 - Un solo mensaje, máximo 4 preguntas numeradas, cada una con una opción por defecto en negrita.
 - No preguntes lo que puedes inferir.
-- Cierra con: *"Si respondes **dale**, sigo con las opciones por defecto."*
-- Si el pedido está completo, ejecuta sin preguntar.
+- Cierra con: *"Si respondes **dale**, sigo con las opciones por defecto."* El "dale" nunca cubre el formato.
+- Si el pedido está completo (formato incluido), ejecuta sin preguntar.
+
+**Regla obligatoria: el formato se confirma antes de ejecutar.** Si el pedido no dice el formato y el tamaño (por ejemplo "historia", "feed 4:5", "banner de la app", "1080×1440"), pregúntalo y **no generes nada hasta tener la respuesta**. No lo asumas por defecto, ni aunque respondan "dale" a las demás preguntas: en ese caso vuelve a pedir solo el formato. Si la referencia o el canal sugieren uno, propónlo como opción recomendada, pero espera la confirmación. Ofrece las opciones con su tamaño:
+- Feed 4:5 (1080×1350) · Historia 9:16 (1080×1920) · Cuadrado (1080×1080)
+- Banner de la app (1059×465) · Pestaña de la app (1080×540) · Cupón (1080×400)
+- WhatsApp (cuadrado, estado 9:16 o vertical 4:5) · Hablador impreso (A5, A6 o colgante)
+
 
 ### 3. Adaptar una referencia a Upper
 
