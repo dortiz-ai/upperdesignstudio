@@ -68,9 +68,15 @@ Ejemplo:
 | Cards de tienda con precio | `visual: "cards"` (o solo la foto si ya trae precios) |
 | Titular con tamaños distintos | Marcas `^grande^`, `~pequeño~`, `\|` para salto de línea |
 | Palabras en otro color | `*resaltado*` |
-| Botón o cápsula redondeada | CTA como texto con resaltado recto (regla de marca) |
+| Botón o cápsula redondeada en el CTA | `cta_estilo: "boton"` (también `"resaltado"` o `"subrayado"`) |
+| Fondo con patrón y degradado suave | `degradado: true` (solo en composiciones con patrón: banner, campaña, ofertas) |
+| Productos en las esquinas con contorno verde grueso (post-01) | `recortes` con `silueta: "contorno"`, `color_silueta: "green"` y `disposicion` `p0`…`p3` en las esquinas |
+| Cards claras con sello de precio (post-02) | `visual: "cards"` con `nombre` y `precio` (el sello tipo estallido aún no existe: el precio va en la card) |
+| Precio o tarifa protagonista con código (post-03) | `destacado` para el monto y un `texto` con bloque verde para el código; vigencia en otro `texto` |
+| Persona o producto recortado a la derecha con arco verde (post-04) | `recortes` + `cinta`; titular escalonado con `^grande^` y `\|` |
+| Carrusel de tips con número grande (post-05) | `laminas`: número en el `titular` (`^1.-^`), frase en `subtitulo` |
 | Bloques en otra posición o tamaño | `disposicion`: `x`, `y` (fracción del lienzo), `tamano` (0,4 a 2,2), `ocultar`, `borde` |
-| Otros colores, tipografías, degradados, sombras difusas | Paleta Upper, Noland y Rethink Sans, sin degradados; sombra solo plana |
+| Otros colores, tipografías, degradados fuertes, sombras difusas | Paleta Upper, Noland y Rethink Sans; degradado suave solo en el fondo con patrón; sombra solo plana |
 
 3. **No copies** de la referencia:
    - logos ni marcas de terceros;

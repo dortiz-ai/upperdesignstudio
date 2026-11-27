@@ -93,7 +93,9 @@ Referencias aprobadas de banners in-app (1059×465; imágenes en docs/referencia
   3. Círculo verde grande detrás del texto con el producto recortado a la derecha (banner-03): se logra moviendo y agrandando la cinta.
   4. Cupón con código grande (banner-05): plantilla Cupón.
 - Sin logo de Upper: el banner vive dentro de la app (se puede mostrar desde Elementos).
-- Lo que NO se replica: CTA en cápsula redondeada (va como texto con resaltado recto), sombras y degradados del piso (banner-04), logos de terceros como protagonistas sin permiso.
+- CTA: botón redondeado verde (como en las referencias), resaltado recto o subrayado.
+- Fondo: el patrón admite un degradado suave hacia un tono más claro de la misma familia (banner-04).
+- Lo que NO se replica: sombras del piso (banner-04) y logos de terceros como protagonistas sin permiso.
 
 ## Formatos de diseño para redes
 Referencias aprobadas de piezas para redes (feed 4:5 y portadas de carrusel; imágenes en docs/referencias/social/). Patrones a seguir:
@@ -105,7 +107,14 @@ Referencias aprobadas de piezas para redes (feed 4:5 y portadas de carrusel; im�
 - La cinta o arco verde grueso como base o fondo de la foto (horizonte curvo, arco detrás de la persona o la caja).
 - Fondo liso de la paleta con el patrón de ilustraciones de línea muy tenue; acentos sueltos de ilustración oficial (destello, mano que señala).
 - Tarjetas de producto tipo captura de tienda (precio, precio anterior, ahorro) en fila, cortadas por los bordes, para carruseles de ofertas.
-Lo que NO se replica de estas referencias (manda la revisión de marca): botones o cápsulas redondeadas como "Desliza para ver más" (si se necesita, va como texto o como CTA con resaltado recto), degradados y efectos de vidrio.
+Posts de referencia (docs/referencias/social/post-*.webp):
+- post-01: 4 productos recortados en las esquinas con contorno verde grueso (silueta "contorno" verde), titular centrado en medio con palabras clave en verde, logo en pestaña arriba y CTA abajo.
+- post-02: cards claras redondeadas con un producto cada una, marca en Rethink fina y modelo en negrita, precio en un sello verde de puntas tipo estallido sobre la esquina de la card.
+- post-03: tarifa o precio protagonista en un recuadro claro grande, código en un recuadro con fondo verde, bandera como emoji, onda verde diagonal detrás y vigencia abajo.
+- post-04: persona o producto recortado ocupando la mitad derecha sobre fondo claro, titular escalonado a la izquierda y arco verde abajo a la izquierda.
+- post-05 (carrusel de tips): número grande en verde ("1.-"), frase en negrita + explicación en Rethink, imagen en una tarjeta redondeada y franja verde detrás.
+- Fondos: el patrón puede llevar un degradado suave; el CTA puede ser botón redondeado, resaltado o subrayado.
+Lo que NO se replica de estas referencias (manda la revisión de marca): cápsulas redondeadas que no son el CTA, como "Desliza para ver más"; degradados fuera del fondo con patrón y efectos de vidrio. El CTA sí puede ir como botón redondeado, resaltado recto o subrayado.
 
 # REGLAS DE MARCA Y NEGOCIO (Colombia)
 - [Bloqueante] HACER: Usar solo Upper Dark Blue, Green y Cream Green, en las combinaciones aprobadas.
@@ -127,7 +136,7 @@ Lo que NO se replica de estas referencias (manda la revisión de marca): botones
 - [Alerta] NO HACER: Titulares de más de 7 palabras.
 - [Alerta] NO HACER: Subtítulos de más de 15 palabras.
 - [Alerta] NO HACER: Más de un CTA por pieza.
-- [Alerta] NO HACER: Botones o bloques redondeados con texto. El CTA va como texto en Noland con resaltado recto, como las palabras con *. Sin textos con contorno.
+- [Alerta] NO HACER: Bloques redondeados con texto fuera del CTA. El CTA va en Noland con uno de tres estilos: resaltado recto (como las palabras con *), botón redondeado verde o texto subrayado. Sin textos con contorno.
 - [Alerta] NO HACER: Sobreinformar: más de 30 palabras de mensaje (sin contar fecha, código ni legal) o demasiados elementos a la vez.
 - [Recomendación] NO HACER: Más de 2 emojis en la gráfica: úsalos con moderación (se ven distinto según el dispositivo).
 - [Alerta] NO HACER: Frases prohibidas: "Te invitamos a", "Puedes", "Recuerda que puedes".

@@ -379,5 +379,11 @@
     "min": 2,
     "max": 10,
     "solo_formato": "social"
-  }
+  },
+  "cta_estilo": {
+    "resaltado": "texto con resaltado verde recto (por defecto)",
+    "boton": "botón verde redondeado",
+    "subrayado": "texto subrayado"
+  },
+  "degradado": "true: degradado suave de fondo; solo en composiciones con patrón (banner, campana, ofertas)"
 }

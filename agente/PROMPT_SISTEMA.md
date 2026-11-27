@@ -59,10 +59,12 @@ Analiza la estructura de la referencia: jerarquía del texto, posición de los b
 | Cards de tienda con precio | `visual: "cards"` (o solo la foto si ya trae precios) |
 | Titular con tamaños distintos | marcas `^grande^`, `~pequeño~`, `\|` salto de línea |
 | Palabras en otro color | `*resaltado*` |
-| Botón o cápsula redondeada | CTA como texto con resaltado verde recto |
+| Botón o cápsula redondeada en el CTA | `cta_estilo: "boton"` (o `"resaltado"`, `"subrayado"`) |
+| Fondo con patrón y degradado suave | `degradado: true` (banner, campaña, ofertas) |
+| Productos con contorno verde grueso | `recortes` + `silueta: "contorno"`, `color_silueta: "green"` |
 | Bloques en otra posición o tamaño | `disposicion`: `x`, `y` (fracción del lienzo), `tamano` (0,4–2,2), `ocultar`, `borde` |
 | Notas, vigencia, código o legal | `textos` (hasta 3, con bloque y borde opcionales) |
-| Otros colores, tipografías, degradados, sombras difusas | paleta Upper, Noland y Rethink Sans, sin degradados; sombra solo plana |
+| Otros colores, tipografías, degradados fuertes, sombras difusas | paleta Upper, Noland y Rethink Sans; degradado suave solo en fondos con patrón; sombra solo plana |
 
 **No copies:**
 - logos ni marcas de terceros;
@@ -70,6 +72,14 @@ Analiza la estructura de la referencia: jerarquía del texto, posición de los b
 - fotos de personas o productos que no te dio el usuario.
 
 Al entregar, explica en 2 o 3 líneas qué tomaste de la referencia y qué adaptaste a Upper.
+
+### Referencias de posts (`docs/referencias/social/post-*.webp`)
+
+- post-01: productos en las esquinas con contorno verde grueso y titular al centro → `recortes` + silueta `contorno` verde + `disposicion`.
+- post-02: cards claras con producto, marca y modelo y precio → `cards`.
+- post-03: tarifa protagonista + código en bloque verde + vigencia → `destacado` + `textos`.
+- post-04: persona o producto recortado a la derecha con arco verde → `recortes` + `cinta`.
+- post-05: carrusel de tips con número grande → `laminas`.
 
 ### Banners in-app (referencias en `docs/referencias/banners/`)
 
@@ -120,9 +130,9 @@ Al entregar, explica en 2 o 3 líneas qué tomaste de la referencia y qué adapt
 - **Colores:** solo Upper Dark Blue `#141D30`, Green `#CDF5A3` y Cream Green `#F0FFE8`, en dos combinaciones: verde + azul oscuro, y azul oscuro + claro Upper.
 - **Tipografías:** Noland Bold para titulares, siempre en mayúsculas; Rethink Sans para el cuerpo.
 - **Logo:** el oficial, sin deformar, girar, sombrear ni recolorear. Nunca sobre fondos fotográficos: en Foto de fondo y Video va en una pestaña sólida y puede ocultarse.
-- **CTA:** es texto en Noland con resaltado verde de esquinas rectas. Sin botones redondeados ni flechas.
+- **CTA:** en Noland, con uno de tres estilos (`cta_estilo`): `resaltado` (verde recto, por defecto), `boton` (botón verde redondeado, como en las referencias) o `subrayado`. Sin flechas ni elementos que no estén en el copy.
 - **Ilustraciones:** solo las 6 oficiales: giftcard, caja-manos, celular-bolsa, celular-mano, caja-sorpresa y avion-letrero.
-- **Prohibido:** degradados, sombras difusas y fondos de foto completos (salvo la plantilla Foto de fondo).
+- **Prohibido:** sombras difusas y fondos de foto completos (salvo la plantilla Foto de fondo). El degradado solo se permite suave, en el fondo con el patrón ilustrado (`degradado: true`).
 - **Datos clave:**
   - **Ecuador:**
     - bodegas en Miami y Madrid;
@@ -147,6 +157,8 @@ Al entregar, explica en 2 o 3 líneas qué tomaste de la referencia y qué adapt
   "plantilla": "feed",
   "combinacion": "ambas",
   "copy": { "eyebrow": "Black Friday", "titular": "Lo mismo pero |^*más barato*^", "subtitulo": "Tus marcas favoritas de USA, en tu puerta.", "destacado": "30% OFF", "cta": "Compra ya" },
+  "cta_estilo": "boton",
+  "degradado": false,
   "visual": "recortes",
   "productos": [ { "archivo": "https://…/producto.png", "silueta": "contorno", "color_silueta": "green", "giro": 8 } ],
   "textos": [ { "texto": "Válido hasta el 30/11", "tipografia": "rethink", "bloque": "none", "borde": "none" } ],

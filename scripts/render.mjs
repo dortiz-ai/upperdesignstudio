@@ -107,6 +107,8 @@ function pageCatalog() {
     campos_copy: [...FIELDS, ...EXTRA_FIELDS].map(([k, l]) => ({ campo: k, nombre: l, limite: LIMITS[k] })),
     marcas_de_texto: { "*texto*": "resaltado", "^texto^": "más grande", "~texto~": "más pequeño", "|": "salto de línea" },
     carrusel: { min: CAR_MIN, max: CAR_MAX, solo_formato: "social" },
+    cta_estilo: { resaltado: "texto con resaltado verde recto (por defecto)", boton: "botón verde redondeado", subrayado: "texto subrayado" },
+    degradado: "true: degradado suave de fondo; solo en composiciones con patrón (banner, campana, ofertas)",
   };
 }
 function pageKnowledge(pais) {
@@ -137,6 +139,8 @@ async function pageRender(brief) {
   }
   S.extras.qr = brief.qr || ""; S.waMsg = brief.mensaje || "";
   S.extras.icono = brief.icono === "tiktok" ? "tiktok" : "none";
+  S.extras.ctaEstilo = ["resaltado", "boton", "subrayado"].includes(brief.cta_estilo) ? brief.cta_estilo : "resaltado";
+  S.extras.degradado = !!brief.degradado;
   S.extras.textos = (brief.textos || []).slice(0, 3).map((t) => (typeof t === "string" ? { texto: t } : t)).map((t) => ({
     texto: t.texto || "", fuente: t.tipografia === "noland" ? "d" : "t", caso: t.caso || "normal", color: t.color || "auto",
     bloque: t.bloque || "none", borde: t.borde || "none", bordeColor: t.color_borde || "green" }));

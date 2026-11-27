@@ -266,7 +266,7 @@ dialog#gate::backdrop{background:rgba(20,29,48,.55)}
           <li>Cuerpo y etiquetas en Rethink Sans; titulares, destacado y CTA en Noland.</li>
           <li>Ilustraciones: solo las oficiales, en su versión para fondo claro u oscuro.</li>
           <li>Logo con tamaño mínimo: 35 px en pantalla, 0,5 cm impreso.</li>
-          <li>Sin fondos fotográficos sobrecargados, sombras ni gradientes.</li>
+          <li>Sin fondos fotográficos sobrecargados ni sombras. Degradado suave solo en el fondo con el patrón ilustrado.</li>
           <li>Sin emojis en la pieza; van en el mensaje que la acompaña.</li>
           <li>Máximo 3 logos de aliados por pieza.</li>
         </ul>
@@ -387,11 +387,12 @@ function slideChips(){if(!isCar())return'';
   return `<div class="slidebar" role="group" aria-label="Láminas del carrusel"><span class="hint">Lámina</span>${S.car.slides.map((_,i)=>{const v=withSlide(i,localVerdict);const st=v.empty?'empty':v.ok?'ok':'bad';
     return `<button class="fmt sl-${st} ${i===S.car.idx?'sel':''}" data-slide="${i}" aria-pressed="${i===S.car.idx}" title="${v.empty?'Sin copy':v.ok?'Cumple':'Por corregir'}">${i+1}</button>`;}).join('')}</div>`;}
 function bindSlideChips(){document.querySelectorAll('[data-slide]').forEach(b=>b.onclick=()=>{selectSlide(+b.dataset.slide);saveDraft();drawMain();drawLive();});}
-function saveDraft(){syncSlide();store.set('draft',{v:3,cards:S.extras.productos.map(p=>({nombre:p.nombre||'',precio:p.precio||'',antes:p.antes||'',desc:p.desc||''})),lay:S.extras.lay||null,textos:S.extras.textos,icono:S.extras.icono,req:S.req,car:S.car.on?{on:true,n:S.car.n,idx:S.car.idx,slides:S.car.slides.map(x=>({copy:x.copy,visual:x.visual}))}:null,copy:S.copy,waMsg:S.waMsg,formato:S.formato,tpl:S.tpl,scheme:S.scheme,visual:S.extras.visual,qr:S.extras.qr});}
+function saveDraft(){syncSlide();store.set('draft',{v:3,cards:S.extras.productos.map(p=>({nombre:p.nombre||'',precio:p.precio||'',antes:p.antes||'',desc:p.desc||''})),lay:S.extras.lay||null,ctaEstilo:S.extras.ctaEstilo||'resaltado',degradado:!!S.extras.degradado,textos:S.extras.textos,icono:S.extras.icono,req:S.req,car:S.car.on?{on:true,n:S.car.n,idx:S.car.idx,slides:S.car.slides.map(x=>({copy:x.copy,visual:x.visual}))}:null,copy:S.copy,waMsg:S.waMsg,formato:S.formato,tpl:S.tpl,scheme:S.scheme,visual:S.extras.visual,qr:S.extras.qr});}
 /* Nota, fecha, código y legal ahora son textos adicionales: si llegan en el copy (borradores antiguos), se pasan a textos */
 function migrateExtras(){const ts=S.extras.textos;for(const k of['fecha','codigo','legal','nota']){const v=S.copy[k];if(v&&ts.length<XT_MAX)ts.push({texto:k==='codigo'?'Código: '+v:v,fuente:'t',caso:'normal',color:'auto',bloque:'none',borde:'none',bordeColor:'green'});S.copy[k]='';}}
 function loadDraft(){const d=store.get('draft');if(!d)return;if(!d.v){if(d.copy)['nota','codigo','fecha','legal'].forEach(k=>d.copy[k]='');d.waMsg='';}Object.assign(S.req,d.req||{});Object.assign(S.copy,d.copy||{});['waMsg','formato','tpl','scheme'].forEach(k=>{if(d[k]!=null)S[k]=d[k]});if(d.visual)S.extras.visual=d.visual;if(!VISUALS.some(v=>v[0]===S.extras.visual))S.extras.visual=DEFAULTS.visual;if(d.qr!=null)S.extras.qr=d.qr;if(!FORMATS[S.formato]){S.formato='inapp';S.tpl='hero';}if(!SCHEMES[S.scheme])S.scheme='oscuro';
   if(d.icono)S.extras.icono=d.icono;
+  if(d.ctaEstilo)S.extras.ctaEstilo=d.ctaEstilo;S.extras.degradado=!!d.degradado;
   if(Array.isArray(d.cards)&&d.cards.some(c=>c.nombre||c.precio)&&!S.extras.productos.length)S.extras.productos=d.cards.slice(0,4).map(c=>({img:null,name:c.nombre,...c}));
   if(Array.isArray(d.textos))S.extras.textos=d.textos.filter(t=>t&&typeof t==='object').slice(0,XT_MAX);
   migrateExtras();
@@ -460,14 +461,16 @@ function textFitLines(ctx,R,label,str,b,o){const words=parseRich(str,o.upper);if
 /* CTA: texto en Noland, mayúsculas, con el mismo resaltado que las palabras marcadas con * (fondo verde recto, texto azul). Sin botón, sin bordes redondeados y sin elementos que no estén en el copy. */
 function ctaText(ctx,R,str,x,y,h,color,bg,o={}){
   if(str&&autoOn(ctx,'cta'))return autoEl(ctx,R,'cta',()=>ctaText(ctx,R,str,x,y,h,color,bg,o));
-  if(!str)return 0;const s=str.replace(/\|/g,' ').replace(/[*^~]/g,'').toLocaleUpperCase('es');let fs=h*.6;ctx.font=fd(fs);
-  let w=ctx.measureText(s).width+fs*.16;
-  if(o.maxW&&w>o.maxW){fs=fs*o.maxW/w;ctx.font=fd(fs);w=ctx.measureText(s).width+fs*.16;if(fs<h*.3)R.checks.push({lvl:'warn',msg:'“CTA” queda pequeño: acórtalo.'});}
-  const px=o.align==='center'?x-w/2:o.align==='right'?x-w:x,cy=y+h/2;
-  ctx.fillStyle=C.green;ctx.fillRect(px,cy-fs*.5,w,fs);
-  ctx.fillStyle=C.navy;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(s,px+fs*.08,cy+fs*.04);
-  R.ctas=(R.ctas||0)+1;R.pairs.push({fg:C.navy,bg:C.green,large:true,label:'CTA'});return w;}
-function ctaWidth(ctx,t,h){const fs=h*.6;ctx.font=fd(fs);return ctx.measureText(t.toLocaleUpperCase('es')).width+fs*.16;}
+  if(!str)return 0;const s=str.replace(/\|/g,' ').replace(/[*^~]/g,'').toLocaleUpperCase('es'),est=S.extras.ctaEstilo||'resaltado';let fs=h*(est==='boton'?.42:.6);ctx.font=fd(fs);
+  const padX=est==='boton'?fs*1.1:fs*.08;let w=ctx.measureText(s).width+padX*2;
+  if(o.maxW&&w>o.maxW){const k=o.maxW/w;fs*=k;ctx.font=fd(fs);w*=k;if(fs<h*.25)R.checks.push({lvl:'warn',msg:'“CTA” queda pequeño: acórtalo.'});}
+  const px=o.align==='center'?x-w/2:o.align==='right'?x-w:x,cy=y+h/2,pad=w-ctx.measureText(s).width;
+  ctx.textAlign='left';ctx.textBaseline='middle';
+  if(est==='boton'){const bh=h*.92;rr(ctx,px,cy-bh/2,w,bh,bh*.28);ctx.fillStyle=C.green;ctx.fill();ctx.fillStyle=C.navy;ctx.fillText(s,px+pad/2,cy+fs*.04);R.pairs.push({fg:C.navy,bg:C.green,large:true,label:'CTA'});}
+  else if(est==='subrayado'){const dk=bg!==C.cream&&bg!==C.green,fg=dk?C.green:C.navy;ctx.fillStyle=fg;ctx.fillText(s,px+pad/2,cy);ctx.fillRect(px+pad/2,cy+fs*.52,w-pad,Math.max(2,fs*.09));R.pairs.push({fg,bg:bg||C.navy,large:true,label:'CTA'});}
+  else{ctx.fillStyle=C.green;ctx.fillRect(px,cy-fs*.5,w,fs);ctx.fillStyle=C.navy;ctx.fillText(s,px+fs*.08,cy+fs*.04);R.pairs.push({fg:C.navy,bg:C.green,large:true,label:'CTA'});}
+  R.ctas=(R.ctas||0)+1;return w;}
+function ctaWidth(ctx,t,h){const b=S.extras.ctaEstilo==='boton',fs=h*(b?.42:.6);ctx.font=fd(fs);return ctx.measureText(t.toLocaleUpperCase('es')).width+(b?fs*2.2:fs*.16);}
 function pill(ctx,R,str,x,y,h,bg,fg,o={}){
   if(!str)return 0;const s=o.upper?str.toLocaleUpperCase('es'):str;let fs=h*(o.fs||.42);ctx.font=ft(o.weight||700,fs);
   if('letterSpacing' in ctx)ctx.letterSpacing=o.upper?`${fs*.06}px`:'0px';
@@ -922,7 +925,7 @@ function campLines(ctx,str,cx,cy,maxW,maxH,size,color,weight=600,track=.08){cons
 L.campana=(ctx,W,H,d,sc,R,o)=>{
   const G=CAMP[H/W>1.5?'9x16':'3x4'],dark=sc.bg===C.navy,fg=dark?C.cream:C.navy,line=dark?C.cream:C.navy,boxFill=dark?C.navy:C.cream,u=W/1080;R.logoOptional=true;
   ctx.fillStyle=dark?C.navy:C.cream;ctx.fillRect(0,0,W,H);
-  elBegin(ctx,'patron');const pim=CAMP_IMG[H/W>1.5?'patron-9x16':'patron-3x4'];if(pim){ctx.save();if(!dark)ctx.globalAlpha=.45;coverMedia(ctx,tinted(pim,dark?'#384D66':'#9FB3A0'),W,H);ctx.restore();}elEnd(ctx,R,'patron');
+  bgGrad(ctx,W,H,dark);elBegin(ctx,'patron');const pim=CAMP_IMG[H/W>1.5?'patron-9x16':'patron-3x4'];if(pim){ctx.save();if(!dark)ctx.globalAlpha=.45;coverMedia(ctx,tinted(pim,dark?'#384D66':'#9FB3A0'),W,H);ctx.restore();}elEnd(ctx,R,'patron');
   elBegin(ctx,'destellos');G.dest.forEach(([x,y])=>{const w=G.ds*W;normPath(ctx,DESTELLO_D,x*W,y*H,w,w/DESTELLO_AR);ctx.fillStyle=line;ctx.fill();});elEnd(ctx,R,'destellos');
   elBegin(ctx,'visual');S.extras.productos.filter(p=>p.img).slice(0,4).forEach((pr,i)=>{const[x,y,w,h]=G.per[i];elBegin(ctx,'p'+i);const im=silImg(pr),k=Math.min(w*W/im.width,h*H/im.height),iw=im.width*k,ih=im.height*k;
     ctx.save();if(pr.rot){ctx.translate(x*W+w*W/2,y*H+h*H/2);ctx.rotate(pr.rot*Math.PI/180);ctx.translate(-(x*W+w*W/2),-(y*H+h*H/2));}ctx.drawImage(im,x*W+(w*W-iw)/2,y*H,iw,ih);ctx.restore();elEnd(ctx,R,'p'+i);});R.visual=true;elEnd(ctx,R,'visual');
@@ -973,7 +976,7 @@ function offerCard(ctx,R,p,x,y,w,h,dark,u){const r=w*.09,top=h*.58,line=C.green,
 L.ofertas=(ctx,W,H,d,sc,R,o)=>{
   const dark=sc.bg===C.navy,fg=dark?C.cream:C.navy,u=W/1080;R.logoOptional=true;
   ctx.fillStyle=dark?C.navy:C.cream;ctx.fillRect(0,0,W,H);
-  elBegin(ctx,'patron');const pim=CAMP_IMG['patron-9x16'];if(pim){ctx.save();if(!dark)ctx.globalAlpha=.45;coverMedia(ctx,tinted(pim,dark?'#384D66':'#9FB3A0'),W,H);ctx.restore();}elEnd(ctx,R,'patron');
+  bgGrad(ctx,W,H,dark);elBegin(ctx,'patron');const pim=CAMP_IMG['patron-9x16'];if(pim){ctx.save();if(!dark)ctx.globalAlpha=.45;coverMedia(ctx,tinted(pim,dark?'#384D66':'#9FB3A0'),W,H);ctx.restore();}elEnd(ctx,R,'patron');
   elBegin(ctx,'destellos');[[.81,.115]].forEach(([x,y])=>{const w=.032*W;normPath(ctx,DESTELLO_D,x*W,y*H,w,w/DESTELLO_AR);ctx.lineWidth=2*u;ctx.strokeStyle=fg;ctx.stroke();});elEnd(ctx,R,'destellos');
   if(!elHidden('logo')){elBegin(ctx,'logo');const tabH=Math.max(W*.09,minLogo(R)/.42),tabW=tabH*2.6,tx=(W-tabW)/2;rr(ctx,tx,-tabH*.5,tabW,tabH*1.5,tabH*.32);ctx.fillStyle=C.green;ctx.fill();
     const lgh=Math.max(tabH*.42,minLogo(R));drawLogo(ctx,tx+(tabW-lgh*LB.w/LB.h)/2,(tabH-lgh)/2,lgh,C.navy);R.logo=true;R.logoH=lgh;elEnd(ctx,R,'logo');}
@@ -999,7 +1002,7 @@ function textH(str,w,o){const words=parseRich(str||'',o.upper);if(!words.length)
 L.banner=(ctx,W,H,d,sc,R,o)=>{
   const dark=sc.bg===C.navy,p=W*.048,v=S.extras.visual,ill=isIllus(v),none=!v||v==='none'||elHidden('visual');R.logoOptional=true;
   ctx.fillStyle=sc.bg;ctx.fillRect(0,0,W,H);
-  elBegin(ctx,'patron');const pim=CAMP_IMG['patron-9x16'];if(pim){ctx.save();ctx.globalAlpha=dark?.75:.4;coverMedia(ctx,tinted(pim,dark?'#33465F':'#9FB3A0'),W,H,1);ctx.restore();}elEnd(ctx,R,'patron');
+  bgGrad(ctx,W,H,dark);elBegin(ctx,'patron');const pim=CAMP_IMG['patron-9x16'];if(pim){ctx.save();ctx.globalAlpha=dark?.75:.4;coverMedia(ctx,tinted(pim,dark?'#33465F':'#9FB3A0'),W,H,1);ctx.restore();}elEnd(ctx,R,'patron');
   /* visual */
   if(!none){elBegin(ctx,'visual');
     if(ill){const cb={x:W*.6,y:H*.13,w:W*.355,h:H*.74},card=dark?C.green:C.navy;
@@ -1031,6 +1034,8 @@ L.banner=(ctx,W,H,d,sc,R,o)=>{
   if(S.extras.qr)qr(ctx,R,W-p-H*.26,H-p*.6-H*.26*1.18,H*.26,false);
   text(ctx,R,'Legal',d.legal,{x:p,y:H-p*.6-H*.07,w:cw*1.05,h:H*.07},{font:'t',max:H*.034,min:H*.022,color:sc.fg,bg:sc.bg,lh:1.2,maxLines:2,valign:'bottom'});
 };
+/* Degradado de fondo: solo con el patrón ilustrado visible (decisión del equipo). Del color de fondo a un tono de la misma familia. */
+function bgGrad(ctx,W,H,dark){if(!S.extras.degradado||elHidden('patron'))return;const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,dark?C.navy:C.cream);g.addColorStop(.45,dark?C.navy:C.cream);g.addColorStop(1,dark?'#34496B':'#D4F3BC');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
 const curFormatFor=R=>FORMATS[R.fmt];
 const minLogo=R=>curFormatFor(R).print?64:40;
 
@@ -1079,7 +1084,7 @@ const BRAND_RULES=[
   {id:'n_title7',kind:'dont',check:'auto',sev:'warn',text:'Titulares de más de 7 palabras.'},
   {id:'n_sub15',kind:'dont',check:'auto',sev:'warn',text:'Subtítulos de más de 15 palabras.'},
   {id:'n_cta1',kind:'dont',check:'auto',sev:'warn',text:'Más de un CTA por pieza.'},
-  {id:'n_stroke',kind:'dont',check:'auto',sev:'warn',scope:'design',text:'Botones o bloques redondeados con texto. El CTA va como texto en Noland con resaltado recto, como las palabras con *. Sin textos con contorno.'},
+  {id:'n_stroke',kind:'dont',check:'auto',sev:'warn',scope:'design',text:'Bloques redondeados con texto fuera del CTA. El CTA va en Noland con uno de tres estilos: resaltado recto (como las palabras con *), botón redondeado verde o texto subrayado. Sin textos con contorno.'},
   {id:'n_overinfo',kind:'dont',check:'auto',sev:'warn',text:'Sobreinformar: más de 30 palabras de mensaje (sin contar fecha, código ni legal) o demasiados elementos a la vez.'},
   {id:'n_emoji',kind:'dont',check:'auto',sev:'info',text:'Más de 2 emojis en la gráfica: úsalos con moderación (se ven distinto según el dispositivo).'},
   {id:'n_phrases',kind:'dont',check:'auto',sev:'warn',text:'Frases prohibidas: "Te invitamos a", "Puedes", "Recuerda que puedes".'},
@@ -1154,7 +1159,9 @@ A domicilio con Servientrega a todo el país (ver Tarifas).`},
   3. Círculo verde grande detrás del texto con el producto recortado a la derecha (banner-03): se logra moviendo y agrandando la cinta.
   4. Cupón con código grande (banner-05): plantilla Cupón.
 - Sin logo de Upper: el banner vive dentro de la app (se puede mostrar desde Elementos).
-- Lo que NO se replica: CTA en cápsula redondeada (va como texto con resaltado recto), sombras y degradados del piso (banner-04), logos de terceros como protagonistas sin permiso.`},
+- CTA: botón redondeado verde (como en las referencias), resaltado recto o subrayado.
+- Fondo: el patrón admite un degradado suave hacia un tono más claro de la misma familia (banner-04).
+- Lo que NO se replica: sombras del piso (banner-04) y logos de terceros como protagonistas sin permiso.`},
  {id:'ec_disenos',titulo:'Formatos de diseño para redes',texto:`Referencias aprobadas de piezas para redes (feed 4:5 y portadas de carrusel; imágenes en docs/referencias/social/). Patrones a seguir:
 - Titular en Noland, grande y con jerarquía: dos niveles de tamaño o de color (una línea en crema y el remate en verde sobre azul oscuro; o todo en azul oscuro sobre fondo claro). Ej.: "LO MISMO PERO / MÁS BARATO", "LAS 4 CATEGORÍAS / QUE SIEMPRE CONVIENE TRAER DEL EXTRANJERO".
 - Titular escalonado y expresivo: líneas de distinto tamaño, alineado a la izquierda, con las palabras clave mucho más grandes ("TIENDAS EN / USA / CON / CARTERAS TOP EN OFERTA").
@@ -1164,7 +1171,14 @@ A domicilio con Servientrega a todo el país (ver Tarifas).`},
 - La cinta o arco verde grueso como base o fondo de la foto (horizonte curvo, arco detrás de la persona o la caja).
 - Fondo liso de la paleta con el patrón de ilustraciones de línea muy tenue; acentos sueltos de ilustración oficial (destello, mano que señala).
 - Tarjetas de producto tipo captura de tienda (precio, precio anterior, ahorro) en fila, cortadas por los bordes, para carruseles de ofertas.
-Lo que NO se replica de estas referencias (manda la revisión de marca): botones o cápsulas redondeadas como "Desliza para ver más" (si se necesita, va como texto o como CTA con resaltado recto), degradados y efectos de vidrio.`},
+Posts de referencia (docs/referencias/social/post-*.webp):
+- post-01: 4 productos recortados en las esquinas con contorno verde grueso (silueta "contorno" verde), titular centrado en medio con palabras clave en verde, logo en pestaña arriba y CTA abajo.
+- post-02: cards claras redondeadas con un producto cada una, marca en Rethink fina y modelo en negrita, precio en un sello verde de puntas tipo estallido sobre la esquina de la card.
+- post-03: tarifa o precio protagonista en un recuadro claro grande, código en un recuadro con fondo verde, bandera como emoji, onda verde diagonal detrás y vigencia abajo.
+- post-04: persona o producto recortado ocupando la mitad derecha sobre fondo claro, titular escalonado a la izquierda y arco verde abajo a la izquierda.
+- post-05 (carrusel de tips): número grande en verde ("1.-"), frase en negrita + explicación en Rethink, imagen en una tarjeta redondeada y franja verde detrás.
+- Fondos: el patrón puede llevar un degradado suave; el CTA puede ser botón redondeado, resaltado o subrayado.
+Lo que NO se replica de estas referencias (manda la revisión de marca): cápsulas redondeadas que no son el CTA, como "Desliza para ver más"; degradados fuera del fondo con patrón y efectos de vidrio. El CTA sí puede ir como botón redondeado, resaltado recto o subrayado.`},
 ],
 co:[
  {id:'co_que',titulo:'Qué es Upper Colombia',texto:`Tu compra de EE. UU., hasta tu puerta en Colombia. Upper (Upper Express Colombia) se encarga de la bodega en Miami, el vuelo, la aduana y la entrega.
@@ -1226,7 +1240,9 @@ No: baterías sueltas, drones, vapes, cannabis, armas, dinero, falsificaciones, 
   3. Círculo verde grande detrás del texto con el producto recortado a la derecha (banner-03): se logra moviendo y agrandando la cinta.
   4. Cupón con código grande (banner-05): plantilla Cupón.
 - Sin logo de Upper: el banner vive dentro de la app (se puede mostrar desde Elementos).
-- Lo que NO se replica: CTA en cápsula redondeada (va como texto con resaltado recto), sombras y degradados del piso (banner-04), logos de terceros como protagonistas sin permiso.`},
+- CTA: botón redondeado verde (como en las referencias), resaltado recto o subrayado.
+- Fondo: el patrón admite un degradado suave hacia un tono más claro de la misma familia (banner-04).
+- Lo que NO se replica: sombras del piso (banner-04) y logos de terceros como protagonistas sin permiso.`},
  {id:'co_disenos',titulo:'Formatos de diseño para redes',texto:`Referencias aprobadas de piezas para redes (feed 4:5 y portadas de carrusel; imágenes en docs/referencias/social/). Patrones a seguir:
 - Titular en Noland, grande y con jerarquía: dos niveles de tamaño o de color (una línea en crema y el remate en verde sobre azul oscuro; o todo en azul oscuro sobre fondo claro). Ej.: "LO MISMO PERO / MÁS BARATO", "LAS 4 CATEGORÍAS / QUE SIEMPRE CONVIENE TRAER DEL EXTRANJERO".
 - Titular escalonado y expresivo: líneas de distinto tamaño, alineado a la izquierda, con las palabras clave mucho más grandes ("TIENDAS EN / USA / CON / CARTERAS TOP EN OFERTA").
@@ -1236,7 +1252,14 @@ No: baterías sueltas, drones, vapes, cannabis, armas, dinero, falsificaciones, 
 - La cinta o arco verde grueso como base o fondo de la foto (horizonte curvo, arco detrás de la persona o la caja).
 - Fondo liso de la paleta con el patrón de ilustraciones de línea muy tenue; acentos sueltos de ilustración oficial (destello, mano que señala).
 - Tarjetas de producto tipo captura de tienda (precio, precio anterior, ahorro) en fila, cortadas por los bordes, para carruseles de ofertas.
-Lo que NO se replica de estas referencias (manda la revisión de marca): botones o cápsulas redondeadas como "Desliza para ver más" (si se necesita, va como texto o como CTA con resaltado recto), degradados y efectos de vidrio.`},
+Posts de referencia (docs/referencias/social/post-*.webp):
+- post-01: 4 productos recortados en las esquinas con contorno verde grueso (silueta "contorno" verde), titular centrado en medio con palabras clave en verde, logo en pestaña arriba y CTA abajo.
+- post-02: cards claras redondeadas con un producto cada una, marca en Rethink fina y modelo en negrita, precio en un sello verde de puntas tipo estallido sobre la esquina de la card.
+- post-03: tarifa o precio protagonista en un recuadro claro grande, código en un recuadro con fondo verde, bandera como emoji, onda verde diagonal detrás y vigencia abajo.
+- post-04: persona o producto recortado ocupando la mitad derecha sobre fondo claro, titular escalonado a la izquierda y arco verde abajo a la izquierda.
+- post-05 (carrusel de tips): número grande en verde ("1.-"), frase en negrita + explicación en Rethink, imagen en una tarjeta redondeada y franja verde detrás.
+- Fondos: el patrón puede llevar un degradado suave; el CTA puede ser botón redondeado, resaltado o subrayado.
+Lo que NO se replica de estas referencias (manda la revisión de marca): cápsulas redondeadas que no son el CTA, como "Desliza para ver más"; degradados fuera del fondo con patrón y efectos de vidrio. El CTA sí puede ir como botón redondeado, resaltado recto o subrayado.`},
 ],
 };
 /* Reglas de negocio por país (complementan a BRAND_RULES; las revisa Claude con el conocimiento del país) */
@@ -1748,7 +1771,9 @@ function step4(){const x=S.extras,a=S.extrasAI,t=curTpl();const filled=new Set(a
   ${navHtml('Ir a descarga')}`;}
 const elPresent=id=>{const d=S.copy;const m={info:d.destacado||d.cta,eyebrow:d.eyebrow,titular:d.titular,subtitulo:d.subtitulo,destacado:d.destacado,cta:d.cta,codigo:d.codigo,fecha:d.fecha,legal:d.legal,mensaje:d.subtitulo};return id in m?!!m[id]:true;};
 function elPanel(){const lay=curTpl().layout,set=EL_SETS[lay];if(!set)return'';const L2=LAY(),key=id=>lay+'.'+id;
-  return `<div class="f full" style="margin-top:14px"><b>Elementos</b><span class="hint">El tamaño y la posición se ajustan en la vista previa: arrastra un elemento para moverlo y su esquina para cambiar el tamaño. Aquí eliges si se muestra y su borde.</span>
+  const ctaRow=set.includes('cta')?`<div class="row" style="gap:8px;align-items:center;margin:6px 0"><b style="font-size:13px">Estilo del CTA</b>${[['resaltado','Resaltado'],['boton','Botón redondeado'],['subrayado','Subrayado']].map(([k,l])=>`<button class="fmt ${(S.extras.ctaEstilo||'resaltado')===k?'sel':''}" data-ctaest="${k}">${l}</button>`).join('')}</div>`:'';
+  const grRow=set.includes('patron')?`<label style="display:flex;gap:6px;align-items:center;margin:6px 0"><input type="checkbox" id="degr" ${S.extras.degradado?'checked':''}> Fondo con degradado (solo con el patrón visible)</label>`:'';
+  return `<div class="f full" style="margin-top:14px"><b>Elementos</b>${ctaRow}${grRow}<span class="hint">El tamaño y la posición se ajustan en la vista previa: arrastra un elemento para moverlo y su esquina para cambiar el tamaño. Aquí eliges si se muestra y su borde.</span>
   <div class="els">${set.filter(id=>elPresent(id)&&!/^x\d$/.test(id)).map(id=>{const nm=lay==='video'&&id==='titular'?'Antetítulo y titular':lay==='cupon'&&id==='tarjeta'?'Tarjeta del cupón':EL_NAMES[id];const k=key(id),st=L2.sty[k]||EL_DEF[k]||{},sz=Math.round((L2.pos[k]?.s||1)*100),canHide=id!=='logo'||EL_LOGO_OPT.has(lay);
     return `<div class="el-row"><label style="display:flex;gap:6px;align-items:center;min-width:190px">${canHide?`<input type="checkbox" data-elv="${id}" ${(k in L2.hide?L2.hide[k]:EL_HIDE_DEF[k])?'':'checked'}>`:''}${nm}</label>
     ${id==='logo'?(canHide?'<span class="hint">Opcional en este formato.</span>':'<span class="hint">Obligatorio en esta composición.</span>'):`<select data-els="${id}" aria-label="Borde de ${nm}">${STROKES.map(([v,l])=>`<option value="${v}" ${(st.t||'none')===v?'selected':''}>${l}</option>`).join('')}</select>
@@ -1815,6 +1840,8 @@ function delSel(){const id=S.elSel;if(!id)return;const lay=curTpl().layout,L2=LA
   S.elSel=null;saveDraft();drawMain();drawLive();}
 document.addEventListener('keydown',e=>{if(S.step!==4||!S.elSel||!['Delete','Backspace'].includes(e.key))return;const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable))return;e.preventDefault();delSel();});
 function bindEls(){const L2=LAY(),lay=curTpl().layout,key=id=>lay+'.'+id;
+  document.querySelectorAll('[data-ctaest]').forEach(b=>b.onclick=()=>{S.extras.ctaEstilo=b.dataset.ctaest;document.querySelectorAll('[data-ctaest]').forEach(x=>x.classList.toggle('sel',x===b));saveDraft();drawMain();drawLive();});
+  $('#degr')&&($('#degr').onchange=e=>{S.extras.degradado=e.target.checked;saveDraft();drawMain();drawLive();});
   document.querySelectorAll('[data-elv]').forEach(c=>c.onchange=()=>{L2.hide[key(c.dataset.elv)]=!c.checked;saveDraft();drawLive();});
   document.querySelectorAll('[data-els]').forEach(c=>c.onchange=()=>{const k=key(c.dataset.els);L2.sty[k]={c:'green',...(L2.sty[k]||EL_DEF[k]||{}),t:c.value};saveDraft();drawLive();});
   document.querySelectorAll('[data-elc]').forEach(c=>c.onchange=()=>{const k=key(c.dataset.elc);const cur=L2.sty[k]||EL_DEF[k]||{};L2.sty[k]={...cur,c:c.value,t:cur.t&&cur.t!=='none'?cur.t:'fino'};saveDraft();drawMain();drawLive();});
@@ -1893,7 +1920,7 @@ Si el pedido trae un dato de negocio que contradice ese conocimiento, recházalo
 Pieza: ${curFormat().label}, "${t.name}" (${t.w}×${t.h}px). Titular: "${S.copy.titular||''}". Destacado: "${S.copy.destacado||''}".
 Archivos subidos: aliados ${S.extras.aliados.length}, foto de producto ${S.extras.producto?'sí':'no'}, productos (recortes o cards) ${S.extras.productos.length}.
 
-Marca (no negociable): solo azul oscuro #141D30, verde #CDF5A3 y crema #F0FFE8; Noland en mayúsculas y Rethink Sans; CTA como texto resaltado, nunca botón ni bloque redondeado; logo oficial sin cambios; solo ilustraciones oficiales; emojis con moderación (máximo 2), sin sombras, degradados ni fondos de foto completos; máximo 3 aliados.
+Marca (no negociable): solo azul oscuro #141D30, verde #CDF5A3 y crema #F0FFE8; Noland en mayúsculas y Rethink Sans; CTA en Noland como resaltado recto, botón redondeado verde o texto subrayado; logo oficial sin cambios; solo ilustraciones oficiales; emojis con moderación (máximo 2), sin sombras ni fondos de foto completos; degradado suave solo en fondos con el patrón ilustrado; máximo 3 aliados.
 La plataforma puede agregar:
 - QR (una URL) · TEXTO: hasta ${XT_MAX} textos adicionales cortos (vigencia, código promocional, legal o una nota), uno por línea
 - MENSAJE: 1-2 líneas para WhatsApp o push, con emojis y un CTA tipo "Mira aquí"
@@ -2332,9 +2359,11 @@ class SvgCtx{
       this.path.push(`A${n2(R)} ${n2(R)} 0 1 ${sw} ${n2(pm[0])} ${n2(pm[1])}`,`A${n2(R)} ${n2(R)} 0 1 ${sw} ${n2(ps[0])} ${n2(ps[1])}`);this.cur=[sx,sy];return;}
     const ex=cx+r*Math.cos(a0+d),ey=cy+r*Math.sin(a0+d);const pe=this.P(ex,ey);
     this.path.push(`A${n2(R)} ${n2(R)} 0 ${Math.abs(d)>Math.PI?1:0} ${sw} ${n2(pe[0])} ${n2(pe[1])}`);this.cur=[ex,ey];}
+  createLinearGradient(x0,y0,x1,y1){const a=this.P(x0,y0),b=this.P(x1,y1);return{__grad:true,a,b,stops:[],addColorStop(o,c){this.stops.push([o,c]);}};}
   clip(){} clearRect(){}
   op(){return this.st.globalAlpha<1?` opacity="${n2(this.st.globalAlpha)}"`:'';}
-  paint(c){if(typeof c!=='string')return'none';const m=c.match(/^rgba?\(([^)]+)\)$/);if(!m)return c;const p=m[1].split(',').map(s=>s.trim());return `rgb(${p[0]},${p[1]},${p[2]})" fill-opacity="${p[3]??1}`;}
+  paint(c){if(c&&c.__grad){const id='g'+(this.ids++);this.out.push(`<defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${n2(c.a[0])}" y1="${n2(c.a[1])}" x2="${n2(c.b[0])}" y2="${n2(c.b[1])}">${c.stops.map(([o,col])=>`<stop offset="${o}" stop-color="${col}"/>`).join('')}</linearGradient></defs>`);return `url(#${id})`;}
+    if(typeof c!=='string')return'none';const m=c.match(/^rgba?\(([^)]+)\)$/);if(!m)return c;const p=m[1].split(',').map(s=>s.trim());return `rgb(${p[0]},${p[1]},${p[2]})" fill-opacity="${p[3]??1}`;}
   fill(p){
     if(p===LOGO_PATH){this.out.push(`<path data-name="Logo Upper" d="${LOGO_D}" fill="${this.st.fillStyle}"${this.mattr()}${this.op()}/>`);return;}
     if(!this.path.length)return;this.out.push(`<path d="${this.path.join('')}" fill="${this.paint(this.st.fillStyle)}"${this.op()}/>`);}

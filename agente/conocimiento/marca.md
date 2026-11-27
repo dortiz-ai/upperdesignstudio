@@ -19,8 +19,8 @@
 - Nunca sobre fondos fotográficos: en Foto de fondo y Video va en una pestaña sólida y se puede ocultar.
 
 ## CTA y bloques
-- **Sin botones ni bloques redondeados con texto.**
-- El CTA es texto en Noland con resaltado verde de esquinas rectas, igual que las palabras marcadas con `*`.
+- **CTA en Noland con uno de tres estilos** (`cta_estilo`): `resaltado` (verde de esquinas rectas, como las palabras con `*`; por defecto), `boton` (botón verde redondeado, como en las referencias) o `subrayado`.
+- Fuera del CTA, sin bloques redondeados con texto (salvo las excepciones de campaña).
 - Nada de flechas ni elementos que no estén en el copy.
 - Antetítulo, destacado, fecha y código van como texto, sin cajas.
 - Los textos adicionales pueden ir sobre un bloque recto (azul, verde o crema) y llevar borde.
@@ -36,7 +36,7 @@
 - **Foto de fondo:** foto a sangre solo en esa plantilla, con el texto de marca abajo.
 
 ## Prohibido
-- Degradados.
+- Degradados fuertes o de colores fuera de la paleta. Se permite un degradado suave en el fondo con el patrón ilustrado (`degradado: true`), hacia un tono más claro de la misma familia.
 - Sombras difusas (solo sombra plana).
 - Fondos fotográficos completos, salvo la plantilla Foto de fondo.
 - Más de 2 emojis en la gráfica. En el mensaje de WhatsApp o push sí van.
